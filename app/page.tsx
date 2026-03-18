@@ -90,7 +90,7 @@ export default function HomePage() {
           <p className="text-secondary mb-8 text-sm sm:text-base">Submit a join request and become part of our growing community.</p>
           <motion.div whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.95 }} className="inline-block">
             <Link href="/join" className="bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-3 rounded-xl font-semibold transition inline-block" style={{ boxShadow: "0 4px 16px rgba(99,102,241,0.3)" }}>
-              Apply Now
+              Join Now
             </Link>
           </motion.div>
         </motion.div>
