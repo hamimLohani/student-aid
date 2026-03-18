@@ -168,11 +168,11 @@ export default function AnnouncementsPage() {
   }, []);
 
   return (
-    <div className="pt-20 sm:pt-24 pb-16 px-3 sm:px-4 max-w-3xl mx-auto">
+    <div className="pt-20 sm:pt-24 pb-16 px-3 sm:px-4 max-w-6xl mx-auto">
       <h1 className="text-3xl sm:text-4xl font-bold mb-1">Announcements</h1>
       <p className="text-secondary text-sm sm:text-base mb-8 sm:mb-10">Stay updated with the latest news from Student Aid BDG.</p>
       {announcements.length === 0 && <p className="text-muted text-center py-20">No announcements yet.</p>}
-      <div className="space-y-4 sm:space-y-6">
+      <div className="max-w-3xl space-y-4 sm:space-y-6">
         {announcements.map((a) => <AnnouncementCard key={a.id} a={a} members={members} />)}
       </div>
     </div>
