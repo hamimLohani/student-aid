@@ -106,7 +106,7 @@ export default function JoinPage() {
 
           <div>
             <label className="block text-sm text-secondary mb-1">Workplace *</label>
-            <input required value={form.workplace} onChange={(e) => set("workplace", e.target.value)} placeholder="Company, School, Hospital, etc." className={inputCls} />
+            <input required value={form.workplace} onChange={(e) => set("workplace", e.target.value)} placeholder="Company, School, University, Hospital, etc." className={inputCls} />
           </div>
 
           <div>
