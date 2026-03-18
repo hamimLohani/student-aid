@@ -1,0 +1,144 @@
+@import "tailwindcss";
+@variant dark (&:where(.dark, .dark *));
+
+/* ── Light mode base ── */
+:root {
+  --bg: #f1f5f9;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f8fafc;
+  --bg-section: #e8edf5;
+  --border: #cbd5e1;
+  --border-hover: #6366f1;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --input-bg: #ffffff;
+  --input-border: #cbd5e1;
+  --nav-bg: rgba(241,245,249,0.85);
+}
+
+/* ── Dark mode base ── */
+.dark {
+  --bg: #030712;
+  --bg-card: rgba(255,255,255,0.05);
+  --bg-card-hover: rgba(255,255,255,0.08);
+  --bg-section: rgba(255,255,255,0.05);
+  --border: rgba(255,255,255,0.10);
+  --border-hover: rgba(99,102,241,0.5);
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --input-bg: rgba(255,255,255,0.05);
+  --input-border: rgba(255,255,255,0.10);
+  --nav-bg: rgba(3,7,18,0.85);
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background-color: var(--bg);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* ── Reusable component classes ── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  transition: border-color 0.2s, background 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+.card:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(99,102,241,0.12);
+}
+
+.section-bg {
+  background: var(--bg-section);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.input-field {
+  width: 100%;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s, background 0.2s;
+}
+.input-field:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99,102,241,0.08);
+}
+.input-field:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+  transform: translateY(-1px);
+  background: var(--bg-card);
+}
+.input-field::placeholder { color: var(--text-muted); }
+.input-field:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* select arrow */
+select.input-field {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+  padding-right: 2.25rem;
+  cursor: pointer;
+}
+
+.text-secondary { color: var(--text-secondary); }
+.text-muted { color: var(--text-muted); }
+
+/* ── Button utilities ── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: #6366f1;
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+}
+.btn-primary:hover {
+  background: #4f46e5;
+  box-shadow: 0 4px 16px rgba(99,102,241,0.35);
+}
+.btn-primary:active { transform: scale(0.96); }
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+}
+.btn-ghost:hover { border-color: var(--border-hover); background: var(--bg-card-hover); }
+.btn-ghost:active { transform: scale(0.96); }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 3px; }
