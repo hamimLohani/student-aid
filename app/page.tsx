@@ -119,6 +119,22 @@ export default function HomePage() {
       </span>
     </div>
 
+{/* Contact Info */}
+    <div className="mt-4 text-sm text-gray-600 dark:text-gray-400 space-y-1">
+      <p>
+        📧 Email:{" "}
+        <a href="mailto: hamimLohani@gmail.com" className="text-indigo-600 hover:underline">
+          hamimLohani@gmail.com
+        </a>
+      </p>
+      <p>
+        📞 Phone:{" "}
+        <a href="tel:+8801572906733" className="text-indigo-600 hover:underline">
+          +8801572906733
+        </a>
+      </p>
+    </div>
+
   </div>
 </footer>
     </div>
