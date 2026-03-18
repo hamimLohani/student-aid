@@ -16,7 +16,7 @@ type Tab = "members" | "activities" | "announcements" | "requests";
 interface Member { id: string; name: string; sscYear: string; work: string; workplace: string; bloodGroup: string; address: string; phone?: string; email?: string; image?: string; }
 interface Activity { id: string; title: string; description: string; date: string; images: string[]; }
 interface Announcement { id: string; title: string; content: string; }
-interface JoinRequest { id: string; name: string; sscYear: string; work: string; workplace: string; bloodGroup: string; address: string; phone?: string; email?: string; image?: string; message: string; status: string; }
+interface JoinRequest { id: string; name: string; sscYear: string; work: string; workplace: string; bloodGroup: string; address: string; phone?: string; email?: string; image?: string; message: string; status: string; approvedAt?: { seconds: number }; }
 
 const inputCls = "input-field";
 
@@ -53,6 +53,21 @@ export default function AdminDashboard() {
     ];
     return () => unsubs.forEach((u) => u());
   }, []);
+
+  useEffect(() => {
+    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+    const expiredApproved = requests.filter(
+      (r) => r.status === "approved" && r.approvedAt && r.approvedAt.seconds * 1000 <= cutoff
+    );
+
+    if (expiredApproved.length === 0) return;
+
+    void Promise.all(
+      expiredApproved.map((r) => deleteDoc(doc(db, "joinRequests", r.id)))
+    ).catch(() => {
+      toast.error("Failed to clean up expired approved requests.");
+    });
+  }, [requests]);
 
   const addMember = async () => {
     if (!memberForm.name) return toast.error("Name required");
@@ -126,7 +141,7 @@ export default function AdminDashboard() {
 
   const approveRequest = async (r: JoinRequest) => {
     await addDoc(collection(db, "members"), { name: r.name, sscYear: r.sscYear, work: r.work, workplace: r.workplace || "", bloodGroup: r.bloodGroup || "", address: r.address, phone: r.phone || "", email: r.email || "", image: r.image || "" });
-    await updateDoc(doc(db, "joinRequests", r.id), { status: "approved" });
+    await updateDoc(doc(db, "joinRequests", r.id), { status: "approved", approvedAt: serverTimestamp() });
     toast.success("Member approved!");
   };
 
@@ -408,6 +423,9 @@ export default function AdminDashboard() {
       {tab === "requests" && (
         <div className="space-y-3">
           {requests.length === 0 && <p className="text-muted text-center py-10">No join requests.</p>}
+          {requests.some((r) => r.status === "approved") && (
+            <p className="text-xs text-muted">Approved requests are removed automatically after 24 hours.</p>
+          )}
           {requests.map((r) => (
             <div key={r.id} className="card p-4">
               <div className="flex items-start justify-between gap-2 mb-2">
