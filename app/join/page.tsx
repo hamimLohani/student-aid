@@ -116,7 +116,13 @@ export default function JoinPage() {
 
           <div>
             <label className="block text-sm text-secondary mb-1">Phone Number *</label>
-            <input required type="tel" value={form.phone} onChange={(e) => set("phone", e.target.value)} placeholder="+880 1XXX XXXXXX" className={inputCls} />
+            <input
+              required type="tel" value={form.phone} onChange={(e) => set("phone", e.target.value)}
+              placeholder="+880 1XXX XXXXXX"
+              pattern="^\+880 1[0-9]{3} [0-9]{6}$"
+              title="Phone number must be in the format +880 1XXX XXXXXX"
+              className={inputCls}
+            />
           </div>
 
           <div>

@@ -44,8 +44,16 @@ export default function Footer() {
 
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-muted">
-                Contact
+                Built By
               </p>
+              <div className="mt-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-3">
+                <p className="text-sm font-semibold text-[var(--text-primary)]">
+                  Md. Inzamamul Lohani
+                </p>
+                <p className="mt-1 text-sm text-secondary">
+                  Software Engineering, University of Dhaka
+                </p>
+              </div>
               <div className="mt-4 space-y-3">
                 <a
                   href="mailto:hamimlohani@gmail.com"
@@ -62,10 +70,6 @@ export default function Footer() {
                   <span>+880 1572-906733</span>
                 </a>
               </div>
-
-              <p className="mt-5 text-sm text-secondary">
-                Built by <span className="font-semibold text-[var(--text-primary)]">Md. Inzamamul Lohani</span>
-              </p>
             </div>
           </div>
 

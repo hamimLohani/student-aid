@@ -49,9 +49,9 @@ export default function HomePage() {
         </motion.div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
           {[
-            { icon: "🎯", title: "Mission", desc: "To provide accessible academic support and resources to every student in need." },
-            { icon: "🔭", title: "Vision", desc: "A future where every student has equal opportunity to succeed and thrive." },
-            { icon: "🤝", title: "Goals", desc: "Build a strong network, organize impactful events, and foster lifelong connections." },
+            { icon: <span role="img" aria-label="Target emoji">🎯</span>, title: "Mission", desc: "To provide accessible academic support and resources to every student in need." },
+            { icon: <span role="img" aria-label="Telescope emoji">🔭</span>, title: "Vision", desc: "A future where every student has equal opportunity to succeed and thrive." },
+            { icon: <span role="img" aria-label="Handshake emoji">🤝</span>, title: "Goals", desc: "Build a strong network, organize impactful events, and foster lifelong connections." },
           ].map((item, i) => (
             <motion.div
               key={i} variants={fade} initial="hidden" whileInView="show" viewport={{ once: true }} transition={{ delay: i * 0.15 }}
