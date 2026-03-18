@@ -95,6 +95,32 @@ export default function HomePage() {
           </motion.div>
         </motion.div>
       </section>
+
+
+<footer className="border-t border-gray-200 dark:border-white/10 mt-10">
+  <div className="max-w-6xl mx-auto px-4 py-8 text-center">
+
+    <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+      Student Aid BDG
+    </h3>
+
+    <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+      Empowering students through community, collaboration, and shared growth.
+    </p>
+
+    <div className="mt-4 text-sm text-gray-500 dark:text-gray-400">
+      © {new Date().getFullYear()} All rights reserved
+    </div>
+
+    <div className="mt-2 text-sm">
+      Built with ❤️ by{" "}
+      <span className="font-medium text-indigo-600 dark:text-indigo-400">
+        Md. Inzamamul Lohani
+      </span>
+    </div>
+
+  </div>
+</footer>
     </div>
   );
 }
