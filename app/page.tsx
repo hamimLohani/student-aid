@@ -123,8 +123,8 @@ export default function HomePage() {
     <div className="mt-4 text-sm text-gray-600 dark:text-gray-400 space-y-1">
       <p>
         📧 Email:{" "}
-        <a href="mailto: hamimLohani@gmail.com" className="text-indigo-600 hover:underline">
-          hamimLohani@gmail.com
+        <a href="mailto: hamimlohani@gmail.com" className="text-indigo-600 hover:underline">
+          hamimlohani@gmail.com
         </a>
       </p>
       <p>
