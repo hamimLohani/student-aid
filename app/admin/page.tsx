@@ -201,7 +201,7 @@ export default function AdminDashboard() {
                 className={inputCls}
               >
                 <option value="">SSC Year</option>
-                {Array.from({ length: 20 }, (_, i) => new Date().getFullYear() - i).map((y) => (
+                {Array.from({ length: 30 }, (_, i) => new Date().getFullYear() - i).map((y) => (
                   <option key={y} value={String(y)}>{y}</option>
                 ))}
               </select>
