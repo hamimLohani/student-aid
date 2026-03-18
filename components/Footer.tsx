@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { GraduationCap, Mail, Phone, ArrowUpRight } from "lucide-react";
+import Image from "next/image";
+import { Mail, Phone, ArrowUpRight } from "lucide-react";
 
 const footerButtonBase =
   "inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition";
@@ -17,9 +18,13 @@ export default function Footer() {
           <div className="relative grid gap-8 md:grid-cols-[1.4fr_1fr]">
             <div>
               <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-[0_10px_30px_rgba(99,102,241,0.28)]">
-                  <GraduationCap size={22} />
-                </div>
+                <Image
+                  src="/student-aid-logo.svg"
+                  alt="Student Aid BDG logo"
+                  width={48}
+                  height={48}
+                  className="h-12 w-12 rounded-2xl shadow-[0_10px_30px_rgba(99,102,241,0.18)]"
+                />
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.22em] text-indigo-500">
                     Student Community

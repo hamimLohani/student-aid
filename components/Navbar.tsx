@@ -1,11 +1,12 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { Menu, X, GraduationCap, Sun, Moon } from "lucide-react";
+import { Menu, X, Sun, Moon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const links = [
@@ -24,9 +25,16 @@ export default function Navbar() {
   return (
     <nav className="fixed top-0 w-full z-50 bg-white/80 dark:bg-gray-950/80 backdrop-blur border-b border-gray-200 dark:border-white/10 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
-        <Link href="/" className="flex items-center gap-2 font-bold text-xl text-indigo-600 dark:text-indigo-400">
-          <motion.div whileHover={{ rotate: 10, scale: 1.15 }} transition={{ type: "spring", stiffness: 300 }}>
-            <GraduationCap size={28} />
+        <Link href="/" className="flex items-center gap-3 font-bold text-xl text-indigo-600 dark:text-indigo-400">
+          <motion.div whileHover={{ rotate: 4, scale: 1.06 }} transition={{ type: "spring", stiffness: 300 }}>
+            <Image
+              src="/student-aid-logo.svg"
+              alt="Student Aid BDG logo"
+              width={44}
+              height={44}
+              className="h-11 w-11 rounded-xl"
+              priority
+            />
           </motion.div>
           Student Aid BDG
         </Link>
