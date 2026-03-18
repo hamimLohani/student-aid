@@ -90,7 +90,7 @@ export default function JoinPage() {
           </div>
 
           <div>
-            <label className="block text-sm text-secondary mb-1">SSC Year *</label>
+            <label className="block text-sm text-secondary mb-1">JSC Year *</label>
             <select required value={form.sscYear} onChange={(e) => set("sscYear", e.target.value)} className={inputCls}>
               <option value="">Select JSC year</option>
               {Array.from({ length: 20 }, (_, i) => new Date().getFullYear() - i).map((y) => (
