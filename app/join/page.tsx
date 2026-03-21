@@ -1,10 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import { formatBdPhone, normalizeBdPhone } from "@/lib/phone";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import toast from "react-hot-toast";
 import { Camera } from "lucide-react";
 
@@ -20,10 +21,17 @@ export default function JoinPage() {
   const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    return () => {
+      if (preview) URL.revokeObjectURL(preview);
+    };
+  }, [preview]);
+
   const set = (key: string, value: string) => setForm((f) => ({ ...f, [key]: value }));
 
   const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
+    if (preview) URL.revokeObjectURL(preview);
     setPhoto(file);
     setPreview(file ? URL.createObjectURL(file) : null);
   };
@@ -44,7 +52,6 @@ export default function JoinPage() {
       if (photo) {
         toast.loading("Uploading photo...", { id: "photo" });
         image = await uploadToCloudinary(photo);
-        toast.dismiss("photo");
       }
       await addDoc(collection(db, "joinRequests"), { ...form, phone: formatBdPhone(normalizedPhone), image, createdAt: serverTimestamp(), status: "pending" });
       toast.success("Request submitted! We'll get back to you soon.");
@@ -53,8 +60,10 @@ export default function JoinPage() {
       setPreview(null);
     } catch {
       toast.error("Something went wrong. Please try again.");
+    } finally {
+      toast.dismiss("photo");
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -73,7 +82,7 @@ export default function JoinPage() {
               onClick={() => document.getElementById("photo-input")?.click()}
             >
               {preview ? (
-                <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+                <Image src={preview} alt="Preview" fill sizes="96px" className="object-cover" />
               ) : (
                 <div className="flex flex-col items-center gap-1 text-muted">
                   <Camera size={22} />
@@ -98,7 +107,7 @@ export default function JoinPage() {
             <label className="block text-sm text-secondary mb-1">SSC Year (optional)</label>
             <select value={form.sscYear} onChange={(e) => set("sscYear", e.target.value)} className={inputCls}>
               <option value="">Select SSC year</option>
-              {Array.from({ length: 30 }, (_, i) => new Date().getFullYear() - i).map((y) => (
+              {Array.from({ length: 50 }, (_, i) => new Date().getFullYear() - i).map((y) => (
                 <option key={y} value={String(y)}>{y}</option>
               ))}
             </select>

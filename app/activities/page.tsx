@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { Calendar, Clock, Images, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
@@ -48,7 +49,7 @@ export default function ActivitiesPage() {
               <div className="relative w-full h-40 sm:h-48 bg-gray-100 dark:bg-white/5 overflow-hidden">
                 {a.images?.[0] ? (
                   <>
-                    <img src={a.images[0]} alt={a.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+                    <Image src={a.images[0]} alt={a.title} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover group-hover:scale-105 transition duration-500" />
                     {a.images.length > 1 && (
                       <span className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-lg flex items-center gap-1">
                         <Images size={12} /> {a.images.length}

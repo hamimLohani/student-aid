@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import { signOut } from "firebase/auth";
@@ -21,6 +21,17 @@ export default function Navbar() {
   const { user } = useAuth();
   const { dark, toggle } = useTheme();
   const [open, setOpen] = useState(false);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
+
+  const themeIcon = mounted
+    ? dark
+      ? <Sun size={18} className="text-yellow-400" />
+      : <Moon size={18} className="text-indigo-600" />
+    : <span className="block h-[18px] w-[18px]" aria-hidden="true" />;
 
   return (
     <nav className="fixed top-0 w-full z-50 bg-white/80 dark:bg-gray-950/80 backdrop-blur border-b border-gray-200 dark:border-white/10 transition-colors duration-300">
@@ -62,14 +73,14 @@ export default function Navbar() {
           <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={toggle}
             className="p-2 rounded-lg bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 transition"
           >
-            {dark ? <Sun size={18} className="text-yellow-400" /> : <Moon size={18} className="text-indigo-600" />}
+            {themeIcon}
           </motion.button>
         </div>
 
         {/* Mobile */}
         <div className="md:hidden flex items-center gap-2">
           <motion.button whileTap={{ scale: 0.9 }} onClick={toggle} className="p-2 rounded-lg bg-gray-100 dark:bg-white/10 transition">
-            {dark ? <Sun size={18} className="text-yellow-400" /> : <Moon size={18} className="text-indigo-600" />}
+            {themeIcon}
           </motion.button>
           <motion.button whileTap={{ scale: 0.9 }} onClick={() => setOpen(!open)}>
             <AnimatePresence mode="wait" initial={false}>

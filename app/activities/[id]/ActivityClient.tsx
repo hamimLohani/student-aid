@@ -4,6 +4,7 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { Calendar, Clock, ArrowLeft, X, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
@@ -57,8 +58,8 @@ export default function ActivityDetailClient() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         {/* Hero image */}
         {activity.images?.[0] && (
-          <div className="w-full h-56 sm:h-80 rounded-2xl overflow-hidden mb-6 cursor-pointer" onClick={() => setLightbox(0)}>
-            <img src={activity.images[0]} alt={activity.title} className="w-full h-full object-cover hover:scale-105 transition duration-500" />
+          <div className="relative w-full h-56 sm:h-80 rounded-2xl overflow-hidden mb-6 cursor-pointer" onClick={() => setLightbox(0)}>
+            <Image src={activity.images[0]} alt={activity.title} fill sizes="(max-width: 640px) 100vw, 896px" className="object-cover hover:scale-105 transition duration-500" />
           </div>
         )}
 
@@ -79,10 +80,10 @@ export default function ActivityDetailClient() {
               {activity.images.map((img, i) => (
                 <motion.div
                   key={i} whileHover={{ scale: 1.02 }}
-                  className="aspect-square rounded-xl overflow-hidden cursor-pointer"
+                  className="relative aspect-square rounded-xl overflow-hidden cursor-pointer"
                   onClick={() => setLightbox(i)}
                 >
-                  <img src={img} alt={`Photo ${i + 1}`} className="w-full h-full object-cover" />
+                  <Image src={img} alt={`Photo ${i + 1}`} fill sizes="(max-width: 640px) 50vw, 33vw" className="object-cover" />
                 </motion.div>
               ))}
             </div>

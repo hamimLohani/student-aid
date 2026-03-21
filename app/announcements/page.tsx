@@ -1,88 +1,22 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import {
   collection, onSnapshot, orderBy, query,
   addDoc, updateDoc, doc, arrayUnion, arrayRemove, serverTimestamp,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
-import { motion, AnimatePresence } from "framer-motion";
-import { Heart, MessageCircle, Send, ChevronDown, User } from "lucide-react";
+import Image from "next/image";
+import { motion } from "framer-motion";
+import { Heart, MessageCircle, Send } from "lucide-react";
 
 interface Announcement { id: string; title: string; content: string; timestamp: { seconds: number }; likes: string[]; }
 interface Comment { id: string; text: string; author: string; authorImage?: string; createdAt: { seconds: number }; }
-interface Member { id: string; name: string; image?: string; }
-
-function MemberPicker({ members, selected, onSelect }: { members: Member[]; selected: Member | null; onSelect: (m: Member | null) => void }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handler = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
-  return (
-    <div ref={ref} className="relative">
-      <button type="button" onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 input-field py-2 pr-3 cursor-pointer text-left w-full"
-      >
-        {selected ? (
-          <>
-            <div className="w-6 h-6 rounded-full overflow-hidden bg-indigo-600/30 flex-shrink-0">
-              {selected.image
-                ? <img src={selected.image} alt={selected.name} className="w-full h-full object-cover" />
-                : <span className="w-full h-full flex items-center justify-center text-xs font-bold text-indigo-300">{selected.name[0]}</span>}
-            </div>
-            <span className="text-sm flex-1 truncate">{selected.name}</span>
-          </>
-        ) : (
-          <>
-            <User size={14} className="text-muted flex-shrink-0" />
-            <span className="text-muted text-sm flex-1">Comment as...</span>
-          </>
-        )}
-        <ChevronDown size={14} className={`text-muted transition-transform flex-shrink-0 ${open ? "rotate-180" : ""}`} />
-      </button>
-
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.15 }}
-            className="absolute z-20 top-full mt-1 w-full card py-1 max-h-48 overflow-y-auto shadow-lg"
-          >
-            <button type="button" onClick={() => { onSelect(null); setOpen(false); }}
-              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-muted hover:text-indigo-600 dark:hover:text-white hover:bg-indigo-50 dark:hover:bg-indigo-600/10 transition"
-            >
-              <User size={14} /> Guest
-            </button>
-            {members.map((m) => (
-              <button type="button" key={m.id} onClick={() => { onSelect(m); setOpen(false); }}
-                className="flex items-center gap-2 w-full px-3 py-2 hover:bg-indigo-50 dark:hover:bg-indigo-600/10 transition"
-              >
-                <div className="w-6 h-6 rounded-full overflow-hidden bg-indigo-600/30 flex-shrink-0">
-                  {m.image
-                    ? <img src={m.image} alt={m.name} className="w-full h-full object-cover" />
-                    : <span className="w-full h-full flex items-center justify-center text-xs font-bold text-indigo-300">{m.name[0]}</span>}
-                </div>
-                <span className="text-sm truncate">{m.name}</span>
-              </button>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-function AnnouncementCard({ a, members }: { a: Announcement; members: Member[] }) {
+function AnnouncementCard({ a }: { a: Announcement }) {
   const { user } = useAuth();
   const [comments, setComments] = useState<Comment[]>([]);
   const [showComments, setShowComments] = useState(false);
   const [text, setText] = useState("");
-  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const liked = user && a.likes?.includes(user.uid);
 
   useEffect(() => {
@@ -99,9 +33,9 @@ function AnnouncementCard({ a, members }: { a: Announcement; members: Member[] }
   const postComment = async () => {
     if (!text.trim()) return;
     await addDoc(collection(db, "announcements", a.id, "comments"), {
-      text,
-      author: selectedMember?.name || user?.email || "Guest",
-      authorImage: selectedMember?.image || "",
+      text: text.trim(),
+      author: user?.email || "Guest",
+      authorImage: "",
       createdAt: serverTimestamp(),
     });
     setText("");
@@ -125,9 +59,9 @@ function AnnouncementCard({ a, members }: { a: Announcement; members: Member[] }
         <div className="mt-4 border-t border-[var(--border)] pt-4 space-y-3">
           {comments.map((c) => (
             <div key={c.id} className="flex items-start gap-2 text-sm">
-              <div className="w-7 h-7 rounded-full overflow-hidden bg-indigo-600/30 flex-shrink-0 mt-0.5">
+              <div className="relative w-7 h-7 rounded-full overflow-hidden bg-indigo-600/30 flex-shrink-0 mt-0.5">
                 {c.authorImage
-                  ? <img src={c.authorImage} alt={c.author} className="w-full h-full object-cover" />
+                  ? <Image src={c.authorImage} alt={c.author} fill sizes="28px" className="object-cover" />
                   : <span className="w-full h-full flex items-center justify-center text-xs font-bold text-indigo-300">{c.author[0]?.toUpperCase()}</span>}
               </div>
               <div>
@@ -138,7 +72,9 @@ function AnnouncementCard({ a, members }: { a: Announcement; members: Member[] }
           ))}
 
           <div className="space-y-2 mt-3">
-            <MemberPicker members={members} selected={selectedMember} onSelect={setSelectedMember} />
+            <p className="text-xs text-muted">
+              Commenting as {user?.email || "Guest"}
+            </p>
             <div className="flex gap-2">
               <input value={text} onChange={(e) => setText(e.target.value)}
                 placeholder="Write a comment..."
@@ -158,13 +94,10 @@ function AnnouncementCard({ a, members }: { a: Announcement; members: Member[] }
 
 export default function AnnouncementsPage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const [members, setMembers] = useState<Member[]>([]);
 
   useEffect(() => {
     const q = query(collection(db, "announcements"), orderBy("timestamp", "desc"));
-    const unsub1 = onSnapshot(q, (snap) => setAnnouncements(snap.docs.map((d) => ({ id: d.id, ...d.data() } as Announcement))));
-    const unsub2 = onSnapshot(collection(db, "members"), (snap) => setMembers(snap.docs.map((d) => ({ id: d.id, ...d.data() } as Member))));
-    return () => { unsub1(); unsub2(); };
+    return onSnapshot(q, (snap) => setAnnouncements(snap.docs.map((d) => ({ id: d.id, ...d.data() } as Announcement))));
   }, []);
 
   return (
@@ -173,7 +106,7 @@ export default function AnnouncementsPage() {
       <p className="text-secondary text-sm sm:text-base mb-8 sm:mb-10">Stay updated with the latest news from Student Aid BDG.</p>
       {announcements.length === 0 && <p className="text-muted text-center py-20">No announcements yet.</p>}
       <div className="max-w-3xl space-y-4 sm:space-y-6">
-        {announcements.map((a) => <AnnouncementCard key={a.id} a={a} members={members} />)}
+        {announcements.map((a) => <AnnouncementCard key={a.id} a={a} />)}
       </div>
     </div>
   );

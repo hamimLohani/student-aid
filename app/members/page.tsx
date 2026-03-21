@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 
@@ -123,8 +124,8 @@ export default function MembersPage() {
         {filtered.map((m, i) => (
           <motion.div key={m.id} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} whileHover={{ y: -4, scale: 1.02 }} whileTap={{ scale: 0.97 }} transition={{ delay: i * 0.05, type: "spring", stiffness: 280, damping: 20 }}>
             <Link href={`/members/${m.id}`} className="card block p-3 sm:p-5 text-center hover:border-indigo-400">
-              <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full mx-auto mb-2 sm:mb-3 overflow-hidden bg-indigo-100 dark:bg-indigo-600/30 flex items-center justify-center text-xl sm:text-3xl font-bold text-indigo-600 dark:text-indigo-300 ring-2 ring-indigo-200 dark:ring-white/10">
-                {m.image ? <img src={m.image} alt={m.name} className="w-full h-full object-cover" /> : m.name[0]}
+              <div className="relative w-14 h-14 sm:w-20 sm:h-20 rounded-full mx-auto mb-2 sm:mb-3 overflow-hidden bg-indigo-100 dark:bg-indigo-600/30 flex items-center justify-center text-xl sm:text-3xl font-bold text-indigo-600 dark:text-indigo-300 ring-2 ring-indigo-200 dark:ring-white/10">
+                {m.image ? <Image src={m.image} alt={m.name} fill sizes="80px" className="object-cover" /> : m.name[0]}
               </div>
               <h3 className="font-semibold text-sm sm:text-base leading-tight">{m.name}</h3>
               {m.sscYear && <p className="text-secondary text-xs mt-1">SSC {m.sscYear}</p>}

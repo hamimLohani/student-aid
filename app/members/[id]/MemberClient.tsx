@@ -5,6 +5,7 @@ import { db } from "@/lib/firebase";
 import { toBdTel } from "@/lib/phone";
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { MapPin, Briefcase, GraduationCap, ArrowLeft, Building2, Droplets, Phone, Mail } from "lucide-react";
 import Link from "next/link";
 
@@ -42,8 +43,8 @@ export default function MemberProfileClient() {
       </Link>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="card p-6 sm:p-8">
         <div className="flex flex-col items-center mb-6">
-          <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-indigo-100 dark:bg-indigo-600/30 flex items-center justify-center text-4xl sm:text-5xl font-bold text-indigo-600 dark:text-indigo-300 ring-4 ring-indigo-200 dark:ring-indigo-500/20 mb-4">
-            {member.image ? <img src={member.image} alt={member.name} className="w-full h-full object-cover" /> : member.name[0]}
+          <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-indigo-100 dark:bg-indigo-600/30 flex items-center justify-center text-4xl sm:text-5xl font-bold text-indigo-600 dark:text-indigo-300 ring-4 ring-indigo-200 dark:ring-indigo-500/20 mb-4">
+            {member.image ? <Image src={member.image} alt={member.name} fill sizes="128px" className="object-cover" /> : member.name[0]}
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-center">{member.name}</h1>
           {member.bloodGroup && (

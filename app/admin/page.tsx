@@ -4,11 +4,12 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import {
   collection, addDoc, deleteDoc, doc, onSnapshot,
-  serverTimestamp, updateDoc,
+  serverTimestamp, updateDoc, writeBatch,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import { formatBdPhone, normalizeBdPhone } from "@/lib/phone";
+import Image from "next/image";
 import toast from "react-hot-toast";
 import { Trash2, Plus, Users, Megaphone, Calendar, FileText, Pencil, X, Check } from "lucide-react";
 
@@ -39,7 +40,9 @@ export default function AdminDashboard() {
   const [editImage, setEditImage] = useState<File | null>(null);
   const [activityForm, setActivityForm] = useState({ title: "", description: "", date: "" });
   const [activityMedia, setActivityMedia] = useState<File[]>([]);
+  const [activityMediaPreviews, setActivityMediaPreviews] = useState<string[]>([]);
   const [announcementForm, setAnnouncementForm] = useState({ title: "", content: "" });
+  const [approvingId, setApprovingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !user) router.push("/admin/login");
@@ -66,6 +69,15 @@ export default function AdminDashboard() {
     });
   }, [requests]);
 
+  useEffect(() => {
+    const previews = activityMedia.map((file) => URL.createObjectURL(file));
+    setActivityMediaPreviews(previews);
+
+    return () => {
+      previews.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [activityMedia]);
+
   const addMember = async () => {
     if (!memberForm.name) return toast.error("Name required");
     if (memberForm.phone && !normalizeBdPhone(memberForm.phone)) return toast.error("Enter a valid Bangladesh mobile number.");
@@ -75,32 +87,40 @@ export default function AdminDashboard() {
       if (memberImage) {
         toast.loading("Uploading photo...", { id: "mphoto" });
         image = await uploadToCloudinary(memberImage);
-        toast.dismiss("mphoto");
       }
       await addDoc(collection(db, "members"), { ...memberForm, phone: memberForm.phone ? formatBdPhone(memberForm.phone) : "", image });
       setMemberForm({ name: "", sscYear: "", work: "", workplace: "", bloodGroup: "", address: "", phone: "", email: "" });
       setMemberImage(null);
       toast.success("Member added!");
-    } catch { toast.error("Failed to add member."); }
-    setMemberLoading(false);
+    } catch {
+      toast.error("Failed to add member.");
+    } finally {
+      toast.dismiss("mphoto");
+      setMemberLoading(false);
+    }
   };
 
   const addActivity = async () => {
     if (!activityForm.title) return toast.error("Title required");
     toast.loading("Uploading images...", { id: "upload" });
-    const images = await Promise.all(activityMedia.map((f) => uploadToCloudinary(f)));
-    toast.dismiss("upload");
-    const data = { ...activityForm, images };
-    await addDoc(collection(db, "activities"), data);
-    await addDoc(collection(db, "announcements"), {
-      title: `New Activity: ${activityForm.title}`,
-      content: activityForm.description,
-      timestamp: serverTimestamp(),
-      likes: [],
-    });
-    setActivityForm({ title: "", description: "", date: "" });
-    setActivityMedia([]);
-    toast.success("Activity added & announced!");
+    try {
+      const images = await Promise.all(activityMedia.map((f) => uploadToCloudinary(f)));
+      const data = { ...activityForm, images };
+      await addDoc(collection(db, "activities"), data);
+      await addDoc(collection(db, "announcements"), {
+        title: `New Activity: ${activityForm.title}`,
+        content: activityForm.description,
+        timestamp: serverTimestamp(),
+        likes: [],
+      });
+      setActivityForm({ title: "", description: "", date: "" });
+      setActivityMedia([]);
+      toast.success("Activity added & announced!");
+    } catch {
+      toast.error("Failed to add activity.");
+    } finally {
+      toast.dismiss("upload");
+    }
   };
 
   const addAnnouncement = async () => {
@@ -139,9 +159,33 @@ export default function AdminDashboard() {
   };
 
   const approveRequest = async (r: JoinRequest) => {
-    await addDoc(collection(db, "members"), { name: r.name, sscYear: r.sscYear, work: r.work, workplace: r.workplace || "", bloodGroup: r.bloodGroup || "", address: r.address, phone: r.phone || "", email: r.email || "", image: r.image || "" });
-    await deleteDoc(doc(db, "joinRequests", r.id));
-    toast.success("Member approved!");
+    if (approvingId) return;
+    setApprovingId(r.id);
+    try {
+      const batch = writeBatch(db);
+      const memberRef = doc(collection(db, "members"));
+      const requestRef = doc(db, "joinRequests", r.id);
+
+      batch.set(memberRef, {
+        name: r.name,
+        sscYear: r.sscYear,
+        work: r.work,
+        workplace: r.workplace || "",
+        bloodGroup: r.bloodGroup || "",
+        address: r.address,
+        phone: r.phone || "",
+        email: r.email || "",
+        image: r.image || "",
+      });
+      batch.delete(requestRef);
+
+      await batch.commit();
+      toast.success("Member approved!");
+    } catch {
+      toast.error("Failed to approve member.");
+    } finally {
+      setApprovingId(null);
+    }
   };
 
   if (loading || !user) return <div className="pt-32 text-center text-muted">Loading...</div>;
@@ -215,7 +259,7 @@ export default function AdminDashboard() {
                 className={inputCls}
               >
                 <option value="">SSC Year (optional)</option>
-                {Array.from({ length: 30 }, (_, i) => new Date().getFullYear() - i).map((y) => (
+                {Array.from({ length: 50 }, (_, i) => new Date().getFullYear() - i).map((y) => (
                   <option key={y} value={String(y)}>{y}</option>
                 ))}
               </select>
@@ -263,7 +307,7 @@ export default function AdminDashboard() {
                       className={inputCls}
                     >
                       <option value="">SSC Year (optional)</option>
-                      {Array.from({ length: 30 }, (_, i) => new Date().getFullYear() - i).map((y) => (
+                      {Array.from({ length: 50 }, (_, i) => new Date().getFullYear() - i).map((y) => (
                         <option key={y} value={String(y)}>{y}</option>
                       ))}
                     </select>
@@ -294,8 +338,8 @@ export default function AdminDashboard() {
                   </div>
                 ) : (
                   <div className="flex items-center gap-3 px-4 py-3">
-                    <div className="w-9 h-9 rounded-full overflow-hidden bg-indigo-600/30 flex items-center justify-center text-sm font-bold text-indigo-300 flex-shrink-0">
-                      {m.image ? <img src={m.image} alt={m.name} className="w-full h-full object-cover" /> : m.name[0]}
+                    <div className="relative w-9 h-9 rounded-full overflow-hidden bg-indigo-600/30 flex items-center justify-center text-sm font-bold text-indigo-300 flex-shrink-0">
+                      {m.image ? <Image src={m.image} alt={m.name} fill sizes="36px" className="object-cover" /> : m.name[0]}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm truncate">{m.name}</p>
@@ -347,9 +391,9 @@ export default function AdminDashboard() {
                 />
                 {activityMedia.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-2">
-                    {activityMedia.map((f, i) => (
+                    {activityMediaPreviews.map((previewUrl, i) => (
                       <div key={i} className="relative">
-                        <img src={URL.createObjectURL(f)} alt="" className="w-16 h-16 object-cover rounded-lg" />
+                        <Image src={previewUrl} alt="" width={64} height={64} className="object-cover rounded-lg" />
                         <button onClick={() => setActivityMedia(activityMedia.filter((_, j) => j !== i))}
                           className="absolute -top-1 -right-1 bg-red-500 rounded-full w-4 h-4 flex items-center justify-center text-white text-xs"
                         >×</button>
@@ -431,7 +475,7 @@ export default function AdminDashboard() {
               <div className="flex items-start justify-between gap-2 mb-2">
                 <div className="flex gap-3 min-w-0 flex-1">
                   {r.image && (
-                    <img src={r.image} alt={r.name} className="w-12 h-12 rounded-full object-cover flex-shrink-0 ring-2 ring-white/10" />
+                    <Image src={r.image} alt={r.name} width={48} height={48} className="rounded-full object-cover flex-shrink-0 ring-2 ring-white/10" />
                   )}
                   <div className="min-w-0">
                   <p className="font-medium text-sm">{r.name}</p>
@@ -451,9 +495,10 @@ export default function AdminDashboard() {
               {r.status === "pending" && (
                 <div className="flex gap-2 mt-3">
                   <button onClick={() => approveRequest(r)}
-                    className="flex-1 bg-green-600 hover:bg-green-500 py-2 rounded-xl text-xs font-medium transition"
+                    disabled={approvingId === r.id}
+                    className="flex-1 bg-green-600 hover:bg-green-500 disabled:opacity-50 py-2 rounded-xl text-xs font-medium transition"
                   >
-                    ✓ Approve
+                    {approvingId === r.id ? "Approving..." : "✓ Approve"}
                   </button>
                   <button onClick={() => deleteDoc_("joinRequests", r.id, "request")}
                     className="flex-1 bg-red-600/20 hover:bg-red-600/40 text-red-400 py-2 rounded-xl text-xs font-medium transition"

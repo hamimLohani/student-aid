@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Mail, Phone, ArrowUpRight } from "lucide-react";
+import { formatBdPhone, toBdTel } from "@/lib/phone";
 
 const footerButtonBase =
   "inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition";
@@ -8,6 +9,8 @@ const footerButtonBase =
 const footerGhostButton = `${footerButtonBase} border border-[var(--border)] bg-[var(--bg-card)] text-[var(--text-primary)] hover:border-indigo-400 hover:bg-[var(--bg-card-hover)]`;
 
 export default function Footer() {
+  const contactPhone = formatBdPhone("01572906733");
+
   return (
     <footer className="relative mt-16 border-t border-[var(--border)] bg-[var(--bg)]">
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent" />
@@ -68,11 +71,11 @@ export default function Footer() {
                   <span className="truncate">hamimlohani@gmail.com</span>
                 </a>
                 <a
-                  href="tel:+8801572906733"
+                  href={`tel:${toBdTel(contactPhone)}`}
                   className="flex items-center gap-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] px-4 py-3 text-sm transition hover:border-indigo-400 hover:bg-[var(--bg-card-hover)]"
                 >
                   <Phone size={16} className="text-indigo-500" />
-                  <span>+880 1572-906733</span>
+                  <span>{contactPhone}</span>
                 </a>
               </div>
             </div>
