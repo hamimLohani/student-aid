@@ -15,12 +15,13 @@ import { Trash2, Plus, Users, Megaphone, Calendar, FileText, Pencil, X, Check } 
 
 type Tab = "members" | "activities" | "announcements" | "requests";
 
-interface Member { id: string; name: string; sscYear: string; work: string; workplace: string; bloodGroup: string; address: string; phone?: string; email?: string; image?: string; }
+interface Member { id: string; name: string; sscYear: string; memberType?: string; work: string; workplace: string; bloodGroup: string; address: string; phone?: string; email?: string; image?: string; }
 interface Activity { id: string; title: string; description: string; date: string; images: string[]; }
 interface Announcement { id: string; title: string; content: string; }
-interface JoinRequest { id: string; name: string; sscYear: string; work: string; workplace: string; bloodGroup: string; address: string; phone?: string; email?: string; image?: string; message: string; status: string; approvedAt?: { seconds: number }; }
+interface JoinRequest { id: string; name: string; sscYear: string; memberType?: string; work: string; workplace: string; bloodGroup: string; address: string; phone?: string; email?: string; image?: string; message: string; status: string; approvedAt?: { seconds: number }; }
 
 const inputCls = "input-field";
+const MEMBER_TYPES = ["Senior Member", "Junior Member", "Locals"] as const;
 
 export default function AdminDashboard() {
   const { user, loading } = useAuth();
@@ -32,11 +33,11 @@ export default function AdminDashboard() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [requests, setRequests] = useState<JoinRequest[]>([]);
 
-  const [memberForm, setMemberForm] = useState({ name: "", sscYear: "", work: "", workplace: "", bloodGroup: "", address: "", phone: "", email: "" });
+  const [memberForm, setMemberForm] = useState({ name: "", sscYear: "", memberType: "", work: "", workplace: "", bloodGroup: "", address: "", phone: "", email: "" });
   const [memberImage, setMemberImage] = useState<File | null>(null);
   const [memberLoading, setMemberLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState({ name: "", sscYear: "", work: "", workplace: "", bloodGroup: "", address: "", phone: "", email: "" });
+  const [editForm, setEditForm] = useState({ name: "", sscYear: "", memberType: "", work: "", workplace: "", bloodGroup: "", address: "", phone: "", email: "" });
   const [editImage, setEditImage] = useState<File | null>(null);
   const [activityForm, setActivityForm] = useState({ title: "", description: "", date: "" });
   const [activityMedia, setActivityMedia] = useState<File[]>([]);
@@ -80,6 +81,8 @@ export default function AdminDashboard() {
 
   const addMember = async () => {
     if (!memberForm.name) return toast.error("Name required");
+    if (!memberForm.memberType) return toast.error("Member type required");
+    if (!memberForm.phone) return toast.error("Phone number required");
     if (memberForm.phone && !normalizeBdPhone(memberForm.phone)) return toast.error("Enter a valid Bangladesh mobile number.");
     setMemberLoading(true);
     try {
@@ -89,7 +92,7 @@ export default function AdminDashboard() {
         image = await uploadToCloudinary(memberImage);
       }
       await addDoc(collection(db, "members"), { ...memberForm, phone: memberForm.phone ? formatBdPhone(memberForm.phone) : "", image });
-      setMemberForm({ name: "", sscYear: "", work: "", workplace: "", bloodGroup: "", address: "", phone: "", email: "" });
+      setMemberForm({ name: "", sscYear: "", memberType: "", work: "", workplace: "", bloodGroup: "", address: "", phone: "", email: "" });
       setMemberImage(null);
       toast.success("Member added!");
     } catch {
@@ -138,12 +141,14 @@ export default function AdminDashboard() {
 
   const startEdit = (m: Member) => {
     setEditingId(m.id);
-    setEditForm({ name: m.name, sscYear: m.sscYear, work: m.work, workplace: m.workplace, bloodGroup: m.bloodGroup, address: m.address, phone: m.phone || "", email: m.email || "" });
+    setEditForm({ name: m.name, sscYear: m.sscYear, memberType: m.memberType || "", work: m.work, workplace: m.workplace, bloodGroup: m.bloodGroup, address: m.address, phone: m.phone || "", email: m.email || "" });
     setEditImage(null);
   };
 
   const saveEdit = async () => {
     if (!editingId) return;
+    if (!editForm.memberType) return toast.error("Member type required");
+    if (!editForm.phone) return toast.error("Phone number required");
     if (editForm.phone && !normalizeBdPhone(editForm.phone)) return toast.error("Enter a valid Bangladesh mobile number.");
     let image: string | undefined;
     if (editImage) {
@@ -169,6 +174,7 @@ export default function AdminDashboard() {
       batch.set(memberRef, {
         name: r.name,
         sscYear: r.sscYear,
+        memberType: r.memberType || "",
         work: r.work,
         workplace: r.workplace || "",
         bloodGroup: r.bloodGroup || "",
@@ -248,7 +254,7 @@ export default function AdminDashboard() {
               <Plus size={15} /> Add Member
             </h2>
             <div className="space-y-3">
-              {([["name", "Full Name"], ["work", "Occupation"], ["workplace", "Workplace"], ["address", "Current Address"], ["phone", "Phone Number (optional)"], ["email", "Email Address (optional)"]] as [keyof typeof memberForm, string][]).map(([k, p]) => (
+              {([["name", "Full Name *"], ["work", "Occupation *"], ["workplace", "Workplace *"], ["address", "Current Address *"], ["phone", "Phone Number *"], ["email", "Email Address (optional)"]] as [keyof typeof memberForm, string][]).map(([k, p]) => (
                 <input key={k} placeholder={p} value={memberForm[k as keyof typeof memberForm]}
                   onChange={(e) => setMemberForm({ ...memberForm, [k]: e.target.value })}
                   className={inputCls}
@@ -263,11 +269,20 @@ export default function AdminDashboard() {
                   <option key={y} value={String(y)}>{y}</option>
                 ))}
               </select>
+              <select value={memberForm.memberType}
+                onChange={(e) => setMemberForm({ ...memberForm, memberType: e.target.value })}
+                className={inputCls}
+              >
+                <option value="">Type Of Member *</option>
+                {MEMBER_TYPES.map((type) => (
+                  <option key={type} value={type}>{type[0].toUpperCase() + type.slice(1)}</option>
+                ))}
+              </select>
               <select value={memberForm.bloodGroup}
                 onChange={(e) => setMemberForm({ ...memberForm, bloodGroup: e.target.value })}
                 className={inputCls}
               >
-                <option value="">Blood Group</option>
+                <option value="">Blood Group *</option>
                 {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((b) => (
                   <option key={b} value={b}>{b}</option>
                 ))}
@@ -296,7 +311,7 @@ export default function AdminDashboard() {
                       <span className="text-sm font-medium">Editing: {m.name}</span>
                       <button onClick={() => setEditingId(null)} className="text-muted hover:text-secondary transition"><X size={15} /></button>
                     </div>
-                    {([["name", "Full Name"], ["work", "Occupation"], ["workplace", "Workplace"], ["address", "Current Address"], ["phone", "Phone"], ["email", "Email"]] as [keyof typeof editForm, string][]).map(([k, p]) => (
+                    {([["name", "Full Name"], ["work", "Occupation"], ["workplace", "Workplace"], ["address", "Current Address"], ["phone", "Phone *"], ["email", "Email"]] as [keyof typeof editForm, string][]).map(([k, p]) => (
                       <input key={k} placeholder={p} value={editForm[k]}
                         onChange={(e) => setEditForm({ ...editForm, [k]: e.target.value })}
                         className={inputCls}
@@ -309,6 +324,15 @@ export default function AdminDashboard() {
                       <option value="">SSC Year (optional)</option>
                       {Array.from({ length: 50 }, (_, i) => new Date().getFullYear() - i).map((y) => (
                         <option key={y} value={String(y)}>{y}</option>
+                      ))}
+                    </select>
+                    <select value={editForm.memberType}
+                      onChange={(e) => setEditForm({ ...editForm, memberType: e.target.value })}
+                      className={inputCls}
+                    >
+                      <option value="">Type Of Member *</option>
+                      {MEMBER_TYPES.map((type) => (
+                        <option key={type} value={type}>{type[0].toUpperCase() + type.slice(1)}</option>
                       ))}
                     </select>
                     <select value={editForm.bloodGroup}
@@ -344,7 +368,7 @@ export default function AdminDashboard() {
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm truncate">{m.name}</p>
                       <p className="text-secondary text-xs truncate">
-                        {[m.sscYear && `SSC ${m.sscYear}`, m.workplace || m.work, m.bloodGroup].filter(Boolean).join(" · ")}
+                        {[m.memberType && `${m.memberType[0].toUpperCase() + m.memberType.slice(1)}`, m.sscYear && `SSC ${m.sscYear}`, m.workplace || m.work, m.bloodGroup].filter(Boolean).join(" · ")}
                         {m.phone && " · 📞"}
                         {m.email && " · ✉️"}
                       </p>
@@ -479,7 +503,7 @@ export default function AdminDashboard() {
                   )}
                   <div className="min-w-0">
                   <p className="font-medium text-sm">{r.name}</p>
-                  <p className="text-secondary text-xs mt-0.5">{[r.sscYear && `SSC ${r.sscYear}`, r.work].filter(Boolean).join(" · ")}</p>
+                  <p className="text-secondary text-xs mt-0.5">{[r.memberType && `${r.memberType[0].toUpperCase() + r.memberType.slice(1)}`, r.sscYear && `SSC ${r.sscYear}`, r.work].filter(Boolean).join(" · ")}</p>
                   {r.workplace && <p className="text-secondary text-xs">📍 {r.workplace}</p>}
                   {r.address && <p className="text-secondary text-xs">{r.address}</p>}
                   {r.bloodGroup && <p className="text-secondary text-xs">🩸 {r.bloodGroup}</p>}

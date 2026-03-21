@@ -10,7 +10,7 @@ import { MapPin, Briefcase, GraduationCap, ArrowLeft, Building2, Droplets, Phone
 import Link from "next/link";
 
 interface Member {
-  name: string; sscYear: string; work: string; workplace: string;
+  name: string; sscYear: string; memberType?: string; work: string; workplace: string;
   bloodGroup: string; address: string; phone?: string; email?: string; image?: string;
 }
 
@@ -27,6 +27,7 @@ export default function MemberProfileClient() {
   if (!member) return <div className="pt-32 text-center text-muted">Loading...</div>;
 
   const details = [
+    { icon: <Briefcase size={18} className="text-indigo-500" />, label: "Type Of Member", value: member.memberType ? member.memberType[0].toUpperCase() + member.memberType.slice(1) : "" },
     { icon: <GraduationCap size={18} className="text-indigo-500" />, label: "SSC Year", value: member.sscYear },
     { icon: <Briefcase size={18} className="text-indigo-500" />, label: "Occupation", value: member.work },
     { icon: <Building2 size={18} className="text-indigo-500" />, label: "Workplace", value: member.workplace },

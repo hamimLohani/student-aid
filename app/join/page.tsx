@@ -10,11 +10,12 @@ import toast from "react-hot-toast";
 import { Camera } from "lucide-react";
 
 const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+const MEMBER_TYPES = ["Senior Member", "Junior Member", "Locals"] as const;
 const inputCls = "input-field";
 
 export default function JoinPage() {
   const [form, setForm] = useState({
-    name: "", sscYear: "", work: "", workplace: "", bloodGroup: "",
+    name: "", sscYear: "", memberType: "", work: "", workplace: "", bloodGroup: "",
     address: "", phone: "", email: "", message: "",
   });
   const [photo, setPhoto] = useState<File | null>(null);
@@ -38,8 +39,8 @@ export default function JoinPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { name, work, workplace, bloodGroup, address, phone } = form;
-    if (!name || !work || !workplace || !bloodGroup || !address || !phone) {
+    const { name, memberType, work, workplace, bloodGroup, address, phone } = form;
+    if (!name || !memberType || !work || !workplace || !bloodGroup || !address || !phone) {
       return toast.error("Please fill in all required fields.");
     }
     const normalizedPhone = normalizeBdPhone(phone);
@@ -55,7 +56,7 @@ export default function JoinPage() {
       }
       await addDoc(collection(db, "joinRequests"), { ...form, phone: formatBdPhone(normalizedPhone), image, createdAt: serverTimestamp(), status: "pending" });
       toast.success("Request submitted! We'll get back to you soon.");
-      setForm({ name: "", sscYear: "", work: "", workplace: "", bloodGroup: "", address: "", phone: "", email: "", message: "" });
+      setForm({ name: "", sscYear: "", memberType: "", work: "", workplace: "", bloodGroup: "", address: "", phone: "", email: "", message: "" });
       setPhoto(null);
       setPreview(null);
     } catch {
@@ -109,6 +110,16 @@ export default function JoinPage() {
               <option value="">Select SSC year</option>
               {Array.from({ length: 50 }, (_, i) => new Date().getFullYear() - i).map((y) => (
                 <option key={y} value={String(y)}>{y}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm text-secondary mb-1">Type Of Member *</label>
+            <select required value={form.memberType} onChange={(e) => set("memberType", e.target.value)} className={inputCls}>
+              <option value="">Select member type</option>
+              {MEMBER_TYPES.map((type) => (
+                <option key={type} value={type}>{type[0].toUpperCase() + type.slice(1)}</option>
               ))}
             </select>
           </div>

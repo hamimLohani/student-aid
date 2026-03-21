@@ -8,7 +8,7 @@ import Link from "next/link";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 
 interface Member {
-  id: string; name: string; sscYear: string; work: string;
+  id: string; name: string; sscYear: string; memberType?: string; work: string;
   workplace: string; bloodGroup: string; address: string;
   phone?: string; email?: string; image?: string;
 }
@@ -128,6 +128,7 @@ export default function MembersPage() {
                 {m.image ? <Image src={m.image} alt={m.name} fill sizes="80px" className="object-cover" /> : m.name[0]}
               </div>
               <h3 className="font-semibold text-sm sm:text-base leading-tight">{m.name}</h3>
+              {m.memberType && <p className="text-secondary text-xs mt-1">{m.memberType[0].toUpperCase() + m.memberType.slice(1)}</p>}
               {m.sscYear && <p className="text-secondary text-xs mt-1">SSC {m.sscYear}</p>}
               <p className="text-muted text-xs mt-0.5 truncate">📍 {m.workplace || m.work || "—"}</p>
               <div className="flex flex-wrap justify-center gap-1 mt-2">
