@@ -3,6 +3,7 @@ import { useState } from "react";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { uploadToCloudinary } from "@/lib/cloudinary";
+import { formatBdPhone, normalizeBdPhone } from "@/lib/phone";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import { Camera } from "lucide-react";
@@ -29,9 +30,13 @@ export default function JoinPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { name, sscYear, work, workplace, bloodGroup, address, phone, email } = form;
-    if (!name || !sscYear || !work || !workplace || !bloodGroup || !address || !phone || !email) {
+    const { name, work, workplace, bloodGroup, address, phone } = form;
+    if (!name || !work || !workplace || !bloodGroup || !address || !phone) {
       return toast.error("Please fill in all required fields.");
+    }
+    const normalizedPhone = normalizeBdPhone(phone);
+    if (!normalizedPhone) {
+      return toast.error("Enter a valid Bangladesh mobile number.");
     }
     setLoading(true);
     try {
@@ -41,7 +46,7 @@ export default function JoinPage() {
         image = await uploadToCloudinary(photo);
         toast.dismiss("photo");
       }
-      await addDoc(collection(db, "joinRequests"), { ...form, image, createdAt: serverTimestamp(), status: "pending" });
+      await addDoc(collection(db, "joinRequests"), { ...form, phone: formatBdPhone(normalizedPhone), image, createdAt: serverTimestamp(), status: "pending" });
       toast.success("Request submitted! We'll get back to you soon.");
       setForm({ name: "", sscYear: "", work: "", workplace: "", bloodGroup: "", address: "", phone: "", email: "", message: "" });
       setPhoto(null);
@@ -57,7 +62,7 @@ export default function JoinPage() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-3xl sm:text-4xl font-bold mb-2">Join Us</h1>
         <p className="text-secondary text-sm sm:text-base mb-1">Fill out the form below to request membership.</p>
-        <p className="text-muted text-xs mb-6">All fields are required except message.</p>
+        <p className="text-muted text-xs mb-6">SSC year, email, and message are optional.</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
 
@@ -90,15 +95,9 @@ export default function JoinPage() {
           </div>
 
           <div>
-            <label className="block text-sm text-secondary mb-1">SSC Year *</label>
-            <select required value={form.sscYear} onChange={(e) => set("sscYear", e.target.value)} className={inputCls}>
+            <label className="block text-sm text-secondary mb-1">SSC Year (optional)</label>
+            <select value={form.sscYear} onChange={(e) => set("sscYear", e.target.value)} className={inputCls}>
               <option value="">Select SSC year</option>
-
-
-<option value="skip">Skip</option>
-
-
-
               {Array.from({ length: 30 }, (_, i) => new Date().getFullYear() - i).map((y) => (
                 <option key={y} value={String(y)}>{y}</option>
               ))}
@@ -124,16 +123,16 @@ export default function JoinPage() {
             <label className="block text-sm text-secondary mb-1">Phone Number *</label>
             <input
               required type="tel" value={form.phone} onChange={(e) => set("phone", e.target.value)}
-              placeholder="+880 1XXX XXXXXX"
-             /* pattern="^\+880 1[0-9]{3} [0-9]{6}$" */
-              title="Phone number must be in the format +880 1XXX XXXXXX"
+              placeholder="01XXXXXXXXX or +8801XXXXXXXXX"
+              inputMode="numeric"
+              title="Use a valid Bangladesh mobile number, like 01712345678 or +8801712345678"
               className={inputCls}
             />
           </div>
 
           <div>
-            <label className="block text-sm text-secondary mb-1">Email Address *</label>
-            <input required type="email" value={form.email} onChange={(e) => set("email", e.target.value)} placeholder="you@example.com" className={inputCls} />
+            <label className="block text-sm text-secondary mb-1">Email Address (optional)</label>
+            <input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} placeholder="you@example.com" className={inputCls} />
           </div>
 
           <div>

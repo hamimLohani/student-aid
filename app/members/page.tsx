@@ -29,7 +29,7 @@ export default function MembersPage() {
     );
   }, []);
 
-  const years = [...new Set(members.map((m) => m.sscYear))].sort();
+  const years = [...new Set(members.map((m) => m.sscYear).filter(Boolean))].sort();
   const bloodGroups = [...new Set(members.map((m) => m.bloodGroup).filter(Boolean))].sort();
   const workplaces = [...new Set(members.map((m) => m.workplace).filter(Boolean))].sort();
   const addresses = [...new Set(members.map((m) => m.address).filter(Boolean))].sort();
@@ -127,7 +127,7 @@ export default function MembersPage() {
                 {m.image ? <img src={m.image} alt={m.name} className="w-full h-full object-cover" /> : m.name[0]}
               </div>
               <h3 className="font-semibold text-sm sm:text-base leading-tight">{m.name}</h3>
-              <p className="text-secondary text-xs mt-1">SSC {m.sscYear}</p>
+              {m.sscYear && <p className="text-secondary text-xs mt-1">SSC {m.sscYear}</p>}
               <p className="text-muted text-xs mt-0.5 truncate">📍 {m.workplace || m.work || "—"}</p>
               <div className="flex flex-wrap justify-center gap-1 mt-2">
                 {m.bloodGroup && <span className="text-xs bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 px-2 py-0.5 rounded-full">{m.bloodGroup}</span>}

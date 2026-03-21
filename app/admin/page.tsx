@@ -8,6 +8,7 @@ import {
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { uploadToCloudinary } from "@/lib/cloudinary";
+import { formatBdPhone, normalizeBdPhone } from "@/lib/phone";
 import toast from "react-hot-toast";
 import { Trash2, Plus, Users, Megaphone, Calendar, FileText, Pencil, X, Check } from "lucide-react";
 
@@ -55,22 +56,19 @@ export default function AdminDashboard() {
   }, []);
 
   useEffect(() => {
-    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
-    const expiredApproved = requests.filter(
-      (r) => r.status === "approved" && r.approvedAt && r.approvedAt.seconds * 1000 <= cutoff
-    );
-
-    if (expiredApproved.length === 0) return;
+    const approvedRequests = requests.filter((r) => r.status === "approved");
+    if (approvedRequests.length === 0) return;
 
     void Promise.all(
-      expiredApproved.map((r) => deleteDoc(doc(db, "joinRequests", r.id)))
+      approvedRequests.map((r) => deleteDoc(doc(db, "joinRequests", r.id)))
     ).catch(() => {
-      toast.error("Failed to clean up expired approved requests.");
+      toast.error("Failed to remove old approved requests.");
     });
   }, [requests]);
 
   const addMember = async () => {
     if (!memberForm.name) return toast.error("Name required");
+    if (memberForm.phone && !normalizeBdPhone(memberForm.phone)) return toast.error("Enter a valid Bangladesh mobile number.");
     setMemberLoading(true);
     try {
       let image = "";
@@ -79,7 +77,7 @@ export default function AdminDashboard() {
         image = await uploadToCloudinary(memberImage);
         toast.dismiss("mphoto");
       }
-      await addDoc(collection(db, "members"), { ...memberForm, image });
+      await addDoc(collection(db, "members"), { ...memberForm, phone: memberForm.phone ? formatBdPhone(memberForm.phone) : "", image });
       setMemberForm({ name: "", sscYear: "", work: "", workplace: "", bloodGroup: "", address: "", phone: "", email: "" });
       setMemberImage(null);
       toast.success("Member added!");
@@ -126,13 +124,14 @@ export default function AdminDashboard() {
 
   const saveEdit = async () => {
     if (!editingId) return;
+    if (editForm.phone && !normalizeBdPhone(editForm.phone)) return toast.error("Enter a valid Bangladesh mobile number.");
     let image: string | undefined;
     if (editImage) {
       toast.loading("Uploading photo...", { id: "editphoto" });
       image = await uploadToCloudinary(editImage);
       toast.dismiss("editphoto");
     }
-    const data: Record<string, string> = { ...editForm };
+    const data: Record<string, string> = { ...editForm, phone: editForm.phone ? formatBdPhone(editForm.phone) : "" };
     if (image) data.image = image;
     await updateDoc(doc(db, "members", editingId), data);
     setEditingId(null);
@@ -141,7 +140,7 @@ export default function AdminDashboard() {
 
   const approveRequest = async (r: JoinRequest) => {
     await addDoc(collection(db, "members"), { name: r.name, sscYear: r.sscYear, work: r.work, workplace: r.workplace || "", bloodGroup: r.bloodGroup || "", address: r.address, phone: r.phone || "", email: r.email || "", image: r.image || "" });
-    await updateDoc(doc(db, "joinRequests", r.id), { status: "approved", approvedAt: serverTimestamp() });
+    await deleteDoc(doc(db, "joinRequests", r.id));
     toast.success("Member approved!");
   };
 
@@ -205,7 +204,7 @@ export default function AdminDashboard() {
               <Plus size={15} /> Add Member
             </h2>
             <div className="space-y-3">
-              {([["name", "Full Name"], ["work", "Occupation"], ["workplace", "Workplace"], ["address", "Current Address"], ["phone", "Phone Number"], ["email", "Email Address"]] as [keyof typeof memberForm, string][]).map(([k, p]) => (
+              {([["name", "Full Name"], ["work", "Occupation"], ["workplace", "Workplace"], ["address", "Current Address"], ["phone", "Phone Number (optional)"], ["email", "Email Address (optional)"]] as [keyof typeof memberForm, string][]).map(([k, p]) => (
                 <input key={k} placeholder={p} value={memberForm[k as keyof typeof memberForm]}
                   onChange={(e) => setMemberForm({ ...memberForm, [k]: e.target.value })}
                   className={inputCls}
@@ -215,9 +214,7 @@ export default function AdminDashboard() {
                 onChange={(e) => setMemberForm({ ...memberForm, sscYear: e.target.value })}
                 className={inputCls}
               >
-                <option value="">SSC Year</option>
-<option value="skip">Skip</option>
-
+                <option value="">SSC Year (optional)</option>
                 {Array.from({ length: 30 }, (_, i) => new Date().getFullYear() - i).map((y) => (
                   <option key={y} value={String(y)}>{y}</option>
                 ))}
@@ -265,9 +262,7 @@ export default function AdminDashboard() {
                       onChange={(e) => setEditForm({ ...editForm, sscYear: e.target.value })}
                       className={inputCls}
                     >
-                      <option value="">SSC Year</option>
-<option value="skip">Skip</option>
-
+                      <option value="">SSC Year (optional)</option>
                       {Array.from({ length: 30 }, (_, i) => new Date().getFullYear() - i).map((y) => (
                         <option key={y} value={String(y)}>{y}</option>
                       ))}
@@ -304,7 +299,11 @@ export default function AdminDashboard() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm truncate">{m.name}</p>
-                      <p className="text-secondary text-xs truncate">SSC {m.sscYear} · {m.workplace || m.work} {m.bloodGroup && `· ${m.bloodGroup}`}{m.phone && ` · 📞`}{m.email && ` · ✉️`}</p>
+                      <p className="text-secondary text-xs truncate">
+                        {[m.sscYear && `SSC ${m.sscYear}`, m.workplace || m.work, m.bloodGroup].filter(Boolean).join(" · ")}
+                        {m.phone && " · 📞"}
+                        {m.email && " · ✉️"}
+                      </p>
                     </div>
                     <button onClick={() => startEdit(m)} className="text-indigo-400 hover:text-indigo-300 transition flex-shrink-0 p-1">
                       <Pencil size={14} />
@@ -427,9 +426,6 @@ export default function AdminDashboard() {
       {tab === "requests" && (
         <div className="space-y-3">
           {requests.length === 0 && <p className="text-muted text-center py-10">No join requests.</p>}
-          {requests.some((r) => r.status === "approved") && (
-            <p className="text-xs text-muted">Approved requests are removed automatically after 24 hours.</p>
-          )}
           {requests.map((r) => (
             <div key={r.id} className="card p-4">
               <div className="flex items-start justify-between gap-2 mb-2">
@@ -439,13 +435,13 @@ export default function AdminDashboard() {
                   )}
                   <div className="min-w-0">
                   <p className="font-medium text-sm">{r.name}</p>
-                  <p className="text-secondary text-xs mt-0.5">SSC {r.sscYear} · {r.work}</p>
+                  <p className="text-secondary text-xs mt-0.5">{[r.sscYear && `SSC ${r.sscYear}`, r.work].filter(Boolean).join(" · ")}</p>
                   {r.workplace && <p className="text-secondary text-xs">📍 {r.workplace}</p>}
                   {r.address && <p className="text-secondary text-xs">{r.address}</p>}
                   {r.bloodGroup && <p className="text-secondary text-xs">🩸 {r.bloodGroup}</p>}
                   {r.phone && <p className="text-secondary text-xs">📞 {r.phone}</p>}
                   {r.email && <p className="text-secondary text-xs">✉️ {r.email}</p>}
-                  {r.message && <p className="text-muted text-xs mt-1 italic">"{r.message}"</p>}
+                  {r.message && <p className="text-muted text-xs mt-1 italic">&quot;{r.message}&quot;</p>}
                   </div>
                 </div>
                 <span className={`text-xs px-2 py-1 rounded-full flex-shrink-0 ${r.status === "approved" ? "bg-green-500/20 text-green-400" : "bg-amber-500/20 text-amber-400"}`}>

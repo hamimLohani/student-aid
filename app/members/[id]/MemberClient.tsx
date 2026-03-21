@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { toBdTel } from "@/lib/phone";
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { MapPin, Briefcase, GraduationCap, ArrowLeft, Building2, Droplets, Phone, Mail } from "lucide-react";
@@ -63,7 +64,7 @@ export default function MemberProfileClient() {
                 <div className="min-w-0">
                   <p className="text-muted text-xs">{label}</p>
                   {label === "Phone" ? (
-                    <a href={`tel:${value}`} className="text-green-600 dark:text-green-400 hover:underline text-sm font-medium">{value}</a>
+                    <a href={`tel:${toBdTel(value)}`} className="text-green-600 dark:text-green-400 hover:underline text-sm font-medium">{value}</a>
                   ) : label === "Email" ? (
                     <a href={`mailto:${value}`} className="text-blue-600 dark:text-blue-400 hover:underline text-sm font-medium truncate block">{value}</a>
                   ) : (
