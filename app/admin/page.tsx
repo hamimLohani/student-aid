@@ -205,7 +205,7 @@ export default function AdminDashboard() {
               <Plus size={15} /> Add Member
             </h2>
             <div className="space-y-3">
-              {([["name", "Full Name"], ["work", "Occupation"], ["workplace", "Workplace"], ["address", "Current Address"], ["phone", "Phone Number (optional)"], ["email", "Email Address (optional)"]] as [keyof typeof memberForm, string][]).map(([k, p]) => (
+              {([["name", "Full Name"], ["work", "Occupation"], ["workplace", "Workplace"], ["address", "Current Address"], ["phone", "Phone Number"], ["email", "Email Address"]] as [keyof typeof memberForm, string][]).map(([k, p]) => (
                 <input key={k} placeholder={p} value={memberForm[k as keyof typeof memberForm]}
                   onChange={(e) => setMemberForm({ ...memberForm, [k]: e.target.value })}
                   className={inputCls}
@@ -216,6 +216,8 @@ export default function AdminDashboard() {
                 className={inputCls}
               >
                 <option value="">SSC Year</option>
+<option value="skip">Skip</option>
+
                 {Array.from({ length: 30 }, (_, i) => new Date().getFullYear() - i).map((y) => (
                   <option key={y} value={String(y)}>{y}</option>
                 ))}
@@ -264,6 +266,8 @@ export default function AdminDashboard() {
                       className={inputCls}
                     >
                       <option value="">SSC Year</option>
+<option value="skip">Skip</option>
+
                       {Array.from({ length: 30 }, (_, i) => new Date().getFullYear() - i).map((y) => (
                         <option key={y} value={String(y)}>{y}</option>
                       ))}
