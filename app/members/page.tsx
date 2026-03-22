@@ -17,12 +17,13 @@ export default function MembersPage() {
   const [members, setMembers] = useState<Member[]>([]);
   const [search, setSearch] = useState("");
   const [filterYear, setFilterYear] = useState("");
+  const [filterMemberType, setFilterMemberType] = useState("");
   const [filterBlood, setFilterBlood] = useState("");
   const [filterWorkplace, setFilterWorkplace] = useState("");
   const [filterAddress, setFilterAddress] = useState("");
   const [showFilters, setShowFilters] = useState(false);
 
-  const activeFilters = [filterYear, filterBlood, filterWorkplace, filterAddress].filter(Boolean).length;
+  const activeFilters = [filterYear, filterMemberType, filterBlood, filterWorkplace, filterAddress].filter(Boolean).length;
 
   useEffect(() => {
     return onSnapshot(collection(db, "members"), (snap) =>
@@ -31,6 +32,7 @@ export default function MembersPage() {
   }, []);
 
   const years = [...new Set(members.map((m) => m.sscYear).filter(Boolean))].sort();
+  const memberTypes = [...new Set(members.map((m) => m.memberType).filter(Boolean))].sort() as string[];
   const bloodGroups = [...new Set(members.map((m) => m.bloodGroup).filter(Boolean))].sort();
   const workplaces = [...new Set(members.map((m) => m.workplace).filter(Boolean))].sort();
   const addresses = [...new Set(members.map((m) => m.address).filter(Boolean))].sort();
@@ -40,6 +42,7 @@ export default function MembersPage() {
     return (
       (m.name.toLowerCase().includes(q)) &&
       (filterYear ? m.sscYear === filterYear : true) &&
+      (filterMemberType ? m.memberType === filterMemberType : true) &&
       (filterBlood ? m.bloodGroup === filterBlood : true) &&
       (filterWorkplace ? m.workplace === filterWorkplace : true) &&
       (filterAddress ? m.address === filterAddress : true)
@@ -79,10 +82,14 @@ export default function MembersPage() {
         transition={{ duration: 0.25, ease: "easeInOut" }}
         className="overflow-hidden sm:!h-auto sm:!opacity-100"
       >
-        <div className="grid grid-cols-1 gap-2 pb-3 sm:grid-cols-4 sm:gap-3 sm:pb-0">
+        <div className="grid grid-cols-1 gap-2 pb-3 sm:grid-cols-5 sm:gap-3 sm:pb-0">
           <select value={filterYear} onChange={(e) => setFilterYear(e.target.value)} className="input-field">
             <option value="">All SSC Years</option>
             {years.map((y) => <option key={y} value={y}>{y}</option>)}
+          </select>
+          <select value={filterMemberType} onChange={(e) => setFilterMemberType(e.target.value)} className="input-field">
+            <option value="">All Member Types</option>
+            {memberTypes.map((type) => <option key={type} value={type}>{type}</option>)}
           </select>
           <select value={filterBlood} onChange={(e) => setFilterBlood(e.target.value)} className="input-field">
             <option value="">All Blood Groups</option>
@@ -98,7 +105,7 @@ export default function MembersPage() {
           </select>
         </div>
         {activeFilters > 0 && (
-          <button onClick={() => { setFilterYear(""); setFilterBlood(""); setFilterWorkplace(""); setFilterAddress(""); }}
+          <button onClick={() => { setFilterYear(""); setFilterMemberType(""); setFilterBlood(""); setFilterWorkplace(""); setFilterAddress(""); }}
             className="sm:hidden flex items-center gap-1 text-xs text-red-400 hover:text-red-300 transition mb-3"
           >
             <X size={12} /> Clear all filters
@@ -110,6 +117,7 @@ export default function MembersPage() {
       {activeFilters > 0 && !showFilters && (
         <div className="flex flex-wrap gap-2 mb-3 sm:hidden">
           {filterYear && <span className="flex items-center gap-1 text-xs bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 px-2 py-1 rounded-full">SSC {filterYear} <button onClick={() => setFilterYear("")}><X size={10} /></button></span>}
+          {filterMemberType && <span className="flex items-center gap-1 text-xs bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 px-2 py-1 rounded-full">👥 {filterMemberType} <button onClick={() => setFilterMemberType("")}><X size={10} /></button></span>}
           {filterBlood && <span className="flex items-center gap-1 text-xs bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 px-2 py-1 rounded-full">🩸 {filterBlood} <button onClick={() => setFilterBlood("")}><X size={10} /></button></span>}
           {filterWorkplace && <span className="flex items-center gap-1 text-xs bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 px-2 py-1 rounded-full">🏢 {filterWorkplace} <button onClick={() => setFilterWorkplace("")}><X size={10} /></button></span>}
           {filterAddress && <span className="flex items-center gap-1 text-xs bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 px-2 py-1 rounded-full">📍 {filterAddress} <button onClick={() => setFilterAddress("")}><X size={10} /></button></span>}
