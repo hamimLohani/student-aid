@@ -47,6 +47,8 @@ export default function MemberProfileClient() {
     );
   }
 
+  if (!member) return null;
+
   const details = [
     { icon: <Briefcase size={18} className="text-indigo-500" />, label: "Type Of Member", value: member.memberType ? member.memberType[0].toUpperCase() + member.memberType.slice(1) : "" },
     { icon: <GraduationCap size={18} className="text-indigo-500" />, label: "SSC Year", value: member.sscYear },
