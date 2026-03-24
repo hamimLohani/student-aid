@@ -282,7 +282,7 @@ export default function AdminDashboard() {
               <Plus size={15} /> Add Member
             </h2>
             <div className="space-y-3">
-              {([["name", "Full Name *"], ["work", "Occupation *"], ["workplace", "Workplace *"], ["address", "Current Address *"], ["phone", "Phone Number *"], ["email", "Email Address (optional)"]] as [keyof typeof memberForm, string][]).map(([k, p]) => (
+              {([["name", "Full Name *"], ["work", "Occupation *"], ["workplace", "Workplace *"], ["address", "Present Address *"], ["phone", "Phone Number *"], ["email", "Email Address (optional)"]] as [keyof typeof memberForm, string][]).map(([k, p]) => (
                 <input key={k} placeholder={p} value={memberForm[k as keyof typeof memberForm]}
                   onChange={(e) => setMemberForm({ ...memberForm, [k]: e.target.value })}
                   className={inputCls}
@@ -392,7 +392,7 @@ export default function AdminDashboard() {
                     </div>
                     {isEditPanelVisible ? (
                       <>
-                        {([["name", "Full Name"], ["work", "Occupation"], ["workplace", "Workplace"], ["address", "Current Address"], ["phone", "Phone *"], ["email", "Email"]] as [keyof typeof editForm, string][]).map(([k, p]) => (
+                        {([["name", "Full Name"], ["work", "Occupation"], ["workplace", "Workplace"], ["address", "Present Address"], ["phone", "Phone *"], ["email", "Email"]] as [keyof typeof editForm, string][]).map(([k, p]) => (
                           <input key={k} placeholder={p} value={editForm[k]}
                             onChange={(e) => setEditForm({ ...editForm, [k]: e.target.value })}
                             className={inputCls}

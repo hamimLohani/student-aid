@@ -135,7 +135,7 @@ export default function JoinPage() {
           </div>
 
           <div>
-            <label className="block text-sm text-secondary mb-1">Current Address *</label>
+            <label className="block text-sm text-secondary mb-1">Present Address *</label>
             <input required value={form.address} onChange={(e) => set("address", e.target.value)} placeholder="Road no, Upozilla, City, Country" className={inputCls} />
           </div>
 

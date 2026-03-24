@@ -32,7 +32,7 @@ export default function MemberProfileClient() {
     { icon: <Briefcase size={18} className="text-indigo-500" />, label: "Occupation", value: member.work },
     { icon: <Building2 size={18} className="text-indigo-500" />, label: "Workplace", value: member.workplace },
     { icon: <Droplets size={18} className="text-red-500" />, label: "Blood Group", value: member.bloodGroup },
-    { icon: <MapPin size={18} className="text-indigo-500" />, label: "Current Address", value: member.address },
+    { icon: <MapPin size={18} className="text-indigo-500" />, label: "Present Address", value: member.address },
     { icon: <Phone size={18} className="text-green-500" />, label: "Phone", value: member.phone },
     { icon: <Mail size={18} className="text-blue-500" />, label: "Email", value: member.email },
   ];
