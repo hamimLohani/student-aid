@@ -17,14 +17,35 @@ interface Member {
 export default function MemberProfileClient() {
   const { id } = useParams<{ id: string }>();
   const [member, setMember] = useState<Member | null>(null);
+  const [status, setStatus] = useState<"loading" | "ready" | "not-found">("loading");
 
   useEffect(() => {
     return onSnapshot(doc(db, "members", id), (d) => {
-      if (d.exists()) setMember(d.data() as Member);
+      if (d.exists()) {
+        setMember(d.data() as Member);
+        setStatus("ready");
+        return;
+      }
+      setMember(null);
+      setStatus("not-found");
     });
   }, [id]);
 
-  if (!member) return <div className="pt-32 text-center text-muted">Loading...</div>;
+  if (status === "loading") return <div className="pt-32 text-center text-muted">Loading...</div>;
+
+  if (status === "not-found") {
+    return (
+      <div className="pt-20 sm:pt-24 pb-16 px-4 max-w-2xl mx-auto">
+        <Link href="/members" className="flex items-center gap-2 text-secondary hover:text-indigo-600 mb-6 transition text-sm">
+          <ArrowLeft size={16} /> Back to Members
+        </Link>
+        <div className="card p-6 sm:p-8 text-center">
+          <h1 className="text-2xl font-bold">Member not found</h1>
+          <p className="text-secondary text-sm mt-2">This member profile is unavailable or has been removed.</p>
+        </div>
+      </div>
+    );
+  }
 
   const details = [
     { icon: <Briefcase size={18} className="text-indigo-500" />, label: "Type Of Member", value: member.memberType ? member.memberType[0].toUpperCase() + member.memberType.slice(1) : "" },

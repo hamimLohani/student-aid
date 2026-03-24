@@ -38,6 +38,7 @@ export default function AdminDashboard() {
   const [memberLoading, setMemberLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isEditPanelVisible, setIsEditPanelVisible] = useState(true);
+  const [editLoading, setEditLoading] = useState(false);
   const [editForm, setEditForm] = useState({ name: "", sscYear: "", memberType: "", work: "", workplace: "", bloodGroup: "", address: "", phone: "", email: "" });
   const [editImage, setEditImage] = useState<File | null>(null);
   const [memberSearch, setMemberSearch] = useState("");
@@ -61,17 +62,6 @@ export default function AdminDashboard() {
     ];
     return () => unsubs.forEach((u) => u());
   }, []);
-
-  useEffect(() => {
-    const approvedRequests = requests.filter((r) => r.status === "approved");
-    if (approvedRequests.length === 0) return;
-
-    void Promise.all(
-      approvedRequests.map((r) => deleteDoc(doc(db, "joinRequests", r.id)))
-    ).catch(() => {
-      toast.error("Failed to remove old approved requests.");
-    });
-  }, [requests]);
 
   useEffect(() => {
     const previews = activityMedia.map((file) => URL.createObjectURL(file));
@@ -154,18 +144,25 @@ export default function AdminDashboard() {
     if (!editForm.memberType) return toast.error("Member type required");
     if (!editForm.phone) return toast.error("Phone number required");
     if (editForm.phone && !normalizeBdPhone(editForm.phone)) return toast.error("Enter a valid Bangladesh mobile number.");
-    let image: string | undefined;
-    if (editImage) {
-      toast.loading("Uploading photo...", { id: "editphoto" });
-      image = await uploadToCloudinary(editImage);
+    setEditLoading(true);
+    try {
+      let image: string | undefined;
+      if (editImage) {
+        toast.loading("Uploading photo...", { id: "editphoto" });
+        image = await uploadToCloudinary(editImage);
+      }
+      const data: Record<string, string> = { ...editForm, phone: editForm.phone ? formatBdPhone(editForm.phone) : "" };
+      if (image) data.image = image;
+      await updateDoc(doc(db, "members", editingId), data);
+      setEditingId(null);
+      setIsEditPanelVisible(true);
+      toast.success("Member updated!");
+    } catch {
+      toast.error("Failed to update member.");
+    } finally {
       toast.dismiss("editphoto");
+      setEditLoading(false);
     }
-    const data: Record<string, string> = { ...editForm, phone: editForm.phone ? formatBdPhone(editForm.phone) : "" };
-    if (image) data.image = image;
-    await updateDoc(doc(db, "members", editingId), data);
-    setEditingId(null);
-    setIsEditPanelVisible(true);
-    toast.success("Member updated!");
   };
 
   const approveRequest = async (r: JoinRequest) => {
@@ -196,6 +193,16 @@ export default function AdminDashboard() {
       toast.error("Failed to approve member.");
     } finally {
       setApprovingId(null);
+    }
+  };
+
+  const removeRequestMessage = async (id: string) => {
+    if (!confirm("Remove this request message from the queue?")) return;
+    try {
+      await updateDoc(doc(db, "joinRequests", id), { message: "" });
+      toast.success("Request message removed.");
+    } catch {
+      toast.error("Failed to remove request message.");
     }
   };
 
@@ -433,8 +440,8 @@ export default function AdminDashboard() {
                           />
                         </div>
                         <div className="flex gap-2 pt-1">
-                          <button onClick={saveEdit} className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-xl text-xs font-medium transition">
-                            <Check size={13} /> Save
+                          <button onClick={saveEdit} disabled={editLoading} className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 px-4 py-2 rounded-xl text-xs font-medium transition">
+                            <Check size={13} /> {editLoading ? "Saving..." : "Save"}
                           </button>
                           <button onClick={() => {
                             setEditingId(null);
@@ -609,6 +616,16 @@ export default function AdminDashboard() {
                   {r.status}
                 </span>
               </div>
+              {r.message && (
+                <div className="mb-3">
+                  <button
+                    onClick={() => removeRequestMessage(r.id)}
+                    className="text-xs px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-white/5 text-secondary hover:text-primary transition"
+                  >
+                    Remove message
+                  </button>
+                </div>
+              )}
               {r.status === "pending" && (
                 <div className="flex gap-2 mt-3">
                   <button onClick={() => approveRequest(r)}
