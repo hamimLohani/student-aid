@@ -9,6 +9,8 @@ import {
 import { db } from "@/lib/firebase";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import { formatBdPhone, normalizeBdPhone } from "@/lib/phone";
+import { useLanguage } from "@/context/LanguageContext";
+import { adminCopy, getMemberTypeLabel } from "@/lib/i18n";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import { Trash2, Plus, Users, Megaphone, Calendar, FileText, Pencil, X, Check } from "lucide-react";
@@ -25,6 +27,8 @@ const MEMBER_TYPES = ["Senior Member", "Junior Member", "Locals"] as const;
 
 export default function AdminDashboard() {
   const { user, loading } = useAuth();
+  const { language } = useLanguage();
+  const copy = adminCopy[language];
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("members");
 
@@ -73,23 +77,23 @@ export default function AdminDashboard() {
   }, [activityMedia]);
 
   const addMember = async () => {
-    if (!memberForm.name) return toast.error("Name required");
-    if (!memberForm.memberType) return toast.error("Member type required");
-    if (!memberForm.phone) return toast.error("Phone number required");
-    if (memberForm.phone && !normalizeBdPhone(memberForm.phone)) return toast.error("Enter a valid Bangladesh mobile number.");
+    if (!memberForm.name) return toast.error(copy.nameRequired);
+    if (!memberForm.memberType) return toast.error(copy.memberTypeRequired);
+    if (!memberForm.phone) return toast.error(copy.phoneRequired);
+    if (memberForm.phone && !normalizeBdPhone(memberForm.phone)) return toast.error(copy.invalidPhone);
     setMemberLoading(true);
     try {
       let image = "";
       if (memberImage) {
-        toast.loading("Uploading photo...", { id: "mphoto" });
+        toast.loading(copy.uploadingPhoto, { id: "mphoto" });
         image = await uploadToCloudinary(memberImage);
       }
       await addDoc(collection(db, "members"), { ...memberForm, phone: memberForm.phone ? formatBdPhone(memberForm.phone) : "", image });
       setMemberForm({ name: "", sscYear: "", memberType: "", work: "", workplace: "", bloodGroup: "", address: "", phone: "", email: "" });
       setMemberImage(null);
-      toast.success("Member added!");
+      toast.success(copy.memberAdded);
     } catch {
-      toast.error("Failed to add member.");
+      toast.error(copy.addMemberFailed);
     } finally {
       toast.dismiss("mphoto");
       setMemberLoading(false);
@@ -97,8 +101,8 @@ export default function AdminDashboard() {
   };
 
   const addActivity = async () => {
-    if (!activityForm.title) return toast.error("Title required");
-    toast.loading("Uploading images...", { id: "upload" });
+    if (!activityForm.title) return toast.error(copy.titleRequired);
+    toast.loading(copy.uploadingImages, { id: "upload" });
     try {
       const images = await Promise.all(activityMedia.map((f) => uploadToCloudinary(f)));
       const data = { ...activityForm, images };
@@ -111,25 +115,25 @@ export default function AdminDashboard() {
       });
       setActivityForm({ title: "", description: "", date: "" });
       setActivityMedia([]);
-      toast.success("Activity added & announced!");
+      toast.success(copy.activityAdded);
     } catch {
-      toast.error("Failed to add activity.");
+      toast.error(copy.addActivityFailed);
     } finally {
       toast.dismiss("upload");
     }
   };
 
   const addAnnouncement = async () => {
-    if (!announcementForm.title) return toast.error("Title required");
+    if (!announcementForm.title) return toast.error(copy.titleRequired);
     await addDoc(collection(db, "announcements"), { ...announcementForm, timestamp: serverTimestamp(), likes: [] });
     setAnnouncementForm({ title: "", content: "" });
-    toast.success("Announcement posted!");
+    toast.success(copy.announcementPosted);
   };
 
   const deleteDoc_ = async (col: string, id: string, label = "item") => {
-    if (!confirm(`Delete this ${label}? This cannot be undone.`)) return;
+    if (!confirm(copy.deleteConfirm.replace("{label}", label))) return;
     await deleteDoc(doc(db, col, id));
-    toast.success("Deleted!");
+    toast.success(copy.deleted);
   };
 
   const startEdit = (m: Member) => {
@@ -141,14 +145,14 @@ export default function AdminDashboard() {
 
   const saveEdit = async () => {
     if (!editingId) return;
-    if (!editForm.memberType) return toast.error("Member type required");
-    if (!editForm.phone) return toast.error("Phone number required");
-    if (editForm.phone && !normalizeBdPhone(editForm.phone)) return toast.error("Enter a valid Bangladesh mobile number.");
+    if (!editForm.memberType) return toast.error(copy.memberTypeRequired);
+    if (!editForm.phone) return toast.error(copy.phoneRequired);
+    if (editForm.phone && !normalizeBdPhone(editForm.phone)) return toast.error(copy.invalidPhone);
     setEditLoading(true);
     try {
       let image: string | undefined;
       if (editImage) {
-        toast.loading("Uploading photo...", { id: "editphoto" });
+        toast.loading(copy.uploadingPhoto, { id: "editphoto" });
         image = await uploadToCloudinary(editImage);
       }
       const data: Record<string, string> = { ...editForm, phone: editForm.phone ? formatBdPhone(editForm.phone) : "" };
@@ -156,9 +160,9 @@ export default function AdminDashboard() {
       await updateDoc(doc(db, "members", editingId), data);
       setEditingId(null);
       setIsEditPanelVisible(true);
-      toast.success("Member updated!");
+      toast.success(copy.memberUpdated);
     } catch {
-      toast.error("Failed to update member.");
+      toast.error(copy.updateMemberFailed);
     } finally {
       toast.dismiss("editphoto");
       setEditLoading(false);
@@ -188,31 +192,31 @@ export default function AdminDashboard() {
       batch.delete(requestRef);
 
       await batch.commit();
-      toast.success("Member approved!");
+      toast.success(copy.memberApproved);
     } catch {
-      toast.error("Failed to approve member.");
+      toast.error(copy.approveMemberFailed);
     } finally {
       setApprovingId(null);
     }
   };
 
   const removeRequestMessage = async (id: string) => {
-    if (!confirm("Remove this request message from the queue?")) return;
+    if (!confirm(copy.removeRequestMessage)) return;
     try {
       await updateDoc(doc(db, "joinRequests", id), { message: "" });
-      toast.success("Request message removed.");
+      toast.success(copy.requestMessageRemoved);
     } catch {
-      toast.error("Failed to remove request message.");
+      toast.error(copy.removeRequestMessageFailed);
     }
   };
 
-  if (loading || !user) return <div className="pt-32 text-center text-muted">Loading...</div>;
+  if (loading || !user) return <div className="pt-32 text-center text-muted">{copy.loading}</div>;
 
   const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
-    { key: "members", label: "Members", icon: <Users size={16} /> },
-    { key: "activities", label: "Activities", icon: <Calendar size={16} /> },
-    { key: "announcements", label: "Announcements", icon: <Megaphone size={16} /> },
-    { key: "requests", label: "Requests", icon: <FileText size={16} /> },
+    { key: "members", label: copy.members, icon: <Users size={16} /> },
+    { key: "activities", label: copy.activities, icon: <Calendar size={16} /> },
+    { key: "announcements", label: copy.announcements, icon: <Megaphone size={16} /> },
+    { key: "requests", label: copy.requests, icon: <FileText size={16} /> },
   ];
 
   const filteredMembers = members.filter((member) => {
@@ -243,19 +247,19 @@ export default function AdminDashboard() {
 
       {/* Header */}
       <div className="mb-5 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold">Admin Dashboard</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">{copy.dashboard}</h1>
         <p className="text-secondary text-xs sm:text-sm mt-1 truncate">
-          Logged in as <span className="text-indigo-400">{user.email}</span>
+          {copy.loggedInAs} <span className="text-indigo-400">{user.email}</span>
         </p>
       </div>
 
       {/* Stats — 2 cols on mobile, 4 on desktop */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         {[
-          { label: "Members", count: members.length, tab: "members" as Tab },
-          { label: "Activities", count: activities.length, tab: "activities" as Tab },
-          { label: "Announcements", count: announcements.length, tab: "announcements" as Tab },
-          { label: "Pending", count: requests.filter((r) => r.status === "pending").length, tab: "requests" as Tab },
+          { label: copy.members, count: members.length, tab: "members" as Tab },
+          { label: copy.activities, count: activities.length, tab: "activities" as Tab },
+          { label: copy.announcements, count: announcements.length, tab: "announcements" as Tab },
+          { label: copy.pending, count: requests.filter((r) => r.status === "pending").length, tab: "requests" as Tab },
         ].map((s) => (
           <button key={s.label} onClick={() => setTab(s.tab)}
             className={`card p-3 sm:p-4 text-center transition hover:border-indigo-400 ${
@@ -286,10 +290,10 @@ export default function AdminDashboard() {
         <div className="space-y-4">
           <div className="card p-4 sm:p-6">
             <h2 className="font-semibold mb-4 flex items-center gap-2 text-sm sm:text-base">
-              <Plus size={15} /> Add Member
+              <Plus size={15} /> {copy.addMember}
             </h2>
             <div className="space-y-3">
-              {([["name", "Full Name *"], ["work", "Occupation *"], ["workplace", "Workplace *"], ["address", "Present Address *"], ["phone", "Phone Number *"], ["email", "Email Address (optional)"]] as [keyof typeof memberForm, string][]).map(([k, p]) => (
+              {([["name", copy.fullNameRequired], ["work", copy.occupationRequired], ["workplace", copy.workplaceRequired], ["address", copy.addressRequired], ["phone", copy.phoneNumberRequired], ["email", copy.emailOptional]] as [keyof typeof memberForm, string][]).map(([k, p]) => (
                 <input key={k} placeholder={p} value={memberForm[k as keyof typeof memberForm]}
                   onChange={(e) => setMemberForm({ ...memberForm, [k]: e.target.value })}
                   className={inputCls}
@@ -299,7 +303,7 @@ export default function AdminDashboard() {
                 onChange={(e) => setMemberForm({ ...memberForm, sscYear: e.target.value })}
                 className={inputCls}
               >
-                <option value="">SSC Year (optional)</option>
+                <option value="">{copy.sscYearOptional}</option>
                 {Array.from({ length: 50 }, (_, i) => new Date().getFullYear() - i).map((y) => (
                   <option key={y} value={String(y)}>{y}</option>
                 ))}
@@ -308,22 +312,22 @@ export default function AdminDashboard() {
                 onChange={(e) => setMemberForm({ ...memberForm, memberType: e.target.value })}
                 className={inputCls}
               >
-                <option value="">Type Of Member *</option>
+                <option value="">{copy.memberTypeRequiredLabel}</option>
                 {MEMBER_TYPES.map((type) => (
-                  <option key={type} value={type}>{type[0].toUpperCase() + type.slice(1)}</option>
+                  <option key={type} value={type}>{getMemberTypeLabel(type, language)}</option>
                 ))}
               </select>
               <select value={memberForm.bloodGroup}
                 onChange={(e) => setMemberForm({ ...memberForm, bloodGroup: e.target.value })}
                 className={inputCls}
               >
-                <option value="">Blood Group *</option>
+                <option value="">{copy.bloodGroupRequired}</option>
                 {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((b) => (
                   <option key={b} value={b}>{b}</option>
                 ))}
               </select>
               <div>
-                <label className="block text-xs text-secondary mb-1">Profile Photo</label>
+                <label className="block text-xs text-secondary mb-1">{copy.profilePhoto}</label>
                 <input type="file" accept="image/*"
                   onChange={(e) => setMemberImage(e.target.files?.[0] || null)}
                   className="w-full text-sm text-secondary file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-indigo-600/30 file:text-indigo-300 file:text-sm"
@@ -333,7 +337,7 @@ export default function AdminDashboard() {
             <button onClick={addMember} disabled={memberLoading}
               className="mt-4 w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 px-6 py-2.5 rounded-xl text-sm font-medium transition"
             >
-              {memberLoading ? "Adding..." : "Add Member"}
+              {memberLoading ? copy.adding : copy.addMember}
             </button>
           </div>
 
@@ -341,9 +345,9 @@ export default function AdminDashboard() {
             <div className="card p-4 sm:p-5">
               <div className="flex items-center justify-between gap-3 mb-4">
                 <div>
-                  <h2 className="font-semibold text-sm sm:text-base">Search Members</h2>
+                  <h2 className="font-semibold text-sm sm:text-base">{copy.searchMembers}</h2>
                   <p className="text-xs text-secondary mt-1">
-                    Showing {filteredMembers.length} of {members.length} members
+                    {copy.showing.replace("{filtered}", String(filteredMembers.length)).replace("{total}", String(members.length))}
                   </p>
                 </div>
                 {(memberSearch || memberTypeFilter) && (
@@ -354,13 +358,13 @@ export default function AdminDashboard() {
                     }}
                     className="text-xs px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-white/5 text-secondary hover:text-primary transition"
                   >
-                    Clear
+                    {copy.clear}
                   </button>
                 )}
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 <input
-                  placeholder="Search by name, phone, email, workplace..."
+                  placeholder={copy.memberSearchPlaceholder}
                   value={memberSearch}
                   onChange={(e) => setMemberSearch(e.target.value)}
                   className={inputCls}
@@ -370,9 +374,9 @@ export default function AdminDashboard() {
                   onChange={(e) => setMemberTypeFilter(e.target.value)}
                   className={inputCls}
                 >
-                  <option value="">All Member Types</option>
+                  <option value="">{copy.allMemberTypes}</option>
                   {MEMBER_TYPES.map((type) => (
-                    <option key={type} value={type}>{type}</option>
+                    <option key={type} value={type}>{getMemberTypeLabel(type, language)}</option>
                   ))}
                 </select>
               </div>
@@ -383,13 +387,13 @@ export default function AdminDashboard() {
                 {editingId === m.id ? (
                   <div className="p-4 space-y-3">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-medium">Editing: {m.name}</span>
+                      <span className="text-sm font-medium">{copy.editing}: {m.name}</span>
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => setIsEditPanelVisible((visible) => !visible)}
                           className="text-xs px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-white/5 text-secondary hover:text-primary transition"
                         >
-                          {isEditPanelVisible ? "Hide panel" : "Show panel"}
+                          {isEditPanelVisible ? copy.hidePanel : copy.showPanel}
                         </button>
                         <button onClick={() => {
                           setEditingId(null);
@@ -399,7 +403,7 @@ export default function AdminDashboard() {
                     </div>
                     {isEditPanelVisible ? (
                       <>
-                        {([["name", "Full Name"], ["work", "Occupation"], ["workplace", "Workplace"], ["address", "Present Address"], ["phone", "Phone *"], ["email", "Email"]] as [keyof typeof editForm, string][]).map(([k, p]) => (
+                        {([["name", copy.fullName], ["work", copy.occupation], ["workplace", copy.workplace], ["address", copy.address], ["phone", copy.phone], ["email", copy.email]] as [keyof typeof editForm, string][]).map(([k, p]) => (
                           <input key={k} placeholder={p} value={editForm[k]}
                             onChange={(e) => setEditForm({ ...editForm, [k]: e.target.value })}
                             className={inputCls}
@@ -409,7 +413,7 @@ export default function AdminDashboard() {
                           onChange={(e) => setEditForm({ ...editForm, sscYear: e.target.value })}
                           className={inputCls}
                         >
-                          <option value="">SSC Year (optional)</option>
+                          <option value="">{copy.sscYearOptional}</option>
                           {Array.from({ length: 50 }, (_, i) => new Date().getFullYear() - i).map((y) => (
                             <option key={y} value={String(y)}>{y}</option>
                           ))}
@@ -418,22 +422,22 @@ export default function AdminDashboard() {
                           onChange={(e) => setEditForm({ ...editForm, memberType: e.target.value })}
                           className={inputCls}
                         >
-                          <option value="">Type Of Member *</option>
+                          <option value="">{copy.memberTypeRequiredLabel}</option>
                           {MEMBER_TYPES.map((type) => (
-                            <option key={type} value={type}>{type[0].toUpperCase() + type.slice(1)}</option>
+                            <option key={type} value={type}>{getMemberTypeLabel(type, language)}</option>
                           ))}
                         </select>
                         <select value={editForm.bloodGroup}
                           onChange={(e) => setEditForm({ ...editForm, bloodGroup: e.target.value })}
                           className={inputCls}
                         >
-                          <option value="">Blood Group</option>
+                          <option value="">{copy.bloodGroup}</option>
                           {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((b) => (
                             <option key={b} value={b}>{b}</option>
                           ))}
                         </select>
                         <div>
-                          <label className="block text-xs text-secondary mb-1">Change Photo (optional)</label>
+                          <label className="block text-xs text-secondary mb-1">{copy.changePhoto}</label>
                           <input type="file" accept="image/*"
                             onChange={(e) => setEditImage(e.target.files?.[0] || null)}
                             className="w-full text-sm text-secondary file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-indigo-600/30 file:text-indigo-300 file:text-sm"
@@ -441,18 +445,18 @@ export default function AdminDashboard() {
                         </div>
                         <div className="flex gap-2 pt-1">
                           <button onClick={saveEdit} disabled={editLoading} className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 px-4 py-2 rounded-xl text-xs font-medium transition">
-                            <Check size={13} /> {editLoading ? "Saving..." : "Save"}
+                            <Check size={13} /> {editLoading ? copy.saving : copy.save}
                           </button>
                           <button onClick={() => {
                             setEditingId(null);
                             setIsEditPanelVisible(true);
                           }} className="px-4 py-2 rounded-xl text-xs font-medium bg-gray-100 dark:bg-white/5 text-secondary hover:text-primary transition">
-                            Cancel
+                            {copy.cancel}
                           </button>
                         </div>
                       </>
                     ) : (
-                      <p className="text-xs text-secondary">Editing panel hidden. Use “Show panel” to continue editing this member.</p>
+                      <p className="text-xs text-secondary">{copy.editingPanelHidden}</p>
                     )}
                   </div>
                 ) : (
@@ -480,7 +484,7 @@ export default function AdminDashboard() {
             ))}
             {filteredMembers.length === 0 && (
               <div className="card p-6 text-center text-sm text-secondary">
-                No members matched the current search.
+                {copy.noMembersMatched}
               </div>
             )}
           </div>
@@ -492,14 +496,14 @@ export default function AdminDashboard() {
         <div className="space-y-4">
           <div className="card p-4 sm:p-6">
             <h2 className="font-semibold mb-4 flex items-center gap-2 text-sm sm:text-base">
-              <Plus size={15} /> Add Activity
+              <Plus size={15} /> {copy.addActivity}
             </h2>
             <div className="space-y-3">
-              <input placeholder="Title" value={activityForm.title}
+              <input placeholder={copy.title} value={activityForm.title}
                 onChange={(e) => setActivityForm({ ...activityForm, title: e.target.value })}
                 className={inputCls}
               />
-              <textarea placeholder="Description" value={activityForm.description} rows={3}
+              <textarea placeholder={copy.description} value={activityForm.description} rows={3}
                 onChange={(e) => setActivityForm({ ...activityForm, description: e.target.value })}
                 className={`${inputCls} resize-none`}
               />
@@ -508,7 +512,7 @@ export default function AdminDashboard() {
                 className={inputCls}
               />
               <div>
-                <label className="block text-xs text-secondary mb-1">Photos (select multiple)</label>
+                <label className="block text-xs text-secondary mb-1">{copy.photosMultiple}</label>
                 <input type="file" accept="image/*" multiple
                   onChange={(e) => setActivityMedia(Array.from(e.target.files || []))}
                   className="w-full text-sm text-secondary file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-indigo-600/30 file:text-indigo-300 file:text-sm"
@@ -530,7 +534,7 @@ export default function AdminDashboard() {
             <button onClick={addActivity}
               className="mt-4 w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 px-6 py-2.5 rounded-xl text-sm font-medium transition"
             >
-              Add Activity
+              {copy.addActivityButton}
             </button>
           </div>
 
@@ -539,7 +543,7 @@ export default function AdminDashboard() {
               <div key={a.id} className="card flex items-center gap-3 px-4 py-3">
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm truncate">{a.title}</p>
-                  <p className="text-secondary text-xs">{a.date} · {a.images?.length || 0} photos</p>
+                  <p className="text-secondary text-xs">{a.date} · {copy.activityCountPhotos.replace("{count}", String(a.images?.length || 0))}</p>
                 </div>
                 <button onClick={() => deleteDoc_("activities", a.id, "activity")} className="text-red-400 hover:text-red-300 transition flex-shrink-0 p-1">
                   <Trash2 size={15} />
@@ -555,14 +559,14 @@ export default function AdminDashboard() {
         <div className="space-y-4">
           <div className="card p-4 sm:p-6">
             <h2 className="font-semibold mb-4 flex items-center gap-2 text-sm sm:text-base">
-              <Plus size={15} /> Post Announcement
+              <Plus size={15} /> {copy.postAnnouncement}
             </h2>
             <div className="space-y-3">
-              <input placeholder="Title" value={announcementForm.title}
+              <input placeholder={copy.title} value={announcementForm.title}
                 onChange={(e) => setAnnouncementForm({ ...announcementForm, title: e.target.value })}
                 className={inputCls}
               />
-              <textarea placeholder="Content" value={announcementForm.content} rows={4}
+              <textarea placeholder={copy.content} value={announcementForm.content} rows={4}
                 onChange={(e) => setAnnouncementForm({ ...announcementForm, content: e.target.value })}
                 className={`${inputCls} resize-none`}
               />
@@ -570,7 +574,7 @@ export default function AdminDashboard() {
             <button onClick={addAnnouncement}
               className="mt-4 w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 px-6 py-2.5 rounded-xl text-sm font-medium transition"
             >
-              Post Announcement
+              {copy.postAnnouncementButton}
             </button>
           </div>
 
@@ -593,7 +597,7 @@ export default function AdminDashboard() {
       {/* ── Join Requests Tab ── */}
       {tab === "requests" && (
         <div className="space-y-3">
-          {requests.length === 0 && <p className="text-muted text-center py-10">No join requests.</p>}
+          {requests.length === 0 && <p className="text-muted text-center py-10">{copy.noJoinRequests}</p>}
           {requests.map((r) => (
             <div key={r.id} className="card p-4">
               <div className="flex items-start justify-between gap-2 mb-2">
@@ -622,7 +626,7 @@ export default function AdminDashboard() {
                     onClick={() => removeRequestMessage(r.id)}
                     className="text-xs px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-white/5 text-secondary hover:text-primary transition"
                   >
-                    Remove message
+                    {copy.removeMessage}
                   </button>
                 </div>
               )}
@@ -632,12 +636,12 @@ export default function AdminDashboard() {
                     disabled={approvingId === r.id}
                     className="flex-1 bg-green-600 hover:bg-green-500 disabled:opacity-50 py-2 rounded-xl text-xs font-medium transition"
                   >
-                    {approvingId === r.id ? "Approving..." : "✓ Approve"}
+                    {approvingId === r.id ? copy.approving : `✓ ${copy.approve}`}
                   </button>
                   <button onClick={() => deleteDoc_("joinRequests", r.id, "request")}
                     className="flex-1 bg-red-600/20 hover:bg-red-600/40 text-red-400 py-2 rounded-xl text-xs font-medium transition"
                   >
-                    ✕ Reject
+                    ✕ {copy.reject}
                   </button>
                 </div>
               )}

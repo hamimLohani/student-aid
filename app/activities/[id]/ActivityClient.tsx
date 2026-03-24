@@ -7,6 +7,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { Calendar, Clock, ArrowLeft, X, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
+import { useLanguage } from "@/context/LanguageContext";
+import { activityDetailCopy } from "@/lib/i18n";
 
 interface Activity {
   title: string;
@@ -15,12 +17,12 @@ interface Activity {
   images: string[];
 }
 
-function Countdown({ date }: { date: string }) {
+function Countdown({ date, pastEventLabel }: { date: string; pastEventLabel: string }) {
   const [time, setTime] = useState("");
   useEffect(() => {
     const tick = () => {
       const diff = new Date(date).getTime() - Date.now();
-      if (diff <= 0) { setTime("Past event"); return; }
+      if (diff <= 0) { setTime(pastEventLabel); return; }
       const d = Math.floor(diff / 86400000);
       const h = Math.floor((diff % 86400000) / 3600000);
       const m = Math.floor((diff % 3600000) / 60000);
@@ -29,12 +31,14 @@ function Countdown({ date }: { date: string }) {
     tick();
     const id = setInterval(tick, 60000);
     return () => clearInterval(id);
-  }, [date]);
+  }, [date, pastEventLabel]);
   return <span className="flex items-center gap-1.5 text-indigo-400"><Clock size={15} />{time}</span>;
 }
 
 export default function ActivityDetailClient() {
   const { id } = useParams<{ id: string }>();
+  const { language } = useLanguage();
+  const copy = activityDetailCopy[language];
   const [activity, setActivity] = useState<Activity | null>(null);
   const [lightbox, setLightbox] = useState<number | null>(null);
 
@@ -47,12 +51,12 @@ export default function ActivityDetailClient() {
   const prev = () => setLightbox((i) => (i! > 0 ? i! - 1 : activity!.images.length - 1));
   const next = () => setLightbox((i) => (i! < activity!.images.length - 1 ? i! + 1 : 0));
 
-  if (!activity) return <div className="pt-32 text-center text-muted">Loading...</div>;
+  if (!activity) return <div className="pt-32 text-center text-muted">{copy.loading}</div>;
 
   return (
     <div className="pt-20 sm:pt-24 pb-16 px-3 sm:px-4 max-w-4xl mx-auto">
       <Link href="/activities" className="flex items-center gap-2 text-secondary hover:text-indigo-600 mb-6 transition text-sm">
-        <ArrowLeft size={16} /> Back to Activities
+        <ArrowLeft size={16} /> {copy.back}
       </Link>
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -66,8 +70,8 @@ export default function ActivityDetailClient() {
         {/* Title & meta */}
         <h1 className="text-2xl sm:text-4xl font-bold mb-3">{activity.title}</h1>
         <div className="flex flex-wrap gap-4 text-sm text-secondary mb-6">
-          <span className="flex items-center gap-1.5"><Calendar size={15} />{new Date(activity.date).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</span>
-          <Countdown date={activity.date} />
+          <span className="flex items-center gap-1.5"><Calendar size={15} />{new Date(activity.date).toLocaleDateString(language === "bn" ? "bn-BD" : "en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</span>
+          <Countdown date={activity.date} pastEventLabel={copy.pastEvent} />
         </div>
 
         <p className="text-secondary text-sm sm:text-base leading-relaxed mb-10 whitespace-pre-line">{activity.description}</p>
@@ -75,7 +79,7 @@ export default function ActivityDetailClient() {
         {/* Photo gallery */}
         {activity.images?.length > 1 && (
           <div>
-            <h2 className="text-lg font-semibold mb-4">Gallery ({activity.images.length} photos)</h2>
+            <h2 className="text-lg font-semibold mb-4">{copy.gallery} ({activity.images.length} {copy.photos})</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
               {activity.images.map((img, i) => (
                 <motion.div
@@ -83,7 +87,7 @@ export default function ActivityDetailClient() {
                   className="relative aspect-square rounded-xl overflow-hidden cursor-pointer"
                   onClick={() => setLightbox(i)}
                 >
-                  <Image src={img} alt={`Photo ${i + 1}`} fill sizes="(max-width: 640px) 50vw, 33vw" className="object-cover" />
+                  <Image src={img} alt={`${copy.photo} ${i + 1}`} fill sizes="(max-width: 640px) 50vw, 33vw" className="object-cover" />
                 </motion.div>
               ))}
             </div>
@@ -118,7 +122,7 @@ export default function ActivityDetailClient() {
               key={lightbox}
               initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
               src={activity.images[lightbox]}
-              alt={`Photo ${lightbox + 1}`}
+              alt={`${copy.photo} ${lightbox + 1}`}
               className="max-h-[85vh] max-w-full rounded-xl object-contain"
               onClick={(e) => e.stopPropagation()}
             />

@@ -8,12 +8,16 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import { Camera } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
+import { getMemberTypeLabel, joinCopy } from "@/lib/i18n";
 
 const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 const MEMBER_TYPES = ["Senior Member", "Junior Member", "Locals"] as const;
 const inputCls = "input-field";
 
 export default function JoinPage() {
+  const { language } = useLanguage();
+  const copy = joinCopy[language];
   const [form, setForm] = useState({
     name: "", sscYear: "", memberType: "", work: "", workplace: "", bloodGroup: "",
     address: "", phone: "", email: "", message: "",
@@ -41,26 +45,26 @@ export default function JoinPage() {
     e.preventDefault();
     const { name, memberType, work, workplace, bloodGroup, address, phone } = form;
     if (!name || !memberType || !work || !workplace || !bloodGroup || !address || !phone) {
-      return toast.error("Please fill in all required fields.");
+      return toast.error(copy.requiredFields);
     }
     const normalizedPhone = normalizeBdPhone(phone);
     if (!normalizedPhone) {
-      return toast.error("Enter a valid Bangladesh mobile number.");
+      return toast.error(copy.invalidPhone);
     }
     setLoading(true);
     try {
       let image = "";
       if (photo) {
-        toast.loading("Uploading photo...", { id: "photo" });
+        toast.loading(copy.uploadingPhoto, { id: "photo" });
         image = await uploadToCloudinary(photo);
       }
       await addDoc(collection(db, "joinRequests"), { ...form, phone: formatBdPhone(normalizedPhone), image, createdAt: serverTimestamp(), status: "pending" });
-      toast.success("Request submitted! We'll get back to you soon.");
+      toast.success(copy.submitted);
       setForm({ name: "", sscYear: "", memberType: "", work: "", workplace: "", bloodGroup: "", address: "", phone: "", email: "", message: "" });
       setPhoto(null);
       setPreview(null);
     } catch {
-      toast.error("Something went wrong. Please try again.");
+      toast.error(copy.failed);
     } finally {
       toast.dismiss("photo");
       setLoading(false);
@@ -70,9 +74,9 @@ export default function JoinPage() {
   return (
     <div className="pt-20 sm:pt-24 pb-16 px-4 max-w-xl mx-auto">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-3xl sm:text-4xl font-bold mb-2">Join Us</h1>
-        <p className="text-secondary text-sm sm:text-base mb-1">Fill out the form below to request membership.</p>
-        <p className="text-muted text-xs mb-6">SSC year, email, and message are optional.</p>
+        <h1 className="text-3xl sm:text-4xl font-bold mb-2">{copy.title}</h1>
+        <p className="text-secondary text-sm sm:text-base mb-1">{copy.description}</p>
+        <p className="text-muted text-xs mb-6">{copy.optionalInfo}</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
 
@@ -87,7 +91,7 @@ export default function JoinPage() {
               ) : (
                 <div className="flex flex-col items-center gap-1 text-muted">
                   <Camera size={22} />
-                  <span className="text-xs">Photo</span>
+                  <span className="text-xs">{copy.photo}</span>
                 </div>
               )}
             </motion.div>
@@ -95,19 +99,19 @@ export default function JoinPage() {
             <button type="button" onClick={() => document.getElementById("photo-input")?.click()}
               className="text-xs text-indigo-400 hover:text-indigo-300 transition"
             >
-              {preview ? "Change photo" : "Upload profile photo (optional)"}
+              {preview ? copy.changePhoto : copy.uploadPhoto}
             </button>
           </div>
 
           <div>
-            <label className="block text-sm text-secondary mb-1">Full Name *</label>
-            <input required value={form.name} onChange={(e) => set("name", e.target.value)} placeholder="Your full name" className={inputCls} />
+            <label className="block text-sm text-secondary mb-1">{copy.fullName}</label>
+            <input required value={form.name} onChange={(e) => set("name", e.target.value)} placeholder={copy.fullNamePlaceholder} className={inputCls} />
           </div>
 
           <div>
-            <label className="block text-sm text-secondary mb-1">SSC Year (optional)</label>
+            <label className="block text-sm text-secondary mb-1">{copy.sscYear}</label>
             <select value={form.sscYear} onChange={(e) => set("sscYear", e.target.value)} className={inputCls}>
-              <option value="">Select SSC year</option>
+              <option value="">{copy.selectSscYear}</option>
               {Array.from({ length: 50 }, (_, i) => new Date().getFullYear() - i).map((y) => (
                 <option key={y} value={String(y)}>{y}</option>
               ))}
@@ -115,59 +119,59 @@ export default function JoinPage() {
           </div>
 
           <div>
-            <label className="block text-sm text-secondary mb-1">Type Of Member *</label>
+            <label className="block text-sm text-secondary mb-1">{copy.memberType}</label>
             <select required value={form.memberType} onChange={(e) => set("memberType", e.target.value)} className={inputCls}>
-              <option value="">Select member type</option>
+              <option value="">{copy.selectMemberType}</option>
               {MEMBER_TYPES.map((type) => (
-                <option key={type} value={type}>{type[0].toUpperCase() + type.slice(1)}</option>
+                <option key={type} value={type}>{getMemberTypeLabel(type, language)}</option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="block text-sm text-secondary mb-1">Occupation *</label>
-            <input required value={form.work} onChange={(e) => set("work", e.target.value)} placeholder="Student, Engineer, Doctor, etc." className={inputCls} />
+            <label className="block text-sm text-secondary mb-1">{copy.occupation}</label>
+            <input required value={form.work} onChange={(e) => set("work", e.target.value)} placeholder={copy.occupationPlaceholder} className={inputCls} />
           </div>
 
           <div>
-            <label className="block text-sm text-secondary mb-1">Workplace *</label>
-            <input required value={form.workplace} onChange={(e) => set("workplace", e.target.value)} placeholder="Company, University, Hospital, etc." className={inputCls} />
+            <label className="block text-sm text-secondary mb-1">{copy.workplace}</label>
+            <input required value={form.workplace} onChange={(e) => set("workplace", e.target.value)} placeholder={copy.workplacePlaceholder} className={inputCls} />
           </div>
 
           <div>
-            <label className="block text-sm text-secondary mb-1">Present Address *</label>
-            <input required value={form.address} onChange={(e) => set("address", e.target.value)} placeholder="Road no, Upozilla, City, Country" className={inputCls} />
+            <label className="block text-sm text-secondary mb-1">{copy.address}</label>
+            <input required value={form.address} onChange={(e) => set("address", e.target.value)} placeholder={copy.addressPlaceholder} className={inputCls} />
           </div>
 
           <div>
-            <label className="block text-sm text-secondary mb-1">Phone Number *</label>
+            <label className="block text-sm text-secondary mb-1">{copy.phone}</label>
             <input
               required type="tel" value={form.phone} onChange={(e) => set("phone", e.target.value)}
-              placeholder="01XXXXXXXXX or +8801XXXXXXXXX"
+              placeholder={copy.phonePlaceholder}
               inputMode="numeric"
-              title="Use a valid Bangladesh mobile number, like 01712345678 or +8801712345678"
+              title={copy.phoneTitle}
               className={inputCls}
             />
           </div>
 
           <div>
-            <label className="block text-sm text-secondary mb-1">Email Address (optional)</label>
-            <input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} placeholder="you@example.com" className={inputCls} />
+            <label className="block text-sm text-secondary mb-1">{copy.email}</label>
+            <input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} placeholder={copy.emailPlaceholder} className={inputCls} />
           </div>
 
           <div>
-            <label className="block text-sm text-secondary mb-1">Blood Group *</label>
+            <label className="block text-sm text-secondary mb-1">{copy.bloodGroup}</label>
             <select required value={form.bloodGroup} onChange={(e) => set("bloodGroup", e.target.value)} className={inputCls}>
-              <option value="">Select blood group</option>
+              <option value="">{copy.selectBloodGroup}</option>
               {BLOOD_GROUPS.map((b) => <option key={b} value={b}>{b}</option>)}
             </select>
           </div>
 
           <div>
-            <label className="block text-sm text-secondary mb-1">Message (optional)</label>
+            <label className="block text-sm text-secondary mb-1">{copy.message}</label>
             <textarea
               value={form.message} onChange={(e) => set("message", e.target.value)}
-              rows={3} placeholder="Why do you want to join?"
+              rows={3} placeholder={copy.messagePlaceholder}
               className={`${inputCls} resize-none`}
             />
           </div>
@@ -176,7 +180,7 @@ export default function JoinPage() {
             className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 py-3.5 rounded-xl font-semibold transition text-base"
             style={{ boxShadow: "0 4px 16px rgba(99,102,241,0.3)" }}
           >
-            {loading ? "Submitting..." : "Submit Request"}
+            {loading ? copy.submitting : copy.submit}
           </motion.button>
         </form>
       </motion.div>

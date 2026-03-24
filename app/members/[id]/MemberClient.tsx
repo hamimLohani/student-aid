@@ -8,6 +8,8 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { MapPin, Briefcase, GraduationCap, ArrowLeft, Building2, Droplets, Phone, Mail } from "lucide-react";
 import Link from "next/link";
+import { useLanguage } from "@/context/LanguageContext";
+import { memberDetailCopy } from "@/lib/i18n";
 
 interface Member {
   name: string; sscYear: string; memberType?: string; work: string; workplace: string;
@@ -16,6 +18,8 @@ interface Member {
 
 export default function MemberProfileClient() {
   const { id } = useParams<{ id: string }>();
+  const { language } = useLanguage();
+  const copy = memberDetailCopy[language];
   const [member, setMember] = useState<Member | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "not-found">("loading");
 
@@ -31,17 +35,17 @@ export default function MemberProfileClient() {
     });
   }, [id]);
 
-  if (status === "loading") return <div className="pt-32 text-center text-muted">Loading...</div>;
+  if (status === "loading") return <div className="pt-32 text-center text-muted">{copy.loading}</div>;
 
   if (status === "not-found") {
     return (
       <div className="pt-20 sm:pt-24 pb-16 px-4 max-w-2xl mx-auto">
         <Link href="/members" className="flex items-center gap-2 text-secondary hover:text-indigo-600 mb-6 transition text-sm">
-          <ArrowLeft size={16} /> Back to Members
+          <ArrowLeft size={16} /> {copy.back}
         </Link>
         <div className="card p-6 sm:p-8 text-center">
-          <h1 className="text-2xl font-bold">Member not found</h1>
-          <p className="text-secondary text-sm mt-2">This member profile is unavailable or has been removed.</p>
+          <h1 className="text-2xl font-bold">{copy.notFoundTitle}</h1>
+          <p className="text-secondary text-sm mt-2">{copy.notFoundDescription}</p>
         </div>
       </div>
     );
@@ -50,20 +54,20 @@ export default function MemberProfileClient() {
   if (!member) return null;
 
   const details = [
-    { icon: <Briefcase size={18} className="text-indigo-500" />, label: "Type Of Member", value: member.memberType ? member.memberType[0].toUpperCase() + member.memberType.slice(1) : "" },
-    { icon: <GraduationCap size={18} className="text-indigo-500" />, label: "SSC Year", value: member.sscYear },
-    { icon: <Briefcase size={18} className="text-indigo-500" />, label: "Occupation", value: member.work },
-    { icon: <Building2 size={18} className="text-indigo-500" />, label: "Workplace", value: member.workplace },
-    { icon: <Droplets size={18} className="text-red-500" />, label: "Blood Group", value: member.bloodGroup },
-    { icon: <MapPin size={18} className="text-indigo-500" />, label: "Present Address", value: member.address },
-    { icon: <Phone size={18} className="text-green-500" />, label: "Phone", value: member.phone },
-    { icon: <Mail size={18} className="text-blue-500" />, label: "Email", value: member.email },
+    { icon: <Briefcase size={18} className="text-indigo-500" />, label: copy.memberType, value: member.memberType ? member.memberType[0].toUpperCase() + member.memberType.slice(1) : "" },
+    { icon: <GraduationCap size={18} className="text-indigo-500" />, label: copy.sscYear, value: member.sscYear },
+    { icon: <Briefcase size={18} className="text-indigo-500" />, label: copy.occupation, value: member.work },
+    { icon: <Building2 size={18} className="text-indigo-500" />, label: copy.workplace, value: member.workplace },
+    { icon: <Droplets size={18} className="text-red-500" />, label: copy.bloodGroup, value: member.bloodGroup },
+    { icon: <MapPin size={18} className="text-indigo-500" />, label: copy.address, value: member.address },
+    { icon: <Phone size={18} className="text-green-500" />, label: copy.phone, value: member.phone },
+    { icon: <Mail size={18} className="text-blue-500" />, label: copy.email, value: member.email },
   ];
 
   return (
     <div className="pt-20 sm:pt-24 pb-16 px-4 max-w-2xl mx-auto">
       <Link href="/members" className="flex items-center gap-2 text-secondary hover:text-indigo-600 mb-6 transition text-sm">
-        <ArrowLeft size={16} /> Back to Members
+        <ArrowLeft size={16} /> {copy.back}
       </Link>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="card p-6 sm:p-8">
         <div className="flex flex-col items-center mb-6">
@@ -88,9 +92,9 @@ export default function MemberProfileClient() {
                 <span className="flex-shrink-0">{icon}</span>
                 <div className="min-w-0">
                   <p className="text-muted text-xs">{label}</p>
-                  {label === "Phone" ? (
+                  {label === copy.phone ? (
                     <a href={`tel:${toBdTel(value)}`} className="text-green-600 dark:text-green-400 hover:underline text-sm font-medium">{value}</a>
-                  ) : label === "Email" ? (
+                  ) : label === copy.email ? (
                     <a href={`mailto:${value}`} className="text-blue-600 dark:text-blue-400 hover:underline text-sm font-medium truncate block">{value}</a>
                   ) : (
                     <p className="text-sm font-medium truncate">{value}</p>

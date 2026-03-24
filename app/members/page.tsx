@@ -6,6 +6,8 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { Search, SlidersHorizontal, X } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
+import { getMemberTypeLabel, membersCopy } from "@/lib/i18n";
 
 interface Member {
   id: string; name: string; sscYear: string; memberType?: string; work: string;
@@ -14,6 +16,8 @@ interface Member {
 }
 
 export default function MembersPage() {
+  const { language } = useLanguage();
+  const copy = membersCopy[language];
   const [members, setMembers] = useState<Member[]>([]);
   const [search, setSearch] = useState("");
   const [filterYear, setFilterYear] = useState("");
@@ -67,15 +71,15 @@ export default function MembersPage() {
 
   return (
     <div className="pt-20 sm:pt-24 pb-16 px-3 sm:px-4 max-w-6xl mx-auto">
-      <h1 className="text-3xl sm:text-4xl font-bold mb-1">Member Directory</h1>
-      <p className="text-secondary text-sm sm:text-base mb-6 sm:mb-8">Browse and connect with our community members.</p>
+      <h1 className="text-3xl sm:text-4xl font-bold mb-1">{copy.title}</h1>
+      <p className="text-secondary text-sm sm:text-base mb-6 sm:mb-8">{copy.description}</p>
 
       {/* Search + Filter toggle */}
       <div className="flex gap-2 mb-3">
         <div className="relative flex-1">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
           <input value={search} onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, phone, email, work, workplace, address, SSC year, blood group, or member type..."
+            placeholder={copy.searchPlaceholder}
             className="input-field pl-9"
           />
         </div>
@@ -100,23 +104,23 @@ export default function MembersPage() {
       >
         <div className="grid grid-cols-1 gap-2 pb-3 sm:grid-cols-5 sm:gap-3 sm:pb-0">
           <select value={filterYear} onChange={(e) => setFilterYear(e.target.value)} className="input-field">
-            <option value="">All SSC Years</option>
+            <option value="">{copy.allSscYears}</option>
             {years.map((y) => <option key={y} value={y}>{y}</option>)}
           </select>
           <select value={filterMemberType} onChange={(e) => setFilterMemberType(e.target.value)} className="input-field">
-            <option value="">All Member Types</option>
-            {memberTypes.map((type) => <option key={type} value={type}>{type}</option>)}
+            <option value="">{copy.allMemberTypes}</option>
+            {memberTypes.map((type) => <option key={type} value={type}>{getMemberTypeLabel(type, language)}</option>)}
           </select>
           <select value={filterBlood} onChange={(e) => setFilterBlood(e.target.value)} className="input-field">
-            <option value="">All Blood Groups</option>
+            <option value="">{copy.allBloodGroups}</option>
             {bloodGroups.map((b) => <option key={b} value={b}>{b}</option>)}
           </select>
           <select value={filterWorkplace} onChange={(e) => setFilterWorkplace(e.target.value)} className="input-field">
-            <option value="">All Workplaces</option>
+            <option value="">{copy.allWorkplaces}</option>
             {workplaces.map((w) => <option key={w} value={w}>{w}</option>)}
           </select>
           <select value={filterAddress} onChange={(e) => setFilterAddress(e.target.value)} className="input-field">
-            <option value="">All Addresses</option>
+            <option value="">{copy.allAddresses}</option>
             {addresses.map((a) => <option key={a} value={a}>{a}</option>)}
           </select>
         </div>
@@ -124,7 +128,7 @@ export default function MembersPage() {
           <button onClick={() => { setFilterYear(""); setFilterMemberType(""); setFilterBlood(""); setFilterWorkplace(""); setFilterAddress(""); }}
             className="sm:hidden flex items-center gap-1 text-xs text-red-400 hover:text-red-300 transition mb-3"
           >
-            <X size={12} /> Clear all filters
+            <X size={12} /> {copy.clearFilters}
           </button>
         )}
       </motion.div>
@@ -142,7 +146,7 @@ export default function MembersPage() {
 
       <div className="mb-6 sm:mb-8" />
 
-      {filtered.length === 0 && <p className="text-muted text-center py-20">No members found.</p>}
+      {filtered.length === 0 && <p className="text-muted text-center py-20">{copy.noMembers}</p>}
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-5 mt-6">
         {filtered.map((m, i) => (

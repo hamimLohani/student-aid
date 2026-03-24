@@ -6,8 +6,12 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import { Lock } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
+import { adminLoginCopy } from "@/lib/i18n";
 
 export default function AdminLogin() {
+  const { language } = useLanguage();
+  const copy = adminLoginCopy[language];
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,10 +22,10 @@ export default function AdminLogin() {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      toast.success("Welcome back!");
+      toast.success(copy.welcomeBack);
       router.push("/admin");
     } catch {
-      toast.error("Invalid credentials.");
+      toast.error(copy.invalidCredentials);
     }
     setLoading(false);
   };
@@ -37,18 +41,18 @@ export default function AdminLogin() {
             <Lock size={28} className="text-indigo-600 dark:text-indigo-400" />
           </div>
         </div>
-        <h1 className="text-2xl font-bold text-center mb-6">Admin Login</h1>
+        <h1 className="text-2xl font-bold text-center mb-6">{copy.title}</h1>
         <form onSubmit={handleLogin} className="space-y-4">
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email" required className="input-field"
+            placeholder={copy.email} required className="input-field"
           />
           <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password" required className="input-field"
+            placeholder={copy.password} required className="input-field"
           />
           <button type="submit" disabled={loading}
             className="w-full bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-50 py-3 rounded-xl font-semibold transition"
           >
-            {loading ? "Logging in..." : "Login"}
+            {loading ? copy.loggingIn : copy.login}
           </button>
         </form>
       </motion.div>

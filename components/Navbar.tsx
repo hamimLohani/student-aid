@@ -4,23 +4,26 @@ import Image from "next/image";
 import { useState, useSyncExternalStore } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { Menu, X, Sun, Moon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-
-const links = [
-  { href: "/", label: "Home" },
-  { href: "/activities", label: "Activities" },
-  { href: "/members", label: "Members" },
-  { href: "/announcements", label: "Announcements" },
-  { href: "/join", label: "Join Us" },
-];
+import { navbarCopy } from "@/lib/i18n";
 
 export default function Navbar() {
   const { user } = useAuth();
   const { dark, toggle } = useTheme();
+  const { language, toggleLanguage } = useLanguage();
   const [open, setOpen] = useState(false);
+  const copy = navbarCopy[language];
+  const links = [
+    { href: "/", label: copy.home },
+    { href: "/activities", label: copy.activities },
+    { href: "/members", label: copy.members },
+    { href: "/announcements", label: copy.announcements },
+    { href: "/join", label: copy.join },
+  ];
   const mounted = useSyncExternalStore(
     () => () => {},
     () => true,
@@ -62,14 +65,22 @@ export default function Navbar() {
           ))}
           {user ? (
             <>
-              <Link href="/admin" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 transition">Admin</Link>
-              <motion.button whileTap={{ scale: 0.93 }} onClick={() => signOut(auth)} className="text-red-500 dark:text-red-400 hover:text-red-400 transition">Logout</motion.button>
+              <Link href="/admin" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 transition">{copy.admin}</Link>
+              <motion.button whileTap={{ scale: 0.93 }} onClick={() => signOut(auth)} className="text-red-500 dark:text-red-400 hover:text-red-400 transition">{copy.logout}</motion.button>
             </>
           ) : (
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Link href="/admin/login" className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-1.5 rounded-lg transition">Login</Link>
+              <Link href="/admin/login" className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-1.5 rounded-lg transition">{copy.login}</Link>
             </motion.div>
           )}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={toggleLanguage}
+            className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition hover:border-indigo-400 hover:text-indigo-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
+          >
+            {copy.language}
+          </motion.button>
           <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={toggle}
             className="p-2 rounded-lg bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 transition"
           >
@@ -79,6 +90,13 @@ export default function Navbar() {
 
         {/* Mobile */}
         <div className="md:hidden flex items-center gap-2">
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={toggleLanguage}
+            className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-xs font-semibold text-gray-700 transition hover:border-indigo-400 hover:text-indigo-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-200"
+          >
+            {copy.language}
+          </motion.button>
           <motion.button whileTap={{ scale: 0.9 }} onClick={toggle} className="p-2 rounded-lg bg-gray-100 dark:bg-white/10 transition">
             {themeIcon}
           </motion.button>
@@ -114,11 +132,11 @@ export default function Navbar() {
               ))}
               {user ? (
                 <>
-                  <Link href="/admin" onClick={() => setOpen(false)} className="text-indigo-600 dark:text-indigo-400">Admin</Link>
-                  <button onClick={() => { signOut(auth); setOpen(false); }} className="text-red-500 dark:text-red-400 text-left">Logout</button>
+                  <Link href="/admin" onClick={() => setOpen(false)} className="text-indigo-600 dark:text-indigo-400">{copy.admin}</Link>
+                  <button onClick={() => { signOut(auth); setOpen(false); }} className="text-red-500 dark:text-red-400 text-left">{copy.logout}</button>
                 </>
               ) : (
-                <Link href="/admin/login" onClick={() => setOpen(false)} className="text-indigo-600 dark:text-indigo-400">Login</Link>
+                <Link href="/admin/login" onClick={() => setOpen(false)} className="text-indigo-600 dark:text-indigo-400">{copy.login}</Link>
               )}
             </div>
           </motion.div>

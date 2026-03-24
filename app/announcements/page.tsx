@@ -9,11 +9,15 @@ import { useAuth } from "@/context/AuthContext";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Heart, MessageCircle, Send } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
+import { announcementsCopy } from "@/lib/i18n";
 
 interface Announcement { id: string; title: string; content: string; timestamp: { seconds: number }; likes: string[]; }
 interface Comment { id: string; text: string; author: string; authorImage?: string; createdAt: { seconds: number }; }
 function AnnouncementCard({ a }: { a: Announcement }) {
   const { user } = useAuth();
+  const { language } = useLanguage();
+  const copy = announcementsCopy[language];
   const [comments, setComments] = useState<Comment[]>([]);
   const [showComments, setShowComments] = useState(false);
   const [text, setText] = useState("");
@@ -34,7 +38,7 @@ function AnnouncementCard({ a }: { a: Announcement }) {
     if (!text.trim()) return;
     await addDoc(collection(db, "announcements", a.id, "comments"), {
       text: text.trim(),
-      author: user?.email || "Guest",
+      author: user?.email || copy.guest,
       authorImage: "",
       createdAt: serverTimestamp(),
     });
@@ -51,7 +55,7 @@ function AnnouncementCard({ a }: { a: Announcement }) {
           <Heart size={16} fill={liked ? "currentColor" : "none"} /> {a.likes?.length || 0}
         </motion.button>
         <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.9 }} onClick={() => setShowComments(!showComments)} className="flex items-center gap-1.5 text-sm text-muted hover:text-indigo-600 dark:hover:text-white transition">
-          <MessageCircle size={16} /> {showComments ? "Hide" : `Comments${comments.length ? ` (${comments.length})` : ""}`}
+          <MessageCircle size={16} /> {showComments ? copy.hide : `${copy.comments}${comments.length ? ` (${comments.length})` : ""}`}
         </motion.button>
       </div>
 
@@ -73,11 +77,11 @@ function AnnouncementCard({ a }: { a: Announcement }) {
 
           <div className="space-y-2 mt-3">
             <p className="text-xs text-muted">
-              Commenting as {user?.email || "Guest"}
+              {copy.commentingAs} {user?.email || copy.guest}
             </p>
             <div className="flex gap-2">
               <input value={text} onChange={(e) => setText(e.target.value)}
-                placeholder="Write a comment..."
+                placeholder={copy.writeComment}
                 className="input-field flex-1 min-w-0 py-2"
                 onKeyDown={(e) => e.key === "Enter" && postComment()}
               />
@@ -93,6 +97,8 @@ function AnnouncementCard({ a }: { a: Announcement }) {
 }
 
 export default function AnnouncementsPage() {
+  const { language } = useLanguage();
+  const copy = announcementsCopy[language];
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
 
   useEffect(() => {
@@ -102,9 +108,9 @@ export default function AnnouncementsPage() {
 
   return (
     <div className="pt-20 sm:pt-24 pb-16 px-3 sm:px-4 max-w-6xl mx-auto">
-      <h1 className="text-3xl sm:text-4xl font-bold mb-1">Announcements</h1>
-      <p className="text-secondary text-sm sm:text-base mb-8 sm:mb-10">Stay updated with the latest news from Student Aid BDG.</p>
-      {announcements.length === 0 && <p className="text-muted text-center py-20">No announcements yet.</p>}
+      <h1 className="text-3xl sm:text-4xl font-bold mb-1">{copy.title}</h1>
+      <p className="text-secondary text-sm sm:text-base mb-8 sm:mb-10">{copy.description}</p>
+      {announcements.length === 0 && <p className="text-muted text-center py-20">{copy.empty}</p>}
       <div className="max-w-3xl space-y-4 sm:space-y-6">
         {announcements.map((a) => <AnnouncementCard key={a.id} a={a} />)}
       </div>
