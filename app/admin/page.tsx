@@ -37,8 +37,11 @@ export default function AdminDashboard() {
   const [memberImage, setMemberImage] = useState<File | null>(null);
   const [memberLoading, setMemberLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [isEditPanelVisible, setIsEditPanelVisible] = useState(true);
   const [editForm, setEditForm] = useState({ name: "", sscYear: "", memberType: "", work: "", workplace: "", bloodGroup: "", address: "", phone: "", email: "" });
   const [editImage, setEditImage] = useState<File | null>(null);
+  const [memberSearch, setMemberSearch] = useState("");
+  const [memberTypeFilter, setMemberTypeFilter] = useState("");
   const [activityForm, setActivityForm] = useState({ title: "", description: "", date: "" });
   const [activityMedia, setActivityMedia] = useState<File[]>([]);
   const [activityMediaPreviews, setActivityMediaPreviews] = useState<string[]>([]);
@@ -141,6 +144,7 @@ export default function AdminDashboard() {
 
   const startEdit = (m: Member) => {
     setEditingId(m.id);
+    setIsEditPanelVisible(true);
     setEditForm({ name: m.name, sscYear: m.sscYear, memberType: m.memberType || "", work: m.work, workplace: m.workplace, bloodGroup: m.bloodGroup, address: m.address, phone: m.phone || "", email: m.email || "" });
     setEditImage(null);
   };
@@ -160,6 +164,7 @@ export default function AdminDashboard() {
     if (image) data.image = image;
     await updateDoc(doc(db, "members", editingId), data);
     setEditingId(null);
+    setIsEditPanelVisible(true);
     toast.success("Member updated!");
   };
 
@@ -202,6 +207,29 @@ export default function AdminDashboard() {
     { key: "announcements", label: "Announcements", icon: <Megaphone size={16} /> },
     { key: "requests", label: "Requests", icon: <FileText size={16} /> },
   ];
+
+  const filteredMembers = members.filter((member) => {
+    const search = memberSearch.trim().toLowerCase();
+    const matchesSearch =
+      !search ||
+      [
+        member.name,
+        member.phone,
+        member.email,
+        member.work,
+        member.workplace,
+        member.address,
+        member.sscYear,
+        member.bloodGroup,
+        member.memberType,
+      ]
+        .filter(Boolean)
+        .some((value) => value!.toLowerCase().includes(search));
+
+    const matchesType = !memberTypeFilter || member.memberType === memberTypeFilter;
+
+    return matchesSearch && matchesType;
+  });
 
   return (
     <div className="pt-20 sm:pt-24 pb-20 px-3 sm:px-6 max-w-5xl mx-auto">
@@ -303,62 +331,122 @@ export default function AdminDashboard() {
           </div>
 
           <div className="space-y-2">
-            {members.map((m) => (
+            <div className="card p-4 sm:p-5">
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <div>
+                  <h2 className="font-semibold text-sm sm:text-base">Search Members</h2>
+                  <p className="text-xs text-secondary mt-1">
+                    Showing {filteredMembers.length} of {members.length} members
+                  </p>
+                </div>
+                {(memberSearch || memberTypeFilter) && (
+                  <button
+                    onClick={() => {
+                      setMemberSearch("");
+                      setMemberTypeFilter("");
+                    }}
+                    className="text-xs px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-white/5 text-secondary hover:text-primary transition"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <input
+                  placeholder="Search by name, phone, email, workplace..."
+                  value={memberSearch}
+                  onChange={(e) => setMemberSearch(e.target.value)}
+                  className={inputCls}
+                />
+                <select
+                  value={memberTypeFilter}
+                  onChange={(e) => setMemberTypeFilter(e.target.value)}
+                  className={inputCls}
+                >
+                  <option value="">All Member Types</option>
+                  {MEMBER_TYPES.map((type) => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {filteredMembers.map((m) => (
               <div key={m.id} className="card overflow-hidden">
                 {editingId === m.id ? (
                   <div className="p-4 space-y-3">
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-sm font-medium">Editing: {m.name}</span>
-                      <button onClick={() => setEditingId(null)} className="text-muted hover:text-secondary transition"><X size={15} /></button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setIsEditPanelVisible((visible) => !visible)}
+                          className="text-xs px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-white/5 text-secondary hover:text-primary transition"
+                        >
+                          {isEditPanelVisible ? "Hide panel" : "Show panel"}
+                        </button>
+                        <button onClick={() => {
+                          setEditingId(null);
+                          setIsEditPanelVisible(true);
+                        }} className="text-muted hover:text-secondary transition"><X size={15} /></button>
+                      </div>
                     </div>
-                    {([["name", "Full Name"], ["work", "Occupation"], ["workplace", "Workplace"], ["address", "Current Address"], ["phone", "Phone *"], ["email", "Email"]] as [keyof typeof editForm, string][]).map(([k, p]) => (
-                      <input key={k} placeholder={p} value={editForm[k]}
-                        onChange={(e) => setEditForm({ ...editForm, [k]: e.target.value })}
-                        className={inputCls}
-                      />
-                    ))}
-                    <select value={editForm.sscYear}
-                      onChange={(e) => setEditForm({ ...editForm, sscYear: e.target.value })}
-                      className={inputCls}
-                    >
-                      <option value="">SSC Year (optional)</option>
-                      {Array.from({ length: 50 }, (_, i) => new Date().getFullYear() - i).map((y) => (
-                        <option key={y} value={String(y)}>{y}</option>
-                      ))}
-                    </select>
-                    <select value={editForm.memberType}
-                      onChange={(e) => setEditForm({ ...editForm, memberType: e.target.value })}
-                      className={inputCls}
-                    >
-                      <option value="">Type Of Member *</option>
-                      {MEMBER_TYPES.map((type) => (
-                        <option key={type} value={type}>{type[0].toUpperCase() + type.slice(1)}</option>
-                      ))}
-                    </select>
-                    <select value={editForm.bloodGroup}
-                      onChange={(e) => setEditForm({ ...editForm, bloodGroup: e.target.value })}
-                      className={inputCls}
-                    >
-                      <option value="">Blood Group</option>
-                      {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((b) => (
-                        <option key={b} value={b}>{b}</option>
-                      ))}
-                    </select>
-                    <div>
-                      <label className="block text-xs text-secondary mb-1">Change Photo (optional)</label>
-                      <input type="file" accept="image/*"
-                        onChange={(e) => setEditImage(e.target.files?.[0] || null)}
-                        className="w-full text-sm text-secondary file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-indigo-600/30 file:text-indigo-300 file:text-sm"
-                      />
-                    </div>
-                    <div className="flex gap-2 pt-1">
-                      <button onClick={saveEdit} className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-xl text-xs font-medium transition">
-                        <Check size={13} /> Save
-                      </button>
-                      <button onClick={() => setEditingId(null)} className="px-4 py-2 rounded-xl text-xs font-medium bg-gray-100 dark:bg-white/5 text-secondary hover:text-primary transition">
-                        Cancel
-                      </button>
-                    </div>
+                    {isEditPanelVisible ? (
+                      <>
+                        {([["name", "Full Name"], ["work", "Occupation"], ["workplace", "Workplace"], ["address", "Current Address"], ["phone", "Phone *"], ["email", "Email"]] as [keyof typeof editForm, string][]).map(([k, p]) => (
+                          <input key={k} placeholder={p} value={editForm[k]}
+                            onChange={(e) => setEditForm({ ...editForm, [k]: e.target.value })}
+                            className={inputCls}
+                          />
+                        ))}
+                        <select value={editForm.sscYear}
+                          onChange={(e) => setEditForm({ ...editForm, sscYear: e.target.value })}
+                          className={inputCls}
+                        >
+                          <option value="">SSC Year (optional)</option>
+                          {Array.from({ length: 50 }, (_, i) => new Date().getFullYear() - i).map((y) => (
+                            <option key={y} value={String(y)}>{y}</option>
+                          ))}
+                        </select>
+                        <select value={editForm.memberType}
+                          onChange={(e) => setEditForm({ ...editForm, memberType: e.target.value })}
+                          className={inputCls}
+                        >
+                          <option value="">Type Of Member *</option>
+                          {MEMBER_TYPES.map((type) => (
+                            <option key={type} value={type}>{type[0].toUpperCase() + type.slice(1)}</option>
+                          ))}
+                        </select>
+                        <select value={editForm.bloodGroup}
+                          onChange={(e) => setEditForm({ ...editForm, bloodGroup: e.target.value })}
+                          className={inputCls}
+                        >
+                          <option value="">Blood Group</option>
+                          {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((b) => (
+                            <option key={b} value={b}>{b}</option>
+                          ))}
+                        </select>
+                        <div>
+                          <label className="block text-xs text-secondary mb-1">Change Photo (optional)</label>
+                          <input type="file" accept="image/*"
+                            onChange={(e) => setEditImage(e.target.files?.[0] || null)}
+                            className="w-full text-sm text-secondary file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-indigo-600/30 file:text-indigo-300 file:text-sm"
+                          />
+                        </div>
+                        <div className="flex gap-2 pt-1">
+                          <button onClick={saveEdit} className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-xl text-xs font-medium transition">
+                            <Check size={13} /> Save
+                          </button>
+                          <button onClick={() => {
+                            setEditingId(null);
+                            setIsEditPanelVisible(true);
+                          }} className="px-4 py-2 rounded-xl text-xs font-medium bg-gray-100 dark:bg-white/5 text-secondary hover:text-primary transition">
+                            Cancel
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <p className="text-xs text-secondary">Editing panel hidden. Use “Show panel” to continue editing this member.</p>
+                    )}
                   </div>
                 ) : (
                   <div className="flex items-center gap-3 px-4 py-3">
@@ -383,6 +471,11 @@ export default function AdminDashboard() {
                 )}
               </div>
             ))}
+            {filteredMembers.length === 0 && (
+              <div className="card p-6 text-center text-sm text-secondary">
+                No members matched the current search.
+              </div>
+            )}
           </div>
         </div>
       )}

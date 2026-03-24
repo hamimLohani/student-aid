@@ -38,9 +38,25 @@ export default function MembersPage() {
   const addresses = [...new Set(members.map((m) => m.address).filter(Boolean))].sort();
 
   const filtered = members.filter((m) => {
-    const q = search.toLowerCase();
+    const q = search.trim().toLowerCase();
+    const matchesSearch =
+      !q ||
+      [
+        m.name,
+        m.phone,
+        m.email,
+        m.work,
+        m.workplace,
+        m.address,
+        m.sscYear,
+        m.bloodGroup,
+        m.memberType,
+      ]
+        .filter(Boolean)
+        .some((value) => value!.toLowerCase().includes(q));
+
     return (
-      (m.name.toLowerCase().includes(q)) &&
+      matchesSearch &&
       (filterYear ? m.sscYear === filterYear : true) &&
       (filterMemberType ? m.memberType === filterMemberType : true) &&
       (filterBlood ? m.bloodGroup === filterBlood : true) &&
@@ -59,7 +75,7 @@ export default function MembersPage() {
         <div className="relative flex-1">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
           <input value={search} onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name..."
+            placeholder="Search by name, phone, email, work, workplace, address, SSC year, blood group, or member type..."
             className="input-field pl-9"
           />
         </div>
