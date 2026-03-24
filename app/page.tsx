@@ -31,8 +31,8 @@ export default function HomePage() {
               </Link>
             </motion.div>
             <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }} className="w-full sm:w-auto">
-              <Link href="/announcements" className="flex items-center justify-center gap-2 border border-indigo-200 dark:border-white/20 hover:border-indigo-400 dark:hover:border-white/40 text-indigo-600 dark:text-white px-6 py-3 rounded-xl font-semibold transition w-full">
-                Latest Updates
+              <Link href="/join" className="flex items-center justify-center gap-2 border border-indigo-200 dark:border-white/20 hover:border-indigo-400 dark:hover:border-white/40 text-indigo-600 dark:text-white px-6 py-3 rounded-xl font-semibold transition w-full">
+                Join Request
               </Link>
             </motion.div>
           </div>
