@@ -8,17 +8,17 @@ const LanguageContext = createContext<{
   setLanguage: (language: Language) => void;
   toggleLanguage: () => void;
 }>({
-  language: "en",
+  language: "bn",
   setLanguage: () => {},
   toggleLanguage: () => {},
 });
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguage] = useState<Language>("en");
+  const [language, setLanguage] = useState<Language>("bn");
 
   useEffect(() => {
-    const saved = localStorage.getItem("language");
-    if (saved === "bn") setLanguage("bn");
+    const saved = localStorage.getItem("language") as Language | null;
+    if (saved === "en" || saved === "bn") setLanguage(saved);
   }, []);
 
   useEffect(() => {
