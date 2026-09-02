@@ -246,23 +246,7 @@ export default function MembersPage() {
           )}
         </div>
 
-        {/* View mode */}
-        <div className="flex gap-1 p-1 rounded-xl border" style={{ borderColor: "var(--border)", background: "var(--bg-card)" }}>
-          {([["grid", <LayoutGrid size={14} key="g" />], ["byYear", <span key="y" className="text-xs font-bold">Y</span>], ["byType", <span key="t" className="text-xs font-bold">T</span>]] as [ViewMode, React.ReactNode][]).map(([mode, icon]) => (
-            <button
-              key={mode}
-              onClick={() => setViewMode(mode)}
-              className="w-8 h-8 rounded-lg flex items-center justify-center transition"
-              style={{
-                background: viewMode === mode ? "var(--accent)" : "transparent",
-                color: viewMode === mode ? "#fff" : "var(--text-muted)",
-              }}
-              title={mode === "grid" ? "Grid" : mode === "byYear" ? "Group by Year" : "Group by Type"}
-            >
-              {icon}
-            </button>
-          ))}
-        </div>
+
 
         {/* Filter toggle */}
         <button
@@ -275,7 +259,7 @@ export default function MembersPage() {
         </button>
 
         {/* Blood Donor link */}
-        <Link href="/members/donors" className="flex items-center gap-1.5 px-3 py-2 rounded-xl border text-sm font-semibold transition hover:border-red-400 hover:text-red-500" style={{ borderColor: "var(--border)", color: "var(--text-secondary)", fontFamily: "'Outfit', system-ui, sans-serif" }}>
+        <Link href="/members/donors" className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-red-500/40 bg-red-500/10 text-red-500 text-sm font-semibold transition hover:bg-red-500/20 hover:border-red-500/60 hover:scale-105" style={{ fontFamily: "'Outfit', system-ui, sans-serif" }}>
           <Droplets size={14} />
           <span className="hidden sm:inline">Donors</span>
         </Link>
@@ -339,7 +323,6 @@ export default function MembersPage() {
       {!loading && (
         <p className="text-sm mb-5 font-medium" style={{ color: "var(--text-muted)" }}>
           {filtered.length} member{filtered.length !== 1 ? "s" : ""} found
-          {viewMode !== "grid" && ` · Grouped by ${viewMode === "byYear" ? "SSC Year" : "Member Type"}`}
         </p>
       )}
 
@@ -362,7 +345,7 @@ export default function MembersPage() {
       )}
 
       {/* Grid view */}
-      {!loading && filtered.length > 0 && viewMode === "grid" && (
+      {!loading && filtered.length > 0 && (
         <>
           <motion.div
             initial="hidden" animate="show"
@@ -393,43 +376,7 @@ export default function MembersPage() {
         </>
       )}
 
-      {/* Grouped views */}
-      {!loading && filtered.length > 0 && viewMode !== "grid" && (
-        <div className="space-y-8">
-          {groupBy(viewMode === "byYear" ? "sscYear" : "memberType").map(([groupKey, groupMembers]) => (
-            <div key={groupKey}>
-              {/* Section header */}
-              <div className="flex items-center gap-3 mb-4">
-                <div className="glow-line flex-1" />
-                <div className="flex items-center gap-2">
-                  <span
-                    className="font-display font-bold text-sm px-4 py-1.5 rounded-full"
-                    style={{ background: "var(--bg-section)", color: "var(--text-primary)" }}
-                  >
-                    {viewMode === "byYear" ? `SSC ${groupKey}` : groupKey}
-                  </span>
-                  <span className="pill pill-violet text-[10px]">
-                    {groupMembers.length} member{groupMembers.length !== 1 ? "s" : ""}
-                  </span>
-                </div>
-                <div className="glow-line flex-1" />
-              </div>
 
-              <motion.div
-                initial="hidden" animate="show"
-                variants={{ show: { transition: { staggerChildren: 0.04 } } }}
-                className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"
-              >
-                {groupMembers.map((m) => (
-                  <motion.div key={m.id} variants={fadeUp} transition={{ type: "spring", stiffness: 300, damping: 24 }}>
-                    <MemberCard m={m} />
-                  </motion.div>
-                ))}
-              </motion.div>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 }
