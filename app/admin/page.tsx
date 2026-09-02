@@ -128,11 +128,56 @@ export default function AdminDashboard() {
     }
   };
 
+  const [sendEmailNotify, setSendEmailNotify] = useState(true);
+  const [sendingEmail, setSendingEmail] = useState(false);
+
   const addAnnouncement = async () => {
     if (!announcementForm.title) return toast.error(copy.titleRequired);
-    await addDoc(collection(db, "announcements"), { ...announcementForm, timestamp: serverTimestamp(), likes: [] });
-    setAnnouncementForm({ title: "", content: "" });
-    toast.success(copy.announcementPosted);
+    try {
+      const titleToEmail = announcementForm.title;
+      const contentToEmail = announcementForm.content;
+
+      await addDoc(collection(db, "announcements"), { ...announcementForm, timestamp: serverTimestamp(), likes: [] });
+      setAnnouncementForm({ title: "", content: "" });
+      toast.success(copy.announcementPosted);
+
+      if (sendEmailNotify) {
+        setSendingEmail(true);
+        const memberEmails = members
+          .map((m) => m.email)
+          .filter((e): e is string => Boolean(e && e.includes("@")));
+
+        if (memberEmails.length > 0) {
+          toast.loading("সদস্যদের ইমেইল পাঠানো হচ্ছে...", { id: "email-send" });
+          try {
+            const res = await fetch("/api/send-announcement-email", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                title: titleToEmail,
+                content: contentToEmail,
+                recipientEmails: memberEmails,
+              }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+              toast.success(`📧 ${data.message || "সদস্যদের ইমেইল নোটিফিকেশন পাঠানো হয়েছে!"}`, { id: "email-send" });
+            } else {
+              toast.error(`ইমেইল পাঠাতে সমস্যা: ${data.error}`, { id: "email-send" });
+            }
+          } catch (e) {
+            console.error("Email error:", e);
+            toast.dismiss("email-send");
+          }
+        } else {
+          toast("ইমেইল পাঠানোর জন্য কোন সদস্য পাওয়া যায়নি", { icon: "ℹ️" });
+        }
+        setSendingEmail(false);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("বিজ্ঞপ্তি প্রকাশ করতে সমস্যা হয়েছে");
+    }
   };
 
   const deleteDoc_ = async (col: string, id: string, label = "item") => {
@@ -623,11 +668,23 @@ export default function AdminDashboard() {
                   placeholder={copy.content}
                 />
               </div>
+              <div className="pt-1">
+                <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer" style={{ color: "var(--text-primary)" }}>
+                  <input
+                    type="checkbox"
+                    checked={sendEmailNotify}
+                    onChange={(e) => setSendEmailNotify(e.target.checked)}
+                    className="w-4 h-4 rounded accent-[var(--accent)] cursor-pointer"
+                  />
+                  <span>📧 সকল সদস্যের ইমেইলে বার্তা পাঠান (Send email notification to all member emails)</span>
+                </label>
+              </div>
             </div>
-            <button onClick={addAnnouncement}
-              className="mt-4 btn-primary !py-2.5 !px-6 !text-sm"
+            <button onClick={addAnnouncement} disabled={sendingEmail}
+              className="mt-4 btn-primary !py-2.5 !px-6 !text-sm flex items-center gap-2"
             >
-              {copy.postAnnouncementButton}
+              {sendingEmail ? <Loader2 size={16} className="animate-spin" /> : <Megaphone size={16} />}
+              {sendingEmail ? "ইমেইল পাঠানো হচ্ছে..." : copy.postAnnouncementButton}
             </button>
           </div>
 

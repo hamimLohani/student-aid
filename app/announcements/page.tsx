@@ -205,11 +205,6 @@ function AnnouncementCard({ a }: { a: Announcement }) {
             <ChevronDown size={14} />
           </motion.span>
         </motion.button>
-
-        {/* Share */}
-        <div className="ml-auto">
-          <ShareButton compact />
-        </div>
       </div>
 
       {/* Comments panel */}
