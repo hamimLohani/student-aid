@@ -183,7 +183,7 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
                 style={{ borderBottom: results.length > 0 || loading ? "1px solid var(--border)" : "none" }}
               >
                 {loading ? (
-                  <Loader2 size={18} className="text-indigo-500 animate-spin flex-shrink-0" />
+                  <Loader2 size={18} className="text-[var(--accent)] animate-spin flex-shrink-0" />
                 ) : (
                   <Search size={18} className="flex-shrink-0" style={{ color: "var(--text-muted)" }} />
                 )}
@@ -248,14 +248,14 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
                                 {r.image ? (
                                   <Image src={r.image} alt={r.title} fill sizes="36px" className="object-cover" />
                                 ) : (
-                                  <span className="text-indigo-500">{TYPE_ICONS[type]}</span>
+                                  <span className="text-[var(--accent)]">{TYPE_ICONS[type]}</span>
                                 )}
                               </div>
 
                               {/* Text */}
                               <div className="flex-1 min-w-0">
                                 <p
-                                  className="text-sm font-semibold truncate group-hover:text-indigo-500 transition-colors"
+                                  className="text-sm font-semibold truncate group-hover:text-[var(--accent)] transition-colors"
                                   style={{ color: "var(--text-primary)", fontFamily: "'Outfit', system-ui, sans-serif" }}
                                 >
                                   {r.title}
@@ -270,7 +270,7 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
                               <span className={`pill ${TYPE_COLORS[r.type]} text-[10px] flex-shrink-0`}>
                                 {TYPE_LABELS[r.type]}
                               </span>
-                              <ArrowRight size={14} className="text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                              <ArrowRight size={14} className="text-[var(--accent)] opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
                             </Link>
                           );
                         })}

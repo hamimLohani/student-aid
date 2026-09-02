@@ -192,7 +192,7 @@ export default function MembersPage() {
             </span>
           )}
         </div>
-        <h3 className="font-display text-sm sm:text-base font-bold leading-tight mb-1.5 group-hover:text-indigo-500 transition-colors" style={{ color: "var(--text-primary)" }}>
+        <h3 className="font-display text-sm sm:text-base font-bold leading-tight mb-1.5 group-hover:text-[var(--accent)] transition-colors" style={{ color: "var(--text-primary)" }}>
           {m.name}
         </h3>
         {m.memberType && (
@@ -215,7 +215,7 @@ export default function MembersPage() {
       </div>
       <div className="overlay">
         <div className="flex items-center gap-2">
-          <MapPin size={12} className="text-indigo-400 flex-shrink-0" />
+          <MapPin size={12} className="text-emerald-300 flex-shrink-0" />
           <span className="text-white text-xs truncate">{m.address || "—"}</span>
         </div>
       </div>
@@ -229,7 +229,7 @@ export default function MembersPage() {
         <span className="badge mb-4"><Users size={12} /> {copy.title}</span>
         <h1
           className="font-display text-4xl sm:text-5xl md:text-6xl font-extrabold mb-4 leading-tight"
-          style={{ background: "linear-gradient(135deg, var(--text-primary) 0%, #6366f1 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
+          style={{ background: "linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
         >
           {copy.title}
         </h1>
@@ -254,11 +254,11 @@ export default function MembersPage() {
         {/* Filter toggle */}
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-sm font-semibold transition ${showFilters || activeFilters > 0 ? "bg-indigo-600 border-indigo-600 text-white" : "border-[var(--border)] text-[var(--text-secondary)]"}`}
+          className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-sm font-semibold transition ${showFilters || activeFilters > 0 ? "bg-[var(--accent)] border-[var(--accent)] text-white shadow-md shadow-emerald-900/20" : "border-[var(--border)] text-[var(--text-secondary)]"}`}
           style={{ fontFamily: "'Outfit', system-ui, sans-serif" }}
         >
           <SlidersHorizontal size={14} />
-          {activeFilters > 0 && <span className="bg-white text-indigo-600 text-xs font-bold w-4 h-4 rounded-full flex items-center justify-center">{activeFilters}</span>}
+          {activeFilters > 0 && <span className="bg-white text-[var(--accent)] text-xs font-bold w-4 h-4 rounded-full flex items-center justify-center">{activeFilters}</span>}
         </button>
 
         {/* Blood Donor link */}
@@ -272,7 +272,7 @@ export default function MembersPage() {
           <button
             onClick={exportPDF}
             disabled={exporting || filtered.length === 0}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border text-sm font-semibold transition hover:border-indigo-400 hover:text-indigo-500 disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border text-sm font-semibold transition hover:border-[var(--accent)] hover:text-[var(--accent)] disabled:opacity-50"
             style={{ borderColor: "var(--border)", color: "var(--text-secondary)", fontFamily: "'Outfit', system-ui, sans-serif" }}
             title="Export as PDF (Admin only)"
           >

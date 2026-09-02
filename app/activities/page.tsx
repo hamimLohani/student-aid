@@ -223,7 +223,7 @@ export default function ActivitiesPage() {
                   {/* Content */}
                   <div className="p-5">
                     <h3
-                      className="font-display text-base sm:text-lg font-bold mb-2 group-hover:text-indigo-500 transition-colors leading-snug"
+                      className="font-display text-base sm:text-lg font-bold mb-2 group-hover:text-[var(--accent)] transition-colors leading-snug"
                       style={{ color: "var(--text-primary)" }}
                     >
                       {a.title}
@@ -252,7 +252,7 @@ export default function ActivitiesPage() {
                           date={a.date}
                           pastEventLabel={copy.pastEvent}
                         />
-                        <span className="text-indigo-500 text-xs flex items-center gap-1 font-semibold group-hover:gap-2 transition-all">
+                        <span className="text-[var(--accent)] text-xs flex items-center gap-1 font-semibold group-hover:gap-2 transition-all">
                           {copy.view}
                           <ArrowRight size={12} />
                         </span>

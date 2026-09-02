@@ -255,7 +255,7 @@ export default function AdminDashboard() {
       <div className="mb-5 sm:mb-8">
         <h1 className="text-2xl sm:text-3xl font-display font-extrabold gradient-text">{copy.dashboard}</h1>
         <p className="text-secondary text-xs sm:text-sm mt-1 truncate">
-          {copy.loggedInAs} <span className="font-medium text-indigo-500">{user.email}</span>
+          {copy.loggedInAs} <span className="font-medium text-[var(--accent)]">{user.email}</span>
         </p>
       </div>
 
@@ -266,7 +266,7 @@ export default function AdminDashboard() {
         {tabs.map((t) => (
           <button key={t.key} onClick={() => setTab(t.key)}
             className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 p-2 sm:px-4 sm:py-2.5 rounded-xl text-[10px] sm:text-sm font-medium transition ${
-              tab === t.key ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30" : "bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-hover)]"
+              tab === t.key ? "bg-[var(--accent)] text-white shadow-lg shadow-emerald-950/30 font-semibold" : "bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-hover)]"
             }`}
           >
             {t.icon} <span className="truncate w-full text-center">{t.label}</span>
@@ -319,7 +319,7 @@ export default function AdminDashboard() {
                 <label className="block text-xs text-secondary mb-1">{copy.profilePhoto}</label>
                 <input type="file" accept="image/*"
                   onChange={(e) => setMemberImage(e.target.files?.[0] || null)}
-                  className="w-full text-sm text-secondary file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-indigo-600/30 file:text-indigo-300 file:text-sm"
+                  className="w-full text-sm text-secondary file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-emerald-600/30 file:text-emerald-300 file:text-sm"
                 />
               </div>
             </div>
@@ -339,35 +339,22 @@ export default function AdminDashboard() {
                     {copy.showing.replace("{filtered}", String(filteredMembers.length)).replace("{total}", String(members.length))}
                   </p>
                 </div>
-                {(memberSearch || memberTypeFilter) && (
+                {memberSearch && (
                   <button
-                    onClick={() => {
-                      setMemberSearch("");
-                      setMemberTypeFilter("");
-                    }}
+                    onClick={() => setMemberSearch("")}
                     className="text-xs px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-white/5 text-secondary hover:text-primary transition"
                   >
                     {copy.clear}
                   </button>
                 )}
               </div>
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div>
                 <input
                   placeholder={copy.memberSearchPlaceholder}
                   value={memberSearch}
                   onChange={(e) => setMemberSearch(e.target.value)}
                   className={inputCls}
                 />
-                <select
-                  value={memberTypeFilter}
-                  onChange={(e) => setMemberTypeFilter(e.target.value)}
-                  className={inputCls}
-                >
-                  <option value="">{copy.allMemberTypes}</option>
-                  {MEMBER_TYPES.map((type) => (
-                    <option key={type} value={type}>{getMemberTypeLabel(type, language)}</option>
-                  ))}
-                </select>
               </div>
             </div>
 
@@ -429,11 +416,11 @@ export default function AdminDashboard() {
                           <label className="block text-xs text-secondary mb-1">{copy.changePhoto}</label>
                           <input type="file" accept="image/*"
                             onChange={(e) => setEditImage(e.target.files?.[0] || null)}
-                            className="w-full text-sm text-secondary file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-indigo-600/30 file:text-indigo-300 file:text-sm"
+                            className="w-full text-sm text-secondary file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-emerald-600/30 file:text-emerald-300 file:text-sm"
                           />
                         </div>
                         <div className="flex gap-2 pt-1">
-                          <button onClick={saveEdit} disabled={editLoading} className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 px-4 py-2 rounded-xl text-xs font-medium transition">
+                          <button onClick={saveEdit} disabled={editLoading} className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 px-4 py-2 rounded-xl text-xs font-medium transition">
                             <Check size={13} /> {editLoading ? copy.saving : copy.save}
                           </button>
                           <button onClick={() => {
@@ -450,7 +437,7 @@ export default function AdminDashboard() {
                   </div>
                 ) : (
                   <div className="flex items-center gap-3 px-4 py-3">
-                    <div className="relative w-9 h-9 rounded-full overflow-hidden bg-indigo-600/30 flex items-center justify-center text-sm font-bold text-indigo-300 flex-shrink-0">
+                    <div className="relative w-9 h-9 rounded-full overflow-hidden bg-emerald-600/30 flex items-center justify-center text-sm font-bold text-emerald-300 flex-shrink-0">
                       {m.image ? <Image src={m.image} alt={m.name} fill sizes="36px" className="object-cover" /> : m.name[0]}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -461,7 +448,7 @@ export default function AdminDashboard() {
                         {m.email && " · ✉️"}
                       </p>
                     </div>
-                    <button onClick={() => startEdit(m)} className="text-indigo-400 hover:text-indigo-300 transition flex-shrink-0 p-1">
+                    <button onClick={() => startEdit(m)} className="text-emerald-400 hover:text-emerald-300 transition flex-shrink-0 p-1">
                       <Pencil size={14} />
                     </button>
                     <button onClick={() => deleteDoc_("members", m.id, "member")} className="text-red-400 hover:text-red-300 transition flex-shrink-0 p-1">
@@ -504,7 +491,7 @@ export default function AdminDashboard() {
                 <label className="block text-xs text-secondary mb-1">{copy.photosMultiple}</label>
                 <input type="file" accept="image/*" multiple
                   onChange={(e) => setActivityMedia(Array.from(e.target.files || []))}
-                  className="w-full text-sm text-secondary file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-indigo-600/30 file:text-indigo-300 file:text-sm"
+                  className="w-full text-sm text-secondary file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-emerald-600/30 file:text-emerald-300 file:text-sm"
                 />
                 {activityMedia.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-2">
@@ -724,7 +711,7 @@ export default function AdminDashboard() {
                     </div>
                   ))}
                   {pendingRequests.length > 5 && (
-                    <button onClick={() => setTab("requests")} className="text-xs text-indigo-500 hover:text-indigo-400 transition">View all {pendingRequests.length} requests →</button>
+                    <button onClick={() => setTab("requests")} className="text-xs text-emerald-500 hover:text-emerald-400 transition">View all {pendingRequests.length} requests →</button>
                   )}
                 </div>
               </div>

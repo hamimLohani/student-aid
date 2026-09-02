@@ -21,8 +21,9 @@ service cloud.firestore {
 
     match /announcements/{announcementId} {
       allow read: if true;
-      allow update, delete: if request.auth != null;
+      allow delete: if request.auth != null;
       allow create: if request.auth != null || (request.resource.data.type == 'emergency');
+      allow update: if request.auth != null || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes']);
     }
 
     // Announcement comments are public to read and create.

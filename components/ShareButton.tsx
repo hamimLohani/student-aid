@@ -122,7 +122,7 @@ export default function ShareButton({ url, title = "Student Aid BDG", compact = 
                 className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm transition text-left hover:bg-[var(--bg-section)]"
                 style={{ color: copied ? "#22c55e" : "var(--text-primary)", fontFamily: "'Inter', system-ui, sans-serif" }}
               >
-                {copied ? <Check size={14} className="text-green-500" /> : <Link2 size={14} className="text-indigo-500" />}
+                {copied ? <Check size={14} className="text-green-500" /> : <Link2 size={14} className="text-[var(--accent)]" />}
                 {copied ? "Copied!" : "Copy Link"}
               </button>
 

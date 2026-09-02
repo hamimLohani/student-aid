@@ -37,8 +37,8 @@ export default function AdminLogin() {
         className="card w-full max-w-sm p-8"
       >
         <div className="flex justify-center mb-6">
-          <div className="bg-indigo-100 dark:bg-indigo-600/20 p-4 rounded-2xl">
-            <Lock size={28} className="text-indigo-600 dark:text-indigo-400" />
+          <div className="bg-emerald-100 dark:bg-emerald-600/20 p-4 rounded-2xl">
+            <Lock size={28} className="text-[var(--accent)]" />
           </div>
         </div>
         <h1 className="text-2xl font-bold text-center mb-6">{copy.title}</h1>
@@ -50,7 +50,7 @@ export default function AdminLogin() {
             placeholder={copy.password} required className="input-field"
           />
           <button type="submit" disabled={loading}
-            className="w-full bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-50 py-3 rounded-xl font-semibold transition"
+            className="w-full btn-primary py-3 rounded-xl font-semibold transition"
           >
             {loading ? copy.loggingIn : copy.login}
           </button>

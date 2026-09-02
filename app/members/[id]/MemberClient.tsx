@@ -40,7 +40,7 @@ export default function MemberProfileClient() {
   if (status === "not-found") {
     return (
       <div className="pt-28 sm:pt-32 pb-16 px-4 max-w-2xl mx-auto">
-        <Link href="/members" className="flex items-center gap-2 text-secondary hover:text-indigo-600 mb-6 transition text-sm">
+        <Link href="/members" className="flex items-center gap-2 text-secondary hover:text-[var(--accent)] mb-6 transition text-sm">
           <ArrowLeft size={16} /> {copy.back}
         </Link>
         <div className="card p-6 sm:p-8 text-center">
@@ -54,24 +54,24 @@ export default function MemberProfileClient() {
   if (!member) return null;
 
   const details = [
-    { icon: <Briefcase size={18} className="text-indigo-500" />, label: copy.memberType, value: member.memberType ? member.memberType[0].toUpperCase() + member.memberType.slice(1) : "" },
-    { icon: <GraduationCap size={18} className="text-indigo-500" />, label: copy.sscYear, value: member.sscYear },
-    { icon: <Briefcase size={18} className="text-indigo-500" />, label: copy.occupation, value: member.work },
-    { icon: <Building2 size={18} className="text-indigo-500" />, label: copy.workplace, value: member.workplace },
+    { icon: <Briefcase size={18} className="text-[var(--accent)]" />, label: copy.memberType, value: member.memberType ? member.memberType[0].toUpperCase() + member.memberType.slice(1) : "" },
+    { icon: <GraduationCap size={18} className="text-[var(--accent)]" />, label: copy.sscYear, value: member.sscYear },
+    { icon: <Briefcase size={18} className="text-[var(--accent)]" />, label: copy.occupation, value: member.work },
+    { icon: <Building2 size={18} className="text-[var(--accent)]" />, label: copy.workplace, value: member.workplace },
     { icon: <Droplets size={18} className="text-red-500" />, label: copy.bloodGroup, value: member.bloodGroup },
-    { icon: <MapPin size={18} className="text-indigo-500" />, label: copy.address, value: member.address },
+    { icon: <MapPin size={18} className="text-[var(--accent)]" />, label: copy.address, value: member.address },
     { icon: <Phone size={18} className="text-green-500" />, label: copy.phone, value: member.phone },
-    { icon: <Mail size={18} className="text-blue-500" />, label: copy.email, value: member.email },
+    { icon: <Mail size={18} className="text-emerald-500" />, label: copy.email, value: member.email },
   ];
 
   return (
     <div className="pt-28 sm:pt-32 pb-16 px-4 max-w-2xl mx-auto">
-      <Link href="/members" className="flex items-center gap-2 text-secondary hover:text-indigo-600 mb-6 transition text-sm">
+      <Link href="/members" className="flex items-center gap-2 text-secondary hover:text-[var(--accent)] mb-6 transition text-sm">
         <ArrowLeft size={16} /> {copy.back}
       </Link>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="card p-6 sm:p-8">
         <div className="flex flex-col items-center mb-6">
-          <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-indigo-100 dark:bg-indigo-600/30 flex items-center justify-center text-4xl sm:text-5xl font-bold text-indigo-600 dark:text-indigo-300 ring-4 ring-indigo-200 dark:ring-indigo-500/20 mb-4">
+          <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-emerald-100 dark:bg-emerald-600/30 flex items-center justify-center text-4xl sm:text-5xl font-bold text-[var(--accent)] dark:text-emerald-300 ring-4 ring-emerald-200 dark:ring-emerald-500/20 mb-4">
             {member.image ? <Image src={member.image} alt={member.name} fill sizes="128px" className="object-cover" /> : member.name[0]}
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-center">{member.name}</h1>

@@ -128,7 +128,7 @@ export default function ActivityDetailClient() {
       <div className="flex items-center justify-between mb-6 gap-3">
         <Link
           href="/activities"
-          className="flex items-center gap-2 text-sm font-medium transition hover:text-indigo-500"
+          className="flex items-center gap-2 text-sm font-medium transition hover:text-[var(--accent)]"
           style={{ color: "var(--text-secondary)" }}
         >
           <ArrowLeft size={16} /> {copy.back}
@@ -222,7 +222,7 @@ export default function ActivityDetailClient() {
             className="flex items-center gap-2 w-full text-left font-display font-semibold text-sm"
             style={{ color: "var(--text-primary)" }}
           >
-            <MessageCircle size={16} className="text-indigo-500" />
+            <MessageCircle size={16} className="text-[var(--accent)]" />
             {showComments ? "Hide Comments" : `Comments${comments.length ? ` (${comments.length})` : ""}`}
             <motion.span
               animate={{ rotate: showComments ? 180 : 0 }}
@@ -257,7 +257,7 @@ export default function ActivityDetailClient() {
                     >
                       <div
                         className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold text-white"
-                        style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}
+                        style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}
                       >
                         {c.author[0]?.toUpperCase()}
                       </div>
@@ -265,7 +265,7 @@ export default function ActivityDetailClient() {
                         className="flex-1 rounded-xl px-3 py-2 text-sm"
                         style={{ background: "var(--bg-section)", color: "var(--text-primary)" }}
                       >
-                        <span className="font-semibold text-indigo-500 mr-1.5">
+                        <span className="font-semibold text-[var(--accent)] mr-1.5">
                           {c.author.split("@")[0]}
                         </span>
                         {c.text}

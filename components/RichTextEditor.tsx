@@ -71,7 +71,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
     extensions: [
       StarterKit,
       Underline,
-      Link.configure({ openOnClick: false, HTMLAttributes: { class: "text-indigo-500 underline" } }),
+      Link.configure({ openOnClick: false, HTMLAttributes: { class: "text-[var(--accent)] underline" } }),
       Image.configure({ HTMLAttributes: { class: "rounded-xl max-w-full my-4" } }),
       Youtube.configure({ HTMLAttributes: { class: "rounded-xl w-full aspect-video my-4" } }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),

@@ -65,7 +65,7 @@ export default function Navbar() {
   const themeIcon = mounted
     ? dark
       ? <Sun size={17} className="text-yellow-400" />
-      : <Moon size={17} className="text-indigo-500" />
+      : <Moon size={17} className="text-[var(--accent)]" />
     : <span className="block h-[17px] w-[17px]" aria-hidden="true" />;
 
   return (
@@ -74,7 +74,7 @@ export default function Navbar() {
         <nav
           className={`pointer-events-auto w-full max-w-6xl rounded-2xl transition-all duration-500 ${
             scrolled
-              ? "py-1.5 shadow-2xl shadow-indigo-500/10"
+              ? "py-1.5 shadow-2xl shadow-emerald-950/10"
               : "py-2 shadow-lg shadow-black/5"
           }`}
           style={{
@@ -97,7 +97,7 @@ export default function Navbar() {
               transition={{ type: "spring", stiffness: 350, damping: 20 }}
               className="relative"
             >
-              <div className="absolute inset-0 rounded-xl bg-indigo-500/30 blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute inset-0 rounded-xl bg-[var(--accent)]/30 blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <Image
                 src="/student-aid-logo.svg"
                 alt="Student Aid BDG logo"
@@ -118,7 +118,7 @@ export default function Navbar() {
                 className="font-display font-bold text-xs tracking-widest uppercase"
                 style={{
                   background:
-                    "linear-gradient(90deg, #6366f1, #8b5cf6, #06b6d4)",
+                    "linear-gradient(90deg, #34744e, #4d8e64, #6fa076)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                 }}
@@ -136,7 +136,7 @@ export default function Navbar() {
                 key={l.href}
                 href={l.href}
                 className={`nav-link px-3.5 py-1.5 rounded-xl transition-all text-sm font-medium ${
-                  isActive(l.href) ? "active bg-[var(--bg-section)]" : "hover:bg-[var(--bg-card-hover)]"
+                  isActive(l.href) ? "active bg-[var(--bg-section)] text-[var(--accent)] font-semibold" : "hover:bg-[var(--bg-card-hover)]"
                 }`}
               >
                 {l.label}
@@ -163,7 +163,7 @@ export default function Navbar() {
               <>
                 <Link
                   href="/admin"
-                  className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg text-indigo-500 hover:bg-indigo-500/10 transition"
+                  className="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg text-[var(--accent)] hover:bg-[var(--accent)]/10 transition"
                 >
                   <Shield size={14} />
                   {copy.admin}
@@ -324,13 +324,13 @@ export default function Navbar() {
                       href={l.href}
                       className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition ${
                         isActive(l.href)
-                          ? "text-indigo-500 bg-indigo-500/10"
+                          ? "text-[var(--accent)] bg-[var(--accent)]/10 font-semibold"
                           : "hover:bg-[var(--bg-card-hover)]"
                       }`}
                       style={{ color: isActive(l.href) ? undefined : "var(--text-secondary)", fontFamily: "'Outfit', system-ui, sans-serif" }}
                     >
                       {isActive(l.href) && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 flex-shrink-0" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] flex-shrink-0" />
                       )}
                       {l.label}
                     </Link>
@@ -344,7 +344,7 @@ export default function Navbar() {
                   <div className="flex flex-col gap-2">
                     <Link
                       href="/admin"
-                      className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-indigo-500 bg-indigo-500/10"
+                      className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-[var(--accent)] bg-[var(--accent)]/10"
                     >
                       <Shield size={14} /> {copy.admin}
                     </Link>

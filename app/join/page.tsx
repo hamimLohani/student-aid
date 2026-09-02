@@ -275,7 +275,7 @@ export default function JoinPage() {
                 <button
                   type="button"
                   onClick={() => document.getElementById("photo-input")?.click()}
-                  className="text-xs mt-3 font-semibold transition-colors hover:text-indigo-400"
+                  className="text-xs mt-3 font-semibold transition-opacity hover:opacity-80"
                   style={{ color: "var(--accent)" }}
                 >
                   {preview ? copy.changePhoto : copy.uploadPhoto}

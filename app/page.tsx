@@ -36,8 +36,8 @@ export default function HomePage() {
   const aboutCards = [
     {
       icon: "🎯",
-      gradient: "from-indigo-500 to-purple-600",
-      glow: "rgba(99,102,241,0.25)",
+      gradient: "from-emerald-500 to-teal-700",
+      glow: "rgba(46,107,69,0.25)",
       title: copy.missionTitle,
       desc: copy.missionDescription,
     },
@@ -399,7 +399,7 @@ export default function HomePage() {
                   </div>
 
                   <span
-                    className="font-display text-lg font-bold mb-1 group-hover:text-indigo-500 transition-colors"
+                    className="font-display text-lg font-bold mb-1 group-hover:text-[var(--accent)] transition-colors"
                     style={{ color: "var(--text-primary)" }}
                   >
                     {item.label}
@@ -409,7 +409,7 @@ export default function HomePage() {
                   </span>
 
                   <motion.div
-                    className="mt-4 flex items-center gap-1 text-indigo-500 text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="mt-4 flex items-center gap-1 text-[var(--accent)] text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity"
                     animate={{ x: [0, 4, 0] }}
                     transition={{ repeat: Infinity, duration: 1.5 }}
                   >

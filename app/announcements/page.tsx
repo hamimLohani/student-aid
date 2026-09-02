@@ -68,6 +68,17 @@ function SkeletonAnnouncement() {
   );
 }
 
+function getVisitorId(userUid?: string): string {
+  if (userUid) return userUid;
+  if (typeof window === "undefined") return "guest";
+  let vid = localStorage.getItem("guest_visitor_id");
+  if (!vid) {
+    vid = "v_" + Math.random().toString(36).substring(2, 12);
+    localStorage.setItem("guest_visitor_id", vid);
+  }
+  return vid;
+}
+
 /* ── Single Announcement Card ── */
 function AnnouncementCard({ a }: { a: Announcement }) {
   const { user } = useAuth();
@@ -77,7 +88,14 @@ function AnnouncementCard({ a }: { a: Announcement }) {
   const [showComments, setShowComments] = useState(false);
   const [text, setText] = useState("");
   const [likeAnim, setLikeAnim] = useState(false);
-  const liked = !!(user && a.likes?.includes(user.uid));
+  const [visitorId, setVisitorId] = useState("");
+
+  useEffect(() => {
+    setVisitorId(getVisitorId(user?.uid));
+  }, [user]);
+
+  const activeId = visitorId || user?.uid || "";
+  const liked = activeId ? !!a.likes?.includes(activeId) : false;
 
   useEffect(() => {
     if (!showComments) return;
@@ -91,12 +109,17 @@ function AnnouncementCard({ a }: { a: Announcement }) {
   }, [showComments, a.id]);
 
   const toggleLike = async () => {
-    if (!user) return;
+    const idToUse = activeId || getVisitorId(user?.uid);
+    if (!idToUse) return;
     setLikeAnim(true);
     setTimeout(() => setLikeAnim(false), 500);
-    await updateDoc(doc(db, "announcements", a.id), {
-      likes: liked ? arrayRemove(user.uid) : arrayUnion(user.uid),
-    });
+    try {
+      await updateDoc(doc(db, "announcements", a.id), {
+        likes: liked ? arrayRemove(idToUse) : arrayUnion(idToUse),
+      });
+    } catch (err) {
+      console.error("Failed to update reaction:", err);
+    }
   };
 
   const postComment = async () => {
@@ -168,7 +191,7 @@ function AnnouncementCard({ a }: { a: Announcement }) {
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={() => setShowComments(!showComments)}
-          className="flex items-center gap-1.5 text-sm font-medium transition-colors hover:text-indigo-500"
+          className="flex items-center gap-1.5 text-sm font-medium transition-colors hover:text-[var(--accent)]"
           style={{ color: "var(--text-muted)" }}
         >
           <MessageCircle size={16} />
@@ -219,7 +242,7 @@ function AnnouncementCard({ a }: { a: Announcement }) {
                   {/* Avatar */}
                   <div
                     className="relative w-7 h-7 rounded-full overflow-hidden flex-shrink-0 mt-0.5 flex items-center justify-center text-xs font-bold text-white"
-                    style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}
+                    style={{ background: "linear-gradient(135deg, var(--accent), var(--accent-2))" }}
                   >
                     {c.authorImage ? (
                       <Image
@@ -241,7 +264,7 @@ function AnnouncementCard({ a }: { a: Announcement }) {
                     }}
                   >
                     <span
-                      className="font-semibold text-indigo-500 mr-1.5"
+                      className="font-semibold text-[var(--accent)] mr-1.5"
                       style={{ fontFamily: "'Outfit', system-ui, sans-serif" }}
                     >
                       {c.author.split("@")[0]}
