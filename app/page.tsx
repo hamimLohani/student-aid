@@ -129,8 +129,7 @@ export default function HomePage() {
           variants={stagger}
           initial="hidden"
           animate="show"
-          className="relative z-10 w-full max-w-4xl mx-auto"
-        >
+          className="relative z-10 w-full max-w-4xl mx-auto">
           {/* Badge */}
           <motion.div variants={fadeUp} className="mb-6">
             <span className="badge">

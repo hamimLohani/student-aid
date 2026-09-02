@@ -97,8 +97,12 @@ export default function ShareButton({ url, title = "Student Aid BDG", compact = 
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.92, y: -4 }}
               transition={{ type: "spring", stiffness: 400, damping: 28 }}
-              className="absolute right-0 top-full mt-2 z-40 min-w-[160px] card py-1"
-              style={{ boxShadow: "0 12px 40px rgba(0,0,0,0.18), 0 0 0 1px var(--border)" }}
+              className="absolute right-0 top-full mt-2 z-40 min-w-[160px] py-1 rounded-xl border"
+              style={{ 
+                borderColor: "var(--border)",
+                background: "var(--bg)", 
+                boxShadow: "0 12px 40px rgba(0,0,0,0.18), 0 0 0 1px var(--border)" 
+              }}
             >
               {/* Native OS Share (if supported) */}
               {canNativeShare && (

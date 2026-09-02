@@ -167,11 +167,11 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
 
           {/* Modal */}
           <motion.div
-            initial={{ opacity: 0, y: -20, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -12, scale: 0.97 }}
+            initial={{ opacity: 0, y: -20, x: "-50%", scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, x: "-50%", scale: 1 }}
+            exit={{ opacity: 0, y: -12, x: "-50%", scale: 0.97 }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="fixed top-[10vh] left-1/2 -translate-x-1/2 z-50 w-full max-w-2xl px-4"
+            className="fixed top-[10vh] left-1/2 z-50 w-full max-w-2xl px-4"
           >
             <div
               className="card overflow-hidden"

@@ -85,10 +85,11 @@ export default function Navbar() {
           }}
         >
           <div className="px-3 sm:px-4 flex items-center justify-between h-14 relative">
-          {/* Logo */}
-          <Link
-            href="/"
-            className="flex items-center gap-3 group"
+          {/* Logo Group */}
+          <div className="flex flex-1 justify-start">
+            <Link
+              href="/"
+              className="flex items-center gap-3 group"
             aria-label="Student Aid BDG Home"
           >
             <motion.div
@@ -125,10 +126,11 @@ export default function Navbar() {
                 BDG
               </span>
             </div>
-          </Link>
+            </Link>
+          </div>
 
           {/* Desktop Nav - Centered */}
-          <div className="hidden lg:flex items-center gap-1 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+          <div className="hidden lg:flex items-center justify-center gap-1">
             {links.map((l) => (
               <Link
                 key={l.href}
@@ -142,8 +144,8 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Desktop Controls */}
-          <div className="hidden md:flex items-center gap-2">
+          {/* Desktop Controls Group */}
+          <div className="flex flex-1 justify-end items-center gap-2">
             {/* Search button */}
             <motion.button
               whileHover={{ scale: 1.04 }}
