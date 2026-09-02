@@ -410,11 +410,17 @@ textarea.input-field { resize: none; line-height: 1.6; }
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: #0d150e;
+  background: #2e6b45;
   border-radius: 99px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #000000;
+  background: #458a5c;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #34744e;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #5a9e70;
 }
 
 .scrollbar-hide::-webkit-scrollbar {

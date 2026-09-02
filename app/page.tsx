@@ -205,16 +205,15 @@ export default function HomePage() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.2, duration: 0.6 }}
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-emerald-100/70"
+          className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
         >
-          <span className="text-xs font-semibold tracking-widest uppercase">
+          <span className="text-xs font-bold tracking-[0.2em] uppercase text-emerald-200/90">
             Scroll
           </span>
           <motion.div
-            animate={{ y: [0, 6, 0] }}
+            animate={{ y: [0, 8, 0] }}
             transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-            className="w-0.5 h-6 rounded-full"
-            style={{ background: "linear-gradient(to bottom, #0d150e, transparent)" }}
+            className="w-0.5 h-7 rounded-full bg-gradient-to-b from-emerald-400 to-transparent shadow-sm shadow-emerald-400/50"
           />
         </motion.div>
       </section>
