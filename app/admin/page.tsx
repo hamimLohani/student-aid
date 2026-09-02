@@ -57,6 +57,11 @@ export default function AdminDashboard() {
   const [activityMediaPreviews, setActivityMediaPreviews] = useState<string[]>([]);
   const [announcementForm, setAnnouncementForm] = useState({ title: "", content: "" });
   const [approvingId, setApprovingId] = useState<string | null>(null);
+  const [sendEmailNotify, setSendEmailNotify] = useState(true);
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const [testEmail, setTestEmail] = useState("");
+  const [testingEmail, setTestingEmail] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) router.push("/admin/login");
@@ -128,8 +133,39 @@ export default function AdminDashboard() {
     }
   };
 
-  const [sendEmailNotify, setSendEmailNotify] = useState(true);
-  const [sendingEmail, setSendingEmail] = useState(false);
+  const sendTestEmail = async () => {
+    const targetEmail = testEmail.trim() || user?.email || "";
+    if (!targetEmail || !targetEmail.includes("@")) {
+      return toast.error("অনুগ্রহ করে একটি সঠিক ইমেইল ঠিকানা দিন");
+    }
+    const sampleTitle = announcementForm.title.trim() || "New Activity: 🌙✨ ঈদ পুনর্মিলনী ২০২৬ ✨🌙";
+    const sampleContent = announcementForm.content.trim() || "আসসালামু আলাইকুম সবাইকে 😊\nআমাদের প্রিয় কমিউনিটির পক্ষ থেকে আয়োজন করা হয়েছে **ঈদ পুনর্মিলনী ২০২৬** 🎉\nএই অনুষ্ঠানে :\n🎤 আড্ডা ও পরিচিতি \n🎾 বিভিন্ন ধরনের খেলাধুলা \n📸 ফটোসেশন \n🎉 সবার সাথে আনন্দময় সময়";
+
+    setTestingEmail(true);
+    toast.loading("টেস্ট ইমেইল পাঠানো হচ্ছে...", { id: "test-email-send" });
+    try {
+      const res = await fetch("/api/send-announcement-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: sampleTitle,
+          content: sampleContent,
+          recipientEmails: [targetEmail],
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(`📧 টেস্ট ইমেইল ${targetEmail} ঠিকানায় সফলভাবে পাঠানো হয়েছে!`, { id: "test-email-send" });
+      } else {
+        toast.error(`টেস্ট ইমেইল পাঠাতে সমস্যা: ${data.error}`, { id: "test-email-send" });
+      }
+    } catch (e) {
+      console.error("Test email error:", e);
+      toast.error("ইমেইল পাঠাতে সমস্যা হয়েছে", { id: "test-email-send" });
+    } finally {
+      setTestingEmail(false);
+    }
+  };
 
   const addAnnouncement = async () => {
     if (!announcementForm.title) return toast.error(copy.titleRequired);
@@ -292,8 +328,6 @@ export default function AdminDashboard() {
     return matchesSearch && matchesType;
   });
 
-  const [exporting, setExporting] = useState(false);
-
   const exportPDF = async () => {
     setExporting(true);
     try {
@@ -437,7 +471,7 @@ export default function AdminDashboard() {
                 <label className="block text-xs text-secondary mb-1">{copy.profilePhoto}</label>
                 <input type="file" accept="image/*"
                   onChange={(e) => setMemberImage(e.target.files?.[0] || null)}
-                  className="w-full text-sm text-secondary file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-emerald-600/30 file:text-emerald-300 file:text-sm"
+                  className="w-full text-sm text-secondary file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-[var(--accent)] file:text-white file:font-semibold hover:file:opacity-90 transition file:text-xs"
                 />
               </div>
             </div>
@@ -534,7 +568,7 @@ export default function AdminDashboard() {
                           <label className="block text-xs text-secondary mb-1">{copy.changePhoto}</label>
                           <input type="file" accept="image/*"
                             onChange={(e) => setEditImage(e.target.files?.[0] || null)}
-                            className="w-full text-sm text-secondary file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-emerald-600/30 file:text-emerald-300 file:text-sm"
+                            className="w-full text-sm text-secondary file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-[var(--accent)] file:text-white file:font-semibold hover:file:opacity-90 transition file:text-xs"
                           />
                         </div>
                         <div className="flex gap-2 pt-1">
@@ -609,7 +643,7 @@ export default function AdminDashboard() {
                 <label className="block text-xs text-secondary mb-1">{copy.photosMultiple}</label>
                 <input type="file" accept="image/*" multiple
                   onChange={(e) => setActivityMedia(Array.from(e.target.files || []))}
-                  className="w-full text-sm text-secondary file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-emerald-600/30 file:text-emerald-300 file:text-sm"
+                  className="w-full text-sm text-secondary file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-[var(--accent)] file:text-white file:font-semibold hover:file:opacity-90 transition file:text-xs"
                 />
                 {activityMedia.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-2">
@@ -668,7 +702,7 @@ export default function AdminDashboard() {
                   placeholder={copy.content}
                 />
               </div>
-              <div className="pt-1">
+              <div className="pt-1 flex flex-col gap-2">
                 <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer" style={{ color: "var(--text-primary)" }}>
                   <input
                     type="checkbox"
