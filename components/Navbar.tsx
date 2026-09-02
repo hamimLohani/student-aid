@@ -9,9 +9,10 @@ import { useTheme } from "@/context/ThemeContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { Menu, X, Sun, Moon, LogOut, Shield } from "lucide-react";
+import { Menu, X, Sun, Moon, LogOut, Shield, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { navbarCopy } from "@/lib/i18n";
+import GlobalSearch from "@/components/GlobalSearch";
 
 export default function Navbar() {
   const { user } = useAuth();
@@ -19,6 +20,7 @@ export default function Navbar() {
   const { language, toggleLanguage } = useLanguage();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const pathname = usePathname();
   const copy = navbarCopy[language];
 
@@ -42,6 +44,18 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Cmd+K / Ctrl+K to open search
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setSearchOpen((v) => !v);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+
   // Close mobile menu on route change
   useEffect(() => { setOpen(false); }, [pathname]);
 
@@ -56,22 +70,21 @@ export default function Navbar() {
 
   return (
     <>
-      <nav
-        className={`fixed top-0 w-full z-50 transition-all duration-500 ${
-          scrolled
-            ? "py-0 shadow-lg shadow-[rgba(99,102,241,0.08)]"
-            : "py-1"
-        }`}
-        style={{
-          background: "var(--nav-bg)",
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
-          borderBottom: scrolled
-            ? "1px solid var(--border)"
-            : "1px solid transparent",
-        }}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
+      <div className="fixed top-0 left-0 right-0 z-50 px-4 pt-4 sm:pt-6 pointer-events-none flex justify-center transition-all duration-500">
+        <nav
+          className={`pointer-events-auto w-full max-w-6xl rounded-2xl transition-all duration-500 ${
+            scrolled
+              ? "py-1.5 shadow-2xl shadow-indigo-500/10"
+              : "py-2 shadow-lg shadow-black/5"
+          }`}
+          style={{
+            background: "var(--nav-bg)",
+            backdropFilter: "blur(24px)",
+            WebkitBackdropFilter: "blur(24px)",
+            border: "1px solid var(--border)",
+          }}
+        >
+          <div className="px-3 sm:px-4 flex items-center justify-between h-14 relative">
           {/* Logo */}
           <Link
             href="/"
@@ -114,14 +127,14 @@ export default function Navbar() {
             </div>
           </Link>
 
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-1">
+          {/* Desktop Nav - Centered */}
+          <div className="hidden lg:flex items-center gap-1 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
             {links.map((l) => (
               <Link
                 key={l.href}
                 href={l.href}
-                className={`nav-link px-3.5 py-2 rounded-lg transition-colors text-sm ${
-                  isActive(l.href) ? "active" : ""
+                className={`nav-link px-3.5 py-1.5 rounded-xl transition-all text-sm font-medium ${
+                  isActive(l.href) ? "active bg-[var(--bg-section)]" : "hover:bg-[var(--bg-card-hover)]"
                 }`}
               >
                 {l.label}
@@ -131,6 +144,19 @@ export default function Navbar() {
 
           {/* Desktop Controls */}
           <div className="hidden md:flex items-center gap-2">
+            {/* Search button */}
+            <motion.button
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.94 }}
+              onClick={() => setSearchOpen(true)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm transition"
+              style={{ borderColor: "var(--border)", background: "var(--bg-card)", color: "var(--text-muted)" }}
+              aria-label="Open search"
+            >
+              <Search size={14} />
+              <span className="text-xs hidden lg:inline" style={{ fontFamily: "'Outfit', system-ui, sans-serif" }}>Search</span>
+              <kbd className="hidden lg:flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded border" style={{ borderColor: "var(--border)", background: "var(--bg-section)" }}>⌘K</kbd>
+            </motion.button>
             {user ? (
               <>
                 <Link
@@ -237,19 +263,8 @@ export default function Navbar() {
             </motion.button>
           </div>
         </div>
-
-        {/* Glow bottom line — visible when scrolled */}
-        <AnimatePresence>
-          {scrolled && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="glow-line"
-            />
-          )}
-        </AnimatePresence>
-      </nav>
+        </nav>
+      </div>
 
       {/* Mobile Drawer */}
       <AnimatePresence>
@@ -264,23 +279,23 @@ export default function Navbar() {
               onClick={() => setOpen(false)}
             />
 
-            {/* Drawer */}
+            {/* Floating Menu */}
             <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed top-0 right-0 bottom-0 z-50 w-72 md:hidden flex flex-col"
+              initial={{ opacity: 0, scale: 0.95, y: -10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: -10 }}
+              transition={{ type: "spring", stiffness: 350, damping: 30 }}
+              className="fixed top-24 left-4 right-4 z-50 md:hidden flex flex-col rounded-[2rem] overflow-hidden"
               style={{
-                background: "var(--bg-card)",
+                background: "var(--nav-bg)",
                 backdropFilter: "blur(24px)",
                 WebkitBackdropFilter: "blur(24px)",
-                borderLeft: "1px solid var(--border)",
-                boxShadow: "-8px 0 40px rgba(99,102,241,0.15)",
+                border: "1px solid var(--border)",
+                boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
               }}
             >
-              {/* Drawer Header */}
-              <div className="flex items-center justify-between p-5 border-b" style={{ borderColor: "var(--border)" }}>
+              {/* Menu Header */}
+              <div className="flex items-center justify-between p-5 pb-2">
                 <span className="font-display font-bold text-base" style={{ color: "var(--text-primary)" }}>
                   Menu
                 </span>
@@ -295,13 +310,13 @@ export default function Navbar() {
               </div>
 
               {/* Nav Links */}
-              <div className="flex flex-col gap-1 p-4 flex-1">
+              <div className="flex flex-col gap-1 p-4 pt-2">
                 {links.map((l, i) => (
                   <motion.div
                     key={l.href}
-                    initial={{ x: 20, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: i * 0.06, type: "spring", stiffness: 300, damping: 25 }}
+                    initial={{ y: 10, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: i * 0.04 + 0.1, type: "spring", stiffness: 300, damping: 25 }}
                   >
                     <Link
                       href={l.href}
@@ -322,7 +337,7 @@ export default function Navbar() {
               </div>
 
               {/* Auth actions */}
-              <div className="p-4 border-t" style={{ borderColor: "var(--border)" }}>
+              <div className="p-4 pt-2">
                 {user ? (
                   <div className="flex flex-col gap-2">
                     <Link
@@ -351,6 +366,8 @@ export default function Navbar() {
           </>
         )}
       </AnimatePresence>
+      {/* GlobalSearch Modal */}
+      <GlobalSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   );
 }

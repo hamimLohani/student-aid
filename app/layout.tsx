@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Outfit, Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
@@ -25,12 +25,28 @@ export const metadata: Metadata = {
   description:
     "Student Aid BDG is a community platform for students — connecting members, sharing activities, and empowering each other through collaboration and support.",
   keywords: ["Student Aid", "BDG", "community", "students", "Bangladesh"],
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Student Aid",
+  },
   openGraph: {
     title: "Student Aid (BDG) — Community Platform",
     description:
       "A premium community platform for Student Aid BDG members. Activities, announcements, member directory and more.",
     type: "website",
+    siteName: "Student Aid BDG",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Student Aid (BDG) — Community Platform",
+    description: "A premium community platform for Student Aid BDG members.",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#6366f1",
 };
 
 export default function RootLayout({

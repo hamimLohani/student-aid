@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { announcementsCopy } from "@/lib/i18n";
+import ShareButton from "@/components/ShareButton";
 
 interface Announcement {
   id: string;
@@ -135,16 +136,15 @@ function AnnouncementCard({ a }: { a: Announcement }) {
         )}
       </div>
 
-      {/* Content */}
-      <p
-        className="text-sm leading-relaxed mb-4 whitespace-pre-line"
+      {/* Content — renders rich HTML or plain text */}
+      <div
+        className="text-sm leading-relaxed mb-4 rich-content"
         style={{ color: "var(--text-secondary)" }}
-      >
-        {a.content}
-      </p>
+        dangerouslySetInnerHTML={{ __html: a.content }}
+      />
 
       {/* Actions */}
-      <div className="flex items-center gap-4 pt-2" style={{ borderTop: "1px solid var(--border)" }}>
+      <div className="flex items-center gap-3 pt-2 flex-wrap" style={{ borderTop: "1px solid var(--border)" }}>
         {/* Like */}
         <motion.button
           whileTap={{ scale: 0.85 }}
@@ -182,6 +182,11 @@ function AnnouncementCard({ a }: { a: Announcement }) {
             <ChevronDown size={14} />
           </motion.span>
         </motion.button>
+
+        {/* Share */}
+        <div className="ml-auto">
+          <ShareButton compact />
+        </div>
       </div>
 
       {/* Comments panel */}
@@ -303,7 +308,7 @@ export default function AnnouncementsPage() {
   }, []);
 
   return (
-    <div className="pt-24 pb-20 px-4 max-w-3xl mx-auto page-enter">
+    <div className="pt-28 sm:pt-32 pb-20 px-4 max-w-3xl mx-auto page-enter">
       {/* Page header */}
       <motion.div
         initial={{ opacity: 0, y: 24 }}

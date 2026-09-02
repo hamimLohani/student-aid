@@ -39,7 +39,7 @@ export default function MemberProfileClient() {
 
   if (status === "not-found") {
     return (
-      <div className="pt-20 sm:pt-24 pb-16 px-4 max-w-2xl mx-auto">
+      <div className="pt-28 sm:pt-32 pb-16 px-4 max-w-2xl mx-auto">
         <Link href="/members" className="flex items-center gap-2 text-secondary hover:text-indigo-600 mb-6 transition text-sm">
           <ArrowLeft size={16} /> {copy.back}
         </Link>

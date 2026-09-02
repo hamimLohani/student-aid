@@ -136,7 +136,7 @@ export default function JoinPage() {
   /* ── Success state ── */
   if (submitted) {
     return (
-      <div className="pt-24 pb-20 px-4 min-h-screen flex items-center justify-center">
+      <div className="pt-28 sm:pt-32 pb-20 px-4 min-h-screen flex items-center justify-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import {
@@ -13,9 +14,13 @@ import { useLanguage } from "@/context/LanguageContext";
 import { adminCopy, getMemberTypeLabel } from "@/lib/i18n";
 import Image from "next/image";
 import toast from "react-hot-toast";
-import { Trash2, Plus, Users, Megaphone, Calendar, FileText, Pencil, X, Check } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import { Trash2, Plus, Users, Megaphone, Calendar, FileText, Pencil, X, Check, BarChart2, TrendingUp, Clock3, CheckCircle2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
-type Tab = "members" | "activities" | "announcements" | "requests";
+const RichTextEditor = dynamic(() => import("@/components/RichTextEditor"), { ssr: false });
+
+type Tab = "members" | "activities" | "announcements" | "requests" | "analytics";
 
 interface Member { id: string; name: string; sscYear: string; memberType?: string; work: string; workplace: string; bloodGroup: string; address: string; phone?: string; email?: string; image?: string; }
 interface Activity { id: string; title: string; description: string; date: string; images: string[]; }
@@ -217,6 +222,7 @@ export default function AdminDashboard() {
     { key: "activities", label: copy.activities, icon: <Calendar size={16} /> },
     { key: "announcements", label: copy.announcements, icon: <Megaphone size={16} /> },
     { key: "requests", label: copy.requests, icon: <FileText size={16} /> },
+    { key: "analytics", label: "Analytics", icon: <BarChart2 size={16} /> },
   ];
 
   const filteredMembers = members.filter((member) => {
@@ -243,44 +249,27 @@ export default function AdminDashboard() {
   });
 
   return (
-    <div className="pt-20 sm:pt-24 pb-20 px-3 sm:px-6 max-w-5xl mx-auto">
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="pt-28 sm:pt-32 pb-20 px-3 sm:px-6 max-w-5xl mx-auto">
 
       {/* Header */}
       <div className="mb-5 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold">{copy.dashboard}</h1>
+        <h1 className="text-2xl sm:text-3xl font-display font-extrabold gradient-text">{copy.dashboard}</h1>
         <p className="text-secondary text-xs sm:text-sm mt-1 truncate">
-          {copy.loggedInAs} <span className="text-indigo-400">{user.email}</span>
+          {copy.loggedInAs} <span className="font-medium text-indigo-500">{user.email}</span>
         </p>
       </div>
 
-      {/* Stats — 2 cols on mobile, 4 on desktop */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        {[
-          { label: copy.members, count: members.length, tab: "members" as Tab },
-          { label: copy.activities, count: activities.length, tab: "activities" as Tab },
-          { label: copy.announcements, count: announcements.length, tab: "announcements" as Tab },
-          { label: copy.pending, count: requests.filter((r) => r.status === "pending").length, tab: "requests" as Tab },
-        ].map((s) => (
-          <button key={s.label} onClick={() => setTab(s.tab)}
-            className={`card p-3 sm:p-4 text-center transition hover:border-indigo-400 ${
-              tab === s.tab ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-600/10" : ""
-            }`}
-          >
-            <div className="text-2xl sm:text-3xl font-bold text-indigo-400">{s.count}</div>
-            <div className="text-secondary text-xs sm:text-sm mt-1">{s.label}</div>
-          </button>
-        ))}
-      </div>
 
-      {/* Tabs — scrollable row on mobile */}
-      <div className="flex gap-2 mb-5 overflow-x-auto pb-1 scrollbar-hide">
+
+      {/* Tabs — mobile app style (5 cols) on mobile, scrollable/flex on desktop */}
+      <div className="grid grid-cols-5 gap-1.5 sm:flex sm:gap-2 mb-5 py-3">
         {tabs.map((t) => (
           <button key={t.key} onClick={() => setTab(t.key)}
-            className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium transition whitespace-nowrap flex-shrink-0 ${
-              tab === t.key ? "bg-indigo-600 text-white" : "bg-gray-100 dark:bg-white/5 text-secondary hover:text-indigo-600 dark:hover:text-white"
+            className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 p-2 sm:px-4 sm:py-2.5 rounded-xl text-[10px] sm:text-sm font-medium transition ${
+              tab === t.key ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30" : "bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-hover)]"
             }`}
           >
-            {t.icon} {t.label}
+            {t.icon} <span className="truncate w-full text-center">{t.label}</span>
           </button>
         ))}
       </div>
@@ -335,7 +324,7 @@ export default function AdminDashboard() {
               </div>
             </div>
             <button onClick={addMember} disabled={memberLoading}
-              className="mt-4 w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 px-6 py-2.5 rounded-xl text-sm font-medium transition"
+              className="mt-4 w-full sm:w-auto btn-primary !py-2.5 !px-6 !text-sm"
             >
               {memberLoading ? copy.adding : copy.addMember}
             </button>
@@ -532,7 +521,7 @@ export default function AdminDashboard() {
               </div>
             </div>
             <button onClick={addActivity}
-              className="mt-4 w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 px-6 py-2.5 rounded-xl text-sm font-medium transition"
+              className="mt-4 w-full sm:w-auto btn-primary !py-2.5 !px-6 !text-sm"
             >
               {copy.addActivityButton}
             </button>
@@ -566,13 +555,17 @@ export default function AdminDashboard() {
                 onChange={(e) => setAnnouncementForm({ ...announcementForm, title: e.target.value })}
                 className={inputCls}
               />
-              <textarea placeholder={copy.content} value={announcementForm.content} rows={4}
-                onChange={(e) => setAnnouncementForm({ ...announcementForm, content: e.target.value })}
-                className={`${inputCls} resize-none`}
-              />
+              <div>
+                <label className="block text-xs mb-1.5" style={{ color: "var(--text-secondary)" }}>{copy.content}</label>
+                <RichTextEditor
+                  value={announcementForm.content}
+                  onChange={(html) => setAnnouncementForm({ ...announcementForm, content: html })}
+                  placeholder={copy.content}
+                />
+              </div>
             </div>
             <button onClick={addAnnouncement}
-              className="mt-4 w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 px-6 py-2.5 rounded-xl text-sm font-medium transition"
+              className="mt-4 btn-primary !py-2.5 !px-6 !text-sm"
             >
               {copy.postAnnouncementButton}
             </button>
@@ -583,7 +576,7 @@ export default function AdminDashboard() {
               <div key={a.id} className="card flex items-center gap-3 px-4 py-3">
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm truncate">{a.title}</p>
-                  <p className="text-secondary text-xs line-clamp-1">{a.content}</p>
+                  <p className="text-secondary text-xs line-clamp-1" dangerouslySetInnerHTML={{ __html: a.content }} />
                 </div>
                 <button onClick={() => deleteDoc_("announcements", a.id, "announcement")} className="text-red-400 hover:text-red-300 transition flex-shrink-0 p-1">
                   <Trash2 size={15} />
@@ -593,6 +586,152 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
+
+      {/* ── Analytics Tab ── */}
+      {tab === "analytics" && (() => {
+        // Member count by SSC year
+        const yearCounts: Record<string, number> = {};
+        members.forEach((m) => { if (m.sscYear) yearCounts[m.sscYear] = (yearCounts[m.sscYear] || 0) + 1; });
+        const yearData = Object.entries(yearCounts).sort((a, b) => a[0].localeCompare(b[0])).map(([year, count]) => ({ year, count }));
+
+        // Member count by type
+        const typeCounts: Record<string, number> = {};
+        members.forEach((m) => { const t = m.memberType || "Unknown"; typeCounts[t] = (typeCounts[t] || 0) + 1; });
+        const typeData = Object.entries(typeCounts).map(([type, count]) => ({ type: type.split(" ")[0], count }));
+
+        // Top liked announcements
+        interface Announcement { id: string; title: string; content: string; likes?: string[]; }
+        const topAnnouncements = [...(announcements as Announcement[])]
+          .filter((a) => a.likes && a.likes.length > 0)
+          .sort((a, b) => (b.likes?.length || 0) - (a.likes?.length || 0))
+          .slice(0, 5)
+          .map((a) => ({ title: a.title.slice(0, 24) + (a.title.length > 24 ? "…" : ""), likes: a.likes?.length || 0 }));
+
+        const pendingRequests = requests.filter((r) => r.status === "pending");
+        const upcomingActivities = activities.filter((a) => a.date && new Date(a.date) > new Date()).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        const COLORS = ["#6366f1", "#8b5cf6", "#06b6d4", "#22c55e", "#f59e0b"];
+
+        return (
+          <div className="space-y-6">
+            {/* Top stat cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {[
+                { label: "Total Members", value: members.length, icon: <Users size={18} />, color: "#6366f1" },
+                { label: "Activities", value: activities.length, icon: <Calendar size={18} />, color: "#8b5cf6" },
+                { label: "Upcoming Events", value: upcomingActivities.length, icon: <TrendingUp size={18} />, color: "#06b6d4" },
+                { label: "Pending Requests", value: pendingRequests.length, icon: <Clock3 size={18} />, color: "#f59e0b" },
+              ].map((s) => (
+                <div key={s.label} className="stat-card">
+                  <div className="w-10 h-10 rounded-2xl mx-auto mb-3 flex items-center justify-center text-white" style={{ background: s.color }}>{s.icon}</div>
+                  <div className="font-display text-3xl font-extrabold mb-1" style={{ color: s.color }}>{s.value}</div>
+                  <p className="text-xs" style={{ color: "var(--text-muted)" }}>{s.label}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Charts row */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+              {/* Members by SSC Year */}
+              <div className="card p-5">
+                <h3 className="font-display font-semibold mb-4 text-sm" style={{ color: "var(--text-primary)" }}>Members by SSC Year</h3>
+                {yearData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={200}>
+                    <BarChart data={yearData} margin={{ top: 0, right: 0, bottom: 0, left: -20 }}>
+                      <XAxis dataKey="year" tick={{ fontSize: 11, fill: "var(--text-muted)" }} />
+                      <YAxis tick={{ fontSize: 11, fill: "var(--text-muted)" }} allowDecimals={false} />
+                      <Tooltip contentStyle={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "0.75rem", fontSize: 12 }} />
+                      <Bar dataKey="count" radius={[6, 6, 0, 0]}>
+                        {yearData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : <p className="text-sm text-center py-12" style={{ color: "var(--text-muted)" }}>No SSC year data yet</p>}
+              </div>
+
+              {/* Members by Type */}
+              <div className="card p-5">
+                <h3 className="font-display font-semibold mb-4 text-sm" style={{ color: "var(--text-primary)" }}>Members by Type</h3>
+                {typeData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={200}>
+                    <BarChart data={typeData} margin={{ top: 0, right: 0, bottom: 0, left: -20 }}>
+                      <XAxis dataKey="type" tick={{ fontSize: 11, fill: "var(--text-muted)" }} />
+                      <YAxis tick={{ fontSize: 11, fill: "var(--text-muted)" }} allowDecimals={false} />
+                      <Tooltip contentStyle={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "0.75rem", fontSize: 12 }} />
+                      <Bar dataKey="count" radius={[6, 6, 0, 0]}>
+                        {typeData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : <p className="text-sm text-center py-12" style={{ color: "var(--text-muted)" }}>No member type data yet</p>}
+              </div>
+            </div>
+
+            {/* Top liked announcements */}
+            {topAnnouncements.length > 0 && (
+              <div className="card p-5">
+                <h3 className="font-display font-semibold mb-4 text-sm" style={{ color: "var(--text-primary)" }}>Top Liked Announcements</h3>
+                <ResponsiveContainer width="100%" height={180}>
+                  <BarChart data={topAnnouncements} layout="vertical" margin={{ top: 0, right: 20, bottom: 0, left: 0 }}>
+                    <XAxis type="number" tick={{ fontSize: 11, fill: "var(--text-muted)" }} allowDecimals={false} />
+                    <YAxis dataKey="title" type="category" tick={{ fontSize: 11, fill: "var(--text-muted)" }} width={120} />
+                    <Tooltip contentStyle={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "0.75rem", fontSize: 12 }} />
+                    <Bar dataKey="likes" radius={[0, 6, 6, 0]} fill="#ef4444" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+
+            {/* Upcoming events */}
+            {upcomingActivities.length > 0 && (
+              <div className="card p-5">
+                <h3 className="font-display font-semibold mb-4 text-sm" style={{ color: "var(--text-primary)" }}>Upcoming Events</h3>
+                <div className="space-y-2">
+                  {upcomingActivities.slice(0, 5).map((a) => {
+                    const diff = Math.ceil((new Date(a.date).getTime() - Date.now()) / 86400000);
+                    return (
+                      <div key={a.id} className="flex items-center justify-between px-4 py-2.5 rounded-xl" style={{ background: "var(--bg-section)" }}>
+                        <span className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>{a.title}</span>
+                        <span className="countdown-pill ml-3 flex-shrink-0">{diff === 0 ? "Today" : `${diff}d`}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Pending requests quick widget */}
+            {pendingRequests.length > 0 && (
+              <div className="card p-5">
+                <h3 className="font-display font-semibold mb-4 text-sm flex items-center gap-2" style={{ color: "var(--text-primary)" }}>
+                  <Clock3 size={15} className="text-amber-400" /> Pending Join Requests ({pendingRequests.length})
+                </h3>
+                <div className="space-y-3">
+                  {pendingRequests.slice(0, 5).map((r) => (
+                    <div key={r.id} className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-sm font-bold text-white" style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)" }}>
+                        {r.image ? <Image src={r.image} alt={r.name} width={36} height={36} className="object-cover" /> : r.name[0]}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>{r.name}</p>
+                        <p className="text-xs truncate" style={{ color: "var(--text-muted)" }}>{r.work} · {r.memberType}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button onClick={() => approveRequest(r)} disabled={approvingId === r.id} className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-500 disabled:opacity-50 text-white transition font-medium">
+                          <CheckCircle2 size={12} /> {approvingId === r.id ? "..." : "Approve"}
+                        </button>
+                        <button onClick={() => deleteDoc_("joinRequests", r.id, "request")} className="text-xs px-3 py-1.5 rounded-lg text-red-400 border transition" style={{ borderColor: "var(--border)" }}>Reject</button>
+                      </div>
+                    </div>
+                  ))}
+                  {pendingRequests.length > 5 && (
+                    <button onClick={() => setTab("requests")} className="text-xs text-indigo-500 hover:text-indigo-400 transition">View all {pendingRequests.length} requests →</button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* ── Join Requests Tab ── */}
       {tab === "requests" && (
@@ -634,12 +773,12 @@ export default function AdminDashboard() {
                 <div className="flex gap-2 mt-3">
                   <button onClick={() => approveRequest(r)}
                     disabled={approvingId === r.id}
-                    className="flex-1 bg-green-600 hover:bg-green-500 disabled:opacity-50 py-2 rounded-xl text-xs font-medium transition"
+                    className="flex-1 btn-primary !py-2 !px-4 !text-xs"
                   >
                     {approvingId === r.id ? copy.approving : `✓ ${copy.approve}`}
                   </button>
                   <button onClick={() => deleteDoc_("joinRequests", r.id, "request")}
-                    className="flex-1 bg-red-600/20 hover:bg-red-600/40 text-red-400 py-2 rounded-xl text-xs font-medium transition"
+                    className="flex-1 btn-ghost !py-2 !px-4 !text-xs !text-red-500 !border-red-500/30 hover:!bg-red-500/10"
                   >
                     ✕ {copy.reject}
                   </button>
@@ -649,6 +788,6 @@ export default function AdminDashboard() {
           ))}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

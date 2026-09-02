@@ -10,6 +10,7 @@ import {
   Images,
   ArrowRight,
   Sparkles,
+  ChevronDown,
 } from "lucide-react";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
@@ -80,12 +81,14 @@ function SkeletonCard() {
 }
 
 const fadeUp = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0 } };
+const PAGE_SIZE = 9;
 
 export default function ActivitiesPage() {
   const { language } = useLanguage();
   const copy = activitiesCopy[language];
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   useEffect(() => {
     const q = query(collection(db, "activities"), orderBy("date", "desc"));
@@ -97,8 +100,11 @@ export default function ActivitiesPage() {
     });
   }, []);
 
+  const visible = activities.slice(0, visibleCount);
+  const hasMore = visibleCount < activities.length;
+
   return (
-    <div className="pt-24 pb-20 px-4 max-w-6xl mx-auto page-enter">
+    <div className="pt-28 sm:pt-32 pb-20 px-4 max-w-6xl mx-auto page-enter">
       {/* Page header */}
       <motion.div
         initial={{ opacity: 0, y: 24 }}
@@ -164,98 +170,115 @@ export default function ActivitiesPage() {
 
       {/* Activity grid */}
       {!loading && activities.length > 0 && (
-        <motion.div
-          initial="hidden"
-          animate="show"
-          variants={{ show: { transition: { staggerChildren: 0.08 } } }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-7"
-        >
-          {activities.map((a) => (
-            <motion.div
-              key={a.id}
-              variants={fadeUp}
-              whileHover={{ y: -6 }}
-              transition={{ type: "spring", stiffness: 280, damping: 22 }}
-            >
-              <Link
-                href={`/activities/${a.id}`}
-                className="card block overflow-hidden group h-full"
+        <>
+          <motion.div
+            initial="hidden"
+            animate="show"
+            variants={{ show: { transition: { staggerChildren: 0.08 } } }}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-7"
+          >
+            {visible.map((a) => (
+              <motion.div
+                key={a.id}
+                variants={fadeUp}
+                whileHover={{ y: -6 }}
+                transition={{ type: "spring", stiffness: 280, damping: 22 }}
               >
-                {/* Image */}
-                <div className="relative w-full h-48 sm:h-52 overflow-hidden rounded-t-[1.25rem]">
-                  {a.images?.[0] ? (
-                    <>
-                      <Image
-                        src={a.images[0]}
-                        alt={a.title}
-                        fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        className="object-cover group-hover:scale-110 transition-transform duration-700"
-                      />
-                      {/* Gradient overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                      {a.images.length > 1 && (
-                        <span className="absolute bottom-3 right-3 flex items-center gap-1 bg-black/60 text-white text-xs px-2.5 py-1.5 rounded-lg backdrop-blur-sm font-medium">
-                          <Images size={12} /> {a.images.length}
-                        </span>
-                      )}
-                    </>
-                  ) : (
-                    <div
-                      className="w-full h-full flex items-center justify-center"
-                      style={{ background: "var(--bg-section)" }}
+                <Link
+                  href={`/activities/${a.id}`}
+                  className="card block overflow-hidden group h-full"
+                >
+                  {/* Image */}
+                  <div className="relative w-full h-48 sm:h-52 overflow-hidden rounded-t-[1.25rem]">
+                    {a.images?.[0] ? (
+                      <>
+                        <Image
+                          src={a.images[0]}
+                          alt={a.title}
+                          fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          className="object-cover group-hover:scale-110 transition-transform duration-700"
+                        />
+                        {/* Gradient overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        {a.images.length > 1 && (
+                          <span className="absolute bottom-3 right-3 flex items-center gap-1 bg-black/60 text-white text-xs px-2.5 py-1.5 rounded-lg backdrop-blur-sm font-medium">
+                            <Images size={12} /> {a.images.length}
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                      <div
+                        className="w-full h-full flex items-center justify-center"
+                        style={{ background: "var(--bg-section)" }}
+                      >
+                        <Images
+                          size={36}
+                          style={{ color: "var(--text-muted)" }}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-5">
+                    <h3
+                      className="font-display text-base sm:text-lg font-bold mb-2 group-hover:text-indigo-500 transition-colors leading-snug"
+                      style={{ color: "var(--text-primary)" }}
                     >
-                      <Images
-                        size={36}
+                      {a.title}
+                    </h3>
+                    <p
+                      className="text-sm mb-4 line-clamp-2 leading-relaxed"
+                      style={{ color: "var(--text-secondary)" }}
+                    >
+                      {a.description}
+                    </p>
+
+                    <div className="flex items-center justify-between">
+                      <span
+                        className="flex items-center gap-1.5 text-xs font-medium"
                         style={{ color: "var(--text-muted)" }}
-                      />
-                    </div>
-                  )}
-                </div>
-
-                {/* Content */}
-                <div className="p-5">
-                  <h3
-                    className="font-display text-base sm:text-lg font-bold mb-2 group-hover:text-indigo-500 transition-colors leading-snug"
-                    style={{ color: "var(--text-primary)" }}
-                  >
-                    {a.title}
-                  </h3>
-                  <p
-                    className="text-sm mb-4 line-clamp-2 leading-relaxed"
-                    style={{ color: "var(--text-secondary)" }}
-                  >
-                    {a.description}
-                  </p>
-
-                  <div className="flex items-center justify-between">
-                    <span
-                      className="flex items-center gap-1.5 text-xs font-medium"
-                      style={{ color: "var(--text-muted)" }}
-                    >
-                      <Calendar size={12} />
-                      {new Date(a.date).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <Countdown
-                        date={a.date}
-                        pastEventLabel={copy.pastEvent}
-                      />
-                      <span className="text-indigo-500 text-xs flex items-center gap-1 font-semibold group-hover:gap-2 transition-all">
-                        {copy.view}
-                        <ArrowRight size={12} />
+                      >
+                        <Calendar size={12} />
+                        {new Date(a.date).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
                       </span>
+                      <div className="flex items-center gap-2">
+                        <Countdown
+                          date={a.date}
+                          pastEventLabel={copy.pastEvent}
+                        />
+                        <span className="text-indigo-500 text-xs flex items-center gap-1 font-semibold group-hover:gap-2 transition-all">
+                          {copy.view}
+                          <ArrowRight size={12} />
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Link>
-            </motion.div>
-          ))}
-        </motion.div>
+                </Link>
+              </motion.div>
+            ))}
+          </motion.div>
+
+          {/* Load more */}
+          {hasMore && (
+            <div className="flex justify-center mt-12">
+              <motion.button
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.96 }}
+                onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+                className="btn-ghost flex items-center gap-2"
+              >
+                <ChevronDown size={16} />
+                Load More ({activities.length - visibleCount} remaining)
+              </motion.button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

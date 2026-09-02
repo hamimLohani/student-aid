@@ -13,6 +13,9 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { homeCopy } from "@/lib/i18n";
+import AnimatedCounter from "@/components/AnimatedCounter";
+import { collection, getCountFromServer } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 /* ── Animation variants ── */
 const fadeUp = {
@@ -24,31 +27,7 @@ const stagger = {
   show: { transition: { staggerChildren: 0.13 } },
 };
 
-/* ── Animated Counter ── */
-function Counter({ target, suffix = "" }: { target: number; suffix?: string }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true });
-  const [val, setVal] = useState(0);
 
-  useEffect(() => {
-    if (!inView) return;
-    let start = 0;
-    const step = Math.ceil(target / 50);
-    const timer = setInterval(() => {
-      start = Math.min(start + step, target);
-      setVal(start);
-      if (start >= target) clearInterval(timer);
-    }, 28);
-    return () => clearInterval(timer);
-  }, [inView, target]);
-
-  return (
-    <span ref={ref}>
-      {val}
-      {suffix}
-    </span>
-  );
-}
 
 export default function HomePage() {
   const { language } = useLanguage();
@@ -78,11 +57,28 @@ export default function HomePage() {
     },
   ];
 
+  const [memberCount, setMemberCount] = useState<number>(120);
+  const [activityCount, setActivityCount] = useState<number>(40);
+
+  useEffect(() => {
+    async function fetchCounts() {
+      try {
+        const memSnap = await getCountFromServer(collection(db, "members"));
+        setMemberCount(memSnap.data().count);
+        const actSnap = await getCountFromServer(collection(db, "activities"));
+        setActivityCount(actSnap.data().count);
+      } catch (err) {
+        console.error("Failed to fetch counts:", err);
+      }
+    }
+    fetchCounts();
+  }, []);
+
   const stats = [
-    { value: 120, suffix: "+", label: "Active Members", icon: <Users size={22} /> },
-    { value: 40, suffix: "+", label: "Activities Held", icon: <Calendar size={22} /> },
-    { value: 5, suffix: "+", label: "Years Active", icon: <Zap size={22} /> },
-    { value: 100, suffix: "%", label: "Community Driven", icon: <Heart size={22} /> },
+    { value: `${memberCount}+`, label: "Active Members", icon: <Users size={22} /> },
+    { value: `${activityCount}+`, label: "Activities Held", icon: <Calendar size={22} /> },
+    { value: "5+", label: "Years Active", icon: <Zap size={22} /> },
+    { value: "100%", label: "Community Driven", icon: <Heart size={22} /> },
   ];
 
   const quickLinks = [
@@ -110,7 +106,7 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="pt-16 overflow-hidden">
+    <div className="pt-28 sm:pt-32 overflow-hidden">
       {/* ═══════════════════════════════════════
           HERO SECTION
       ═══════════════════════════════════════ */}
@@ -252,7 +248,7 @@ export default function HomePage() {
                     WebkitTextFillColor: "transparent",
                   }}
                 >
-                  <Counter target={s.value} suffix={s.suffix} />
+                  <AnimatedCounter value={s.value} />
                 </div>
                 <p className="text-sm font-medium" style={{ color: "var(--text-muted)" }}>
                   {s.label}

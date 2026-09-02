@@ -31,18 +31,18 @@
    DARK MODE TOKENS
 ══════════════════════════════════════════════ */
 .dark {
-  --bg:           #060712;
-  --bg-card:      rgba(255,255,255,0.04);
-  --bg-card-hover:rgba(255,255,255,0.07);
-  --bg-section:   rgba(99,102,241,0.05);
-  --border:       rgba(99,102,241,0.18);
+  --bg:           #111322;
+  --bg-card:      rgba(255,255,255,0.05);
+  --bg-card-hover:rgba(255,255,255,0.08);
+  --bg-section:   rgba(99,102,241,0.08);
+  --border:       rgba(99,102,241,0.2);
   --border-hover: rgba(99,102,241,0.6);
-  --text-primary: #eef0ff;
-  --text-secondary:#8892c0;
-  --text-muted:   #555c8a;
-  --input-bg:     rgba(255,255,255,0.04);
-  --input-border: rgba(99,102,241,0.2);
-  --nav-bg:       rgba(6,7,18,0.82);
+  --text-primary: #f8fafc;
+  --text-secondary:#94a3b8;
+  --text-muted:   #64748b;
+  --input-bg:     rgba(255,255,255,0.05);
+  --input-border: rgba(99,102,241,0.25);
+  --nav-bg:       rgba(17,19,34,0.85);
   --glow-color:   rgba(99,102,241,0.35);
   --glow-strong:  rgba(99,102,241,0.6);
   --orb-1:        rgba(99,102,241,0.22);
@@ -414,6 +414,14 @@ textarea.input-field { resize: none; line-height: 1.6; }
   border-radius: 99px;
 }
 
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* ══════════════════════════════════════════════
    PAGE TRANSITION WRAPPER
 ══════════════════════════════════════════════ */
@@ -543,7 +551,7 @@ textarea.input-field { resize: none; line-height: 1.6; }
 .member-card .overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(6,7,18,0.92) 0%, rgba(6,7,18,0.5) 50%, transparent 100%);
+  background: linear-gradient(to top, rgba(17,19,34,0.92) 0%, rgba(17,19,34,0.5) 50%, transparent 100%);
   opacity: 0;
   transition: opacity 0.35s ease;
   display: flex;
@@ -623,3 +631,33 @@ textarea.input-field { resize: none; line-height: 1.6; }
 .step-dot.done {
   background: #22c55e;
 }
+
+/* ══════════════════════════════════════════════
+   RICH TEXT CONTENT (Tiptap rendered HTML)
+══════════════════════════════════════════════ */
+.rich-content h1 { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.75rem; color: var(--text-primary); }
+.rich-content h2 { font-size: 1.25rem; font-weight: 700; margin: 1rem 0 0.5rem; color: var(--text-primary); }
+.rich-content h3 { font-size: 1.1rem; font-weight: 600; margin: 0.75rem 0 0.4rem; color: var(--text-primary); }
+.rich-content p  { margin-bottom: 0.75rem; line-height: 1.7; }
+.rich-content ul { list-style: disc; padding-left: 1.4rem; margin-bottom: 0.75rem; }
+.rich-content ol { list-style: decimal; padding-left: 1.4rem; margin-bottom: 0.75rem; }
+.rich-content li { margin-bottom: 0.25rem; line-height: 1.6; }
+.rich-content blockquote {
+  border-left: 3px solid var(--accent);
+  padding-left: 1rem;
+  margin: 1rem 0;
+  font-style: italic;
+  color: var(--text-muted);
+}
+.rich-content a { color: var(--accent); text-decoration: underline; }
+.rich-content img { border-radius: 0.75rem; max-width: 100%; margin: 0.75rem 0; }
+.rich-content iframe {
+  width: 100%;
+  aspect-ratio: 16/9;
+  border-radius: 0.75rem;
+  margin: 0.75rem 0;
+  border: none;
+}
+.rich-content strong { font-weight: 700; color: var(--text-primary); }
+.rich-content em { font-style: italic; }
+.rich-content u { text-decoration: underline; }
