@@ -67,7 +67,7 @@ export default function MembersPage() {
   const [filterAddress, setFilterAddress] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [currentPage, setCurrentPage] = useState(1);
   const [exporting, setExporting] = useState(false);
 
   const activeFilters = [filterYear, filterMemberType, filterBlood, filterWorkplace, filterAddress].filter(Boolean).length;
@@ -78,6 +78,11 @@ export default function MembersPage() {
       setLoading(false);
     });
   }, []);
+
+  // Reset to page 1 on filter or search change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filterYear, filterMemberType, filterBlood, filterWorkplace, filterAddress]);
 
   const years = [...new Set(allMembers.map((m) => m.sscYear).filter(Boolean))].sort();
   const memberTypes = [...new Set(allMembers.map((m) => m.memberType).filter(Boolean))].sort() as string[];
@@ -102,8 +107,9 @@ export default function MembersPage() {
     );
   });
 
-  const visible = filtered.slice(0, visibleCount);
-  const hasMore = visibleCount < filtered.length;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const startIndex = (currentPage - 1) * PAGE_SIZE;
+  const visible = filtered.slice(startIndex, startIndex + PAGE_SIZE);
 
   const clearFilters = () => {
     setFilterYear(""); setFilterMemberType(""); setFilterBlood("");
@@ -361,18 +367,46 @@ export default function MembersPage() {
             ))}
           </motion.div>
 
-          {/* Load more */}
-          {hasMore && (
-            <div className="flex justify-center mt-8">
-              <motion.button
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.96 }}
-                onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
-                className="btn-ghost flex items-center gap-2"
-              >
-                <ChevronDown size={16} />
-                Load More ({filtered.length - visibleCount} remaining)
-              </motion.button>
+          {/* Pagination controls */}
+          {totalPages > 1 && (
+            <div className="flex flex-wrap items-center justify-between gap-4 mt-10 pt-6 border-t border-[var(--border)]">
+              <p className="text-xs font-semibold" style={{ color: "var(--text-muted)" }}>
+                Showing <span style={{ color: "var(--text-primary)" }}>{startIndex + 1}</span>–<span style={{ color: "var(--text-primary)" }}>{Math.min(startIndex + PAGE_SIZE, filtered.length)}</span> of <span style={{ color: "var(--text-primary)" }}>{filtered.length}</span> members
+              </p>
+
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 rounded-lg border border-[var(--border)] text-xs font-semibold disabled:opacity-40 transition hover:bg-[var(--bg-card-hover)]"
+                  style={{ color: "var(--text-primary)" }}
+                >
+                  Previous
+                </button>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`w-8 h-8 rounded-lg text-xs font-bold transition ${
+                      currentPage === page
+                        ? "bg-[var(--accent)] text-white shadow-sm"
+                        : "border border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--bg-card-hover)]"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1.5 rounded-lg border border-[var(--border)] text-xs font-semibold disabled:opacity-40 transition hover:bg-[var(--bg-card-hover)]"
+                  style={{ color: "var(--text-primary)" }}
+                >
+                  Next
+                </button>
+              </div>
             </div>
           )}
         </>

@@ -12,10 +12,12 @@ service cloud.firestore {
       allow write: if request.auth != null;
     }
 
-    // Activity comments are public to read and create.
+    // Activity comments are public to read and create (with basic schema validation).
     match /activities/{activityId}/comments/{commentId} {
       allow read: if true;
-      allow create: if true;
+      allow create: if request.resource.data.text is string 
+                    && request.resource.data.text.size() > 0 
+                    && request.resource.data.author is string;
       allow update, delete: if request.auth != null;
     }
 
@@ -26,17 +28,22 @@ service cloud.firestore {
       allow update: if request.auth != null || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes']);
     }
 
-    // Announcement comments are public to read and create.
+    // Announcement comments are public to read and create (with basic schema validation).
     match /announcements/{announcementId}/comments/{commentId} {
       allow read: if true;
-      allow create: if true;
+      allow create: if request.resource.data.text is string 
+                    && request.resource.data.text.size() > 0 
+                    && request.resource.data.author is string;
       allow update, delete: if request.auth != null;
     }
 
-    // Join requests can be submitted by anyone.
+    // Join requests can be submitted by anyone with basic schema validation (name and phone required).
     // Admin panel actions require authenticated user.
     match /joinRequests/{requestId} {
-      allow create: if true;
+      allow create: if request.resource.data.name is string 
+                    && request.resource.data.name.size() > 0 
+                    && request.resource.data.phone is string 
+                    && request.resource.data.phone.size() > 0;
       allow read, update, delete: if request.auth != null;
     }
   }

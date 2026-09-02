@@ -137,6 +137,31 @@ export default function JoinPage() {
         createdAt: serverTimestamp(),
         status: "pending",
       });
+
+      const userEmail = typeof form.email === "string" ? form.email.trim() : "";
+      if (userEmail && userEmail.includes("@")) {
+        fetch("/api/send-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: "join-confirmation",
+            name: form.name,
+            recipientEmails: [userEmail],
+            details: {
+              name: form.name,
+              phone: formatBdPhone(normalizedPhone),
+              email: userEmail,
+              sscYear: form.sscYear,
+              memberType: form.memberType,
+              work: form.work,
+              workplace: form.workplace,
+              bloodGroup: form.bloodGroup,
+              address: form.address,
+            },
+          }),
+        }).catch((err) => console.error("Confirmation email skipped/failed:", err));
+      }
+
       setSubmitted(true);
       toast.success(copy.submitted);
     } catch {

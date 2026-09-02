@@ -279,6 +279,19 @@ export default function AdminDashboard() {
 
       await batch.commit();
       toast.success(copy.memberApproved);
+
+      const reqEmail = typeof r.email === "string" ? r.email.trim() : "";
+      if (reqEmail && reqEmail.includes("@")) {
+        fetch("/api/send-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: "approval",
+            name: r.name,
+            recipientEmails: [reqEmail],
+          }),
+        }).catch((err) => console.error("Approval email skipped/failed:", err));
+      }
     } catch {
       toast.error(copy.approveMemberFailed);
     } finally {
