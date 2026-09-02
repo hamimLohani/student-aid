@@ -106,11 +106,11 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="pt-28 sm:pt-32 overflow-hidden">
+    <div className="overflow-hidden">
       {/* ═══════════════════════════════════════
           HERO SECTION
       ═══════════════════════════════════════ */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-4">
+      <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-4 pt-28 sm:pt-32">
         {/* Floating orbs */}
         <div
           className="orb orb-1 absolute -top-20 -left-32 w-[520px] h-[520px] opacity-60"

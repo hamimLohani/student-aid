@@ -145,7 +145,7 @@ export default function Navbar() {
           </div>
 
           {/* Desktop Controls Group */}
-          <div className="flex flex-1 justify-end items-center gap-2">
+          <div className="hidden md:flex flex-1 justify-end items-center gap-2">
             {/* Search button */}
             <motion.button
               whileHover={{ scale: 1.04 }}
