@@ -113,6 +113,17 @@ export async function POST(req: NextRequest) {
       auth: { user, pass },
     });
 
+    let ctaUrl = "https://student-aid-bdg.vercel.app/members";
+    let ctaText = "ওয়েবসাইটে ডিরেক্টরি দেখুন →";
+
+    if (type === "rejection") {
+      ctaUrl = "https://student-aid-bdg.vercel.app/join";
+      ctaText = "পুনরায় আবেদন করতে এখানে ক্লিক করুন →";
+    } else if (type === "announcement") {
+      ctaUrl = "https://student-aid-bdg.vercel.app/announcements";
+      ctaText = "ওয়েবসাইটে সকল বার্তা দেখুন →";
+    }
+
     const htmlBody = `
       <!DOCTYPE html>
       <html lang="bn">
@@ -156,8 +167,8 @@ export async function POST(req: NextRequest) {
 
                     <!-- Call to Action -->
                     <div style="text-align: center; margin: 32px 0 16px 0;">
-                      <a href="https://student-aid-bdg.vercel.app/members" target="_blank" style="background-color: #2e6b45; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 12px; font-weight: 700; font-size: 14px; display: inline-block; box-shadow: 0 4px 12px rgba(46,107,69,0.25);">
-                        ওয়েবসাইটে ডিরেক্টরি দেখুন →
+                      <a href="${ctaUrl}" target="_blank" style="background-color: #2e6b45; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 12px; font-weight: 700; font-size: 14px; display: inline-block; box-shadow: 0 4px 12px rgba(46,107,69,0.25);">
+                        ${ctaText}
                       </a>
                     </div>
                   </td>
