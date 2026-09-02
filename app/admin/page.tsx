@@ -299,6 +299,29 @@ export default function AdminDashboard() {
     }
   };
 
+  const rejectRequest = async (r: JoinRequest) => {
+    if (!confirm("আপনি কি নিশ্চিত যে এই আবেদনটি বাতিল (Reject) করতে চান?")) return;
+    try {
+      await deleteDoc(doc(db, "joinRequests", r.id));
+      toast.success("আবেদনটি বাতিল করা হয়েছে");
+
+      const reqEmail = typeof r.email === "string" ? r.email.trim() : "";
+      if (reqEmail && reqEmail.includes("@")) {
+        fetch("/api/send-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: "rejection",
+            name: r.name,
+            recipientEmails: [reqEmail],
+          }),
+        }).catch((err) => console.error("Rejection email error:", err));
+      }
+    } catch {
+      toast.error("আবেদন বাতিল করতে সমস্যা হয়েছে");
+    }
+  };
+
   const removeRequestMessage = async (id: string) => {
     if (!confirm(copy.removeRequestMessage)) return;
     try {
@@ -883,7 +906,7 @@ export default function AdminDashboard() {
                         <button onClick={() => approveRequest(r)} disabled={approvingId === r.id} className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-500 disabled:opacity-50 text-white transition font-medium">
                           <CheckCircle2 size={12} /> {approvingId === r.id ? "..." : "Approve"}
                         </button>
-                        <button onClick={() => deleteDoc_("joinRequests", r.id, "request")} className="text-xs px-3 py-1.5 rounded-lg text-red-400 border transition" style={{ borderColor: "var(--border)" }}>Reject</button>
+                        <button onClick={() => rejectRequest(r)} className="text-xs px-3 py-1.5 rounded-lg text-red-400 border transition hover:bg-red-500/10" style={{ borderColor: "var(--border)" }}>Reject</button>
                       </div>
                     </div>
                   ))}
@@ -941,7 +964,7 @@ export default function AdminDashboard() {
                   >
                     {approvingId === r.id ? copy.approving : `✓ ${copy.approve}`}
                   </button>
-                  <button onClick={() => deleteDoc_("joinRequests", r.id, "request")}
+                  <button onClick={() => rejectRequest(r)}
                     className="flex-1 btn-ghost !py-2 !px-4 !text-xs !text-red-500 !border-red-500/30 hover:!bg-red-500/10"
                   >
                     ✕ {copy.reject}
