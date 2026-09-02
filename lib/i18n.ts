@@ -55,26 +55,34 @@ export const navbarCopy = {
 
 export const footerCopy = {
   en: {
-    eyebrow: "Student Community",
+    eyebrow: "Student Community Network",
     description:
-      "Empowering students through community, collaboration, and shared growth. Built for connection, support, and practical opportunities.",
+      "Empowering students through community, collaboration, mutual aid, emergency blood response, and shared opportunities.",
     cta: "Become a Member",
     updates: "Latest Updates",
-    builtBy: "Built By",
-    role: "Software Engineering, University of Dhaka",
+    builtBy: "Development & Tech",
+    developedBy: "Developed by Kannecta",
+    role: "Software Engineering, IIT, University of Dhaka",
     copyright: "All rights reserved.",
-    tagline: "Designed for students who want a stronger network.",
+    tagline: "Designed & Developed by Kannecta",
+    privacy: "Privacy Policy",
+    terms: "Terms of Service",
+    conduct: "Code of Conduct",
   },
   bn: {
-    eyebrow: "শিক্ষার্থী কমিউনিটি",
+    eyebrow: "শিক্ষার্থী কমিউনিটি নেটওয়ার্ক",
     description:
-      "কমিউনিটি, সহযোগিতা এবং একসাথে এগিয়ে যাওয়ার মাধ্যমে শিক্ষার্থীদের শক্তিশালী করা। সংযোগ, সহায়তা এবং বাস্তব সুযোগের জন্য তৈরি।",
+      "কমিউনিটি, সহযোগিতা, পারস্পরিক সহায়তা, জরুরি রক্ত সেবা এবং উন্নয়নমূলক সুযোগের মাধ্যমে শিক্ষার্থীদের ক্ষমতায়ন করা।",
     cta: "সদস্য হোন",
     updates: "সর্বশেষ আপডেট",
-    builtBy: "তৈরি করেছেন",
-    role: "সফটওয়্যার ইঞ্জিনিয়ারিং, ঢাকা বিশ্ববিদ্যালয়",
+    builtBy: "ডেভেলপমেন্ট ও টেক",
+    developedBy: "কানেক্টা দ্বারা নির্মিত",
+    role: "সফটওয়্যার ইঞ্জিনিয়ারিং, আইআইটি, ঢাকা বিশ্ববিদ্যালয়",
     copyright: "সর্বস্বত্ব সংরক্ষিত।",
-    tagline: "শক্তিশালী নেটওয়ার্ক গড়তে আগ্রহী শিক্ষার্থীদের জন্য ডিজাইন করা।",
+    tagline: "কানেক্টা দ্বারা ডিজাইন ও ডেভেলপ করা।",
+    privacy: "গোপনীয়তা নীতি",
+    terms: "ব্যবহারের শর্তাবলী",
+    conduct: "আচরণবিধি",
   },
 } as const;
 
