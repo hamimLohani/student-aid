@@ -121,7 +121,7 @@ export default function MembersPage() {
       const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
 
       // Header
-      doc.setFillColor(99, 102, 241);
+      doc.setFillColor(46, 107, 69);
       doc.rect(0, 0, 297, 20, "F");
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(14);
@@ -144,9 +144,9 @@ export default function MembersPage() {
           m.email || "—",
           m.address || "—",
         ]),
-        headStyles: { fillColor: [99, 102, 241], textColor: 255, fontSize: 9, fontStyle: "bold" },
+        headStyles: { fillColor: [46, 107, 69], textColor: 255, fontSize: 9, fontStyle: "bold" },
         bodyStyles: { fontSize: 8, textColor: [30, 30, 30] },
-        alternateRowStyles: { fillColor: [245, 246, 255] },
+        alternateRowStyles: { fillColor: [240, 247, 242] },
         columnStyles: { 0: { fontStyle: "bold" } },
         margin: { left: 14, right: 14 },
       });
@@ -272,11 +272,11 @@ export default function MembersPage() {
           <button
             onClick={exportPDF}
             disabled={exporting || filtered.length === 0}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border text-sm font-semibold transition hover:border-[var(--accent)] hover:text-[var(--accent)] disabled:opacity-50"
-            style={{ borderColor: "var(--border)", color: "var(--text-secondary)", fontFamily: "'Outfit', system-ui, sans-serif" }}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border text-sm font-semibold transition hover:scale-105 disabled:opacity-50 bg-[var(--accent)]/10 text-[var(--accent)] border-[var(--accent)]/30 hover:bg-[var(--accent)]/20"
+            style={{ fontFamily: "'Outfit', system-ui, sans-serif" }}
             title="Export as PDF (Admin only)"
           >
-            {exporting ? <Loader2 size={14} className="animate-spin" /> : <FileDown size={14} />}
+            {exporting ? <Loader2 size={14} className="animate-spin text-[var(--accent)]" /> : <FileDown size={14} className="text-[var(--accent)]" />}
             <span className="hidden sm:inline">PDF</span>
           </button>
         )}
@@ -292,11 +292,10 @@ export default function MembersPage() {
             transition={{ duration: 0.25 }}
             className="overflow-hidden mb-3"
           >
-            <div className="grid grid-cols-1 gap-2 pb-3 sm:grid-cols-5 sm:gap-3">
+            <div className="grid grid-cols-1 gap-2 pb-3 sm:grid-cols-4 sm:gap-3">
               {[
                 { value: filterYear, set: setFilterYear, label: copy.allSscYears, options: years.map((y) => ({ v: y, l: y })) },
                 { value: filterMemberType, set: setFilterMemberType, label: copy.allMemberTypes, options: memberTypes.map((t) => ({ v: t, l: getMemberTypeLabel(t, language) })) },
-                { value: filterBlood, set: setFilterBlood, label: copy.allBloodGroups, options: bloodGroups.map((b) => ({ v: b, l: b })) },
                 { value: filterWorkplace, set: setFilterWorkplace, label: copy.allWorkplaces, options: workplaces.map((w) => ({ v: w, l: w })) },
                 { value: filterAddress, set: setFilterAddress, label: copy.allAddresses, options: addresses.map((a) => ({ v: a, l: a })) },
               ].map((f, i) => (

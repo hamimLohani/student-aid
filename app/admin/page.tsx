@@ -15,7 +15,7 @@ import { adminCopy, getMemberTypeLabel } from "@/lib/i18n";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
-import { Trash2, Plus, Users, Megaphone, Calendar, FileText, Pencil, X, Check, BarChart2, TrendingUp, Clock3, CheckCircle2 } from "lucide-react";
+import { Trash2, Plus, Users, Megaphone, Calendar, FileText, Pencil, X, Check, BarChart2, TrendingUp, Clock3, CheckCircle2, FileDown, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const RichTextEditor = dynamic(() => import("@/components/RichTextEditor"), { ssr: false });
@@ -244,19 +244,92 @@ export default function AdminDashboard() {
         .some((value) => value!.toLowerCase().includes(search));
 
     const matchesType = !memberTypeFilter || member.memberType === memberTypeFilter;
-
     return matchesSearch && matchesType;
   });
+
+  const [exporting, setExporting] = useState(false);
+
+  const exportPDF = async () => {
+    setExporting(true);
+    try {
+      const { jsPDF } = await import("jspdf");
+      const { default: autoTable } = await import("jspdf-autotable");
+
+      const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+
+      // Header
+      doc.setFillColor(46, 107, 69);
+      doc.rect(0, 0, 297, 20, "F");
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("Student Aid BDG — Official Member Directory", 14, 13);
+      doc.setFontSize(9);
+      doc.text(`Exported: ${new Date().toLocaleDateString("en-US", { dateStyle: "long" })} · Total: ${members.length} members`, 297 - 14, 13, { align: "right" });
+
+      autoTable(doc, {
+        startY: 24,
+        head: [["Name", "Type", "SSC Year", "Occupation", "Workplace", "Blood", "Phone", "Email", "Address"]],
+        body: (filteredMembers.length > 0 ? filteredMembers : members).map((m) => [
+          m.name,
+          m.memberType || "—",
+          m.sscYear || "—",
+          m.work || "—",
+          m.workplace || "—",
+          m.bloodGroup || "—",
+          m.phone || "—",
+          m.email || "—",
+          m.address || "—",
+        ]),
+        headStyles: { fillColor: [46, 107, 69], textColor: 255, fontSize: 9, fontStyle: "bold" },
+        bodyStyles: { fontSize: 8, textColor: [30, 30, 30] },
+        alternateRowStyles: { fillColor: [240, 247, 242] },
+        columnStyles: { 0: { fontStyle: "bold" } },
+        margin: { left: 14, right: 14 },
+      });
+
+      // Footer
+      const pageCount = (doc as typeof doc & { internal: { getNumberOfPages: () => number } }).internal.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setTextColor(150, 150, 150);
+        doc.setFontSize(8);
+        doc.text(`Page ${i} of ${pageCount} · Student Aid BDG (Kannecta)`, 14, 205);
+      }
+
+      doc.save(`StudentAidBDG_Members_${new Date().toISOString().split("T")[0]}.pdf`);
+      toast.success("PDF directory downloaded!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to generate PDF");
+    } finally {
+      setExporting(false);
+    }
+  };
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="pt-28 sm:pt-32 pb-20 px-3 sm:px-6 max-w-5xl mx-auto">
 
       {/* Header */}
-      <div className="mb-5 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-display font-extrabold gradient-text">{copy.dashboard}</h1>
-        <p className="text-secondary text-xs sm:text-sm mt-1 truncate">
-          {copy.loggedInAs} <span className="font-medium text-[var(--accent)]">{user.email}</span>
-        </p>
+      <div className="flex items-center justify-between gap-3 mb-5 sm:mb-8">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-display font-extrabold gradient-text">{copy.dashboard}</h1>
+          <p className="text-secondary text-xs sm:text-sm mt-1 truncate">
+            {copy.loggedInAs} <span className="font-medium text-[var(--accent)]">{user.email}</span>
+          </p>
+        </div>
+        <button
+          onClick={exportPDF}
+          disabled={exporting || members.length === 0}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-semibold transition hover:scale-105 shadow-sm disabled:opacity-50 bg-[var(--accent)]/10 text-[var(--accent)] border-[var(--accent)]/30 hover:bg-[var(--accent)]/20"
+          style={{
+            fontFamily: "'Outfit', system-ui, sans-serif",
+          }}
+          title="Download Members Directory as PDF"
+        >
+          {exporting ? <Loader2 size={16} className="animate-spin text-[var(--accent)]" /> : <FileDown size={16} className="text-[var(--accent)]" />}
+          <span>PDF</span>
+        </button>
       </div>
 
 
