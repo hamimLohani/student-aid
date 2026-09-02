@@ -86,21 +86,21 @@ export default function HomePage() {
       icon: <Calendar size={32} />,
       label: copy.activities,
       href: "/activities",
-      gradient: "from-indigo-600 to-violet-600",
+      gradient: "from-emerald-600 to-teal-700",
       desc: "Events & programs",
     },
     {
       icon: <Users size={32} />,
       label: copy.members,
       href: "/members",
-      gradient: "from-violet-600 to-purple-700",
+      gradient: "from-teal-600 to-emerald-800",
       desc: "Our community",
     },
     {
       icon: <Megaphone size={32} />,
       label: copy.announcements,
       href: "/announcements",
-      gradient: "from-cyan-500 to-blue-600",
+      gradient: "from-emerald-500 to-green-700",
       desc: "Latest updates",
     },
   ];
@@ -108,9 +108,14 @@ export default function HomePage() {
   return (
     <div className="overflow-hidden">
       {/* ═══════════════════════════════════════
-          HERO SECTION
+          HERO SECTION (Dark to Light Transition)
       ═══════════════════════════════════════ */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-4 pt-28 sm:pt-32">
+      <section
+        className="relative min-h-screen flex flex-col items-center justify-center text-center px-4 pt-28 sm:pt-32"
+        style={{
+          background: "linear-gradient(180deg, #0b140e 0%, #162a1e 50%, var(--bg) 100%)",
+        }}
+      >
         {/* Floating orbs */}
         <div
           className="orb orb-1 absolute -top-20 -left-32 w-[520px] h-[520px] opacity-60"
@@ -129,10 +134,11 @@ export default function HomePage() {
           variants={stagger}
           initial="hidden"
           animate="show"
-          className="relative z-10 w-full max-w-4xl mx-auto">
+          className="relative z-10 w-full max-w-4xl mx-auto"
+        >
           {/* Badge */}
           <motion.div variants={fadeUp} className="mb-6">
-            <span className="badge">
+            <span className="badge border-emerald-500/30 bg-emerald-500/10 text-emerald-300">
               <Sparkles size={12} />
               {copy.badge}
             </span>
@@ -141,13 +147,13 @@ export default function HomePage() {
           {/* Heading */}
           <motion.h1
             variants={fadeUp}
-            className="font-display text-5xl sm:text-6xl md:text-8xl font-extrabold mb-6 leading-[1.1] tracking-tight"
+            className="font-display text-5xl sm:text-6xl md:text-8xl font-extrabold mb-6 leading-[1.1] tracking-tight text-white"
           >
             <span
               className={
                 language === "bn"
-                  ? "gradient-text leading-[1.24] pb-3 block"
-                  : "gradient-text leading-tight block"
+                  ? "gradient-text-light leading-[1.24] pb-3 block"
+                  : "gradient-text-light leading-tight block"
               }
             >
               {copy.heroTitle}
@@ -155,7 +161,7 @@ export default function HomePage() {
             <span
               className="inline-block mt-1"
               style={{
-                background: "linear-gradient(135deg, #06b6d4, #6366f1)",
+                background: "linear-gradient(135deg, #6fa076, #a8e0b6)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
               }}
@@ -167,8 +173,7 @@ export default function HomePage() {
           {/* Subtitle */}
           <motion.p
             variants={fadeUp}
-            className="text-base sm:text-lg md:text-xl mb-10 max-w-2xl mx-auto leading-relaxed px-2"
-            style={{ color: "var(--text-secondary)" }}
+            className="text-base sm:text-lg md:text-xl mb-10 max-w-2xl mx-auto leading-relaxed px-2 text-emerald-100/80"
           >
             {copy.heroDescription}
           </motion.p>
@@ -188,7 +193,7 @@ export default function HomePage() {
               </Link>
             </motion.div>
             <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
-              <Link href="/join" className="btn-ghost flex items-center gap-2">
+              <Link href="/join" className="btn-ghost flex items-center gap-2 border-emerald-500/30 text-emerald-100 hover:bg-emerald-500/10">
                 {copy.joinRequest}
               </Link>
             </motion.div>
@@ -200,17 +205,16 @@ export default function HomePage() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.2, duration: 0.6 }}
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
-          style={{ color: "var(--text-muted)" }}
+          className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-emerald-100/70"
         >
-          <span className="text-xs font-medium tracking-widest uppercase">
+          <span className="text-xs font-semibold tracking-widest uppercase">
             Scroll
           </span>
           <motion.div
             animate={{ y: [0, 6, 0] }}
             transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
             className="w-0.5 h-6 rounded-full"
-            style={{ background: "linear-gradient(to bottom, #6366f1, transparent)" }}
+            style={{ background: "linear-gradient(to bottom, #0d150e, transparent)" }}
           />
         </motion.div>
       </section>
