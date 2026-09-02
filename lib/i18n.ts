@@ -1,13 +1,13 @@
 export type Language = "en" | "bn";
 
 export const memberTypeLabels = {
-  "Senior Member": {
-    en: "Senior Member",
-    bn: "সিনিয়র সদস্য",
+  "Founder Member": {
+    en: "Founder Member",
+    bn: "প্রতিষ্ঠাতা সদস্য",
   },
-  "Junior Member": {
-    en: "Junior Member",
-    bn: "জুনিয়র সদস্য",
+  "General Member": {
+    en: "General Member",
+    bn: "সাধারণ সদস্য",
   },
   Locals: {
     en: "Locals",
@@ -16,14 +16,15 @@ export const memberTypeLabels = {
 } as const;
 
 export function getMemberTypeLabel(memberType: string, language: Language) {
-  const normalized =
-    memberType === "Senior Member" ||
-    memberType === "Junior Member" ||
-    memberType === "Locals"
-      ? memberType
-      : null;
-
-  if (normalized) return memberTypeLabels[normalized][language];
+  if (memberType === "Founder Member" || memberType === "Established Member" || memberType === "Senior Member") {
+    return memberTypeLabels["Founder Member"][language];
+  }
+  if (memberType === "General Member" || memberType === "Junior Member") {
+    return memberTypeLabels["General Member"][language];
+  }
+  if (memberType === "Locals") {
+    return memberTypeLabels["Locals"][language];
+  }
   return memberType;
 }
 
@@ -241,8 +242,14 @@ export const announcementsCopy = {
   },
 } as const;
 
+export function toBnDigits(str: string | number): string {
+  const bnDigits = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+  return String(str).replace(/\d/g, (d) => bnDigits[parseInt(d, 10)]);
+}
+
 export const joinCopy = {
   en: {
+    badge: "Join Community",
     title: "Join Us",
     description: "Fill out the form below to request membership.",
     optionalInfo: "SSC year, email, and message are optional.",
@@ -251,9 +258,21 @@ export const joinCopy = {
     uploadingPhoto: "Uploading photo...",
     submitted: "Request submitted! We'll get back to you soon.",
     failed: "Something went wrong. Please try again.",
+    profilePhotoLabel: "Profile Photo",
     photo: "Photo",
     changePhoto: "Change photo",
     uploadPhoto: "Upload profile photo (optional)",
+    whyJoinUs: "Why Join Us?",
+    benefit1: "Join a growing network of {count}+ members",
+    benefit2: "Access exclusive events and activities",
+    benefit3: "Support and be supported by peers",
+    benefit4: "Connect across SSC batches and professions",
+    personalInfo: "Personal Information",
+    professionalDetails: "Professional Details",
+    contactHealth: "Contact & Health",
+    requestSubmittedTitle: "Request Submitted!",
+    requestSubmittedDescription: "Thank you for applying. We will review your request and get back to you shortly.",
+    submitAnother: "Submit Another",
     fullName: "Full Name *",
     fullNamePlaceholder: "Your full name",
     sscYear: "SSC Year (optional)",
@@ -279,6 +298,7 @@ export const joinCopy = {
     submit: "Submit Request",
   },
   bn: {
+    badge: "কমিউনিটিতে যোগ দিন",
     title: "যোগ দিন",
     description: "সদস্য হওয়ার অনুরোধ জানাতে নিচের ফর্মটি পূরণ করুন।",
     optionalInfo: "এসএসসি সাল, ইমেইল এবং বার্তা ঐচ্ছিক।",
@@ -287,9 +307,21 @@ export const joinCopy = {
     uploadingPhoto: "ছবি আপলোড হচ্ছে...",
     submitted: "অনুরোধ জমা হয়েছে। আমরা দ্রুত যোগাযোগ করব।",
     failed: "কিছু সমস্যা হয়েছে। আবার চেষ্টা করুন।",
+    profilePhotoLabel: "প্রোফাইল ছবি",
     photo: "ছবি",
     changePhoto: "ছবি পরিবর্তন করুন",
     uploadPhoto: "প্রোফাইল ছবি আপলোড করুন (ঐচ্ছিক)",
+    whyJoinUs: "কেন আমাদের সাথে যুক্ত হবেন?",
+    benefit1: "{count}+ সদস্যের দ্রুত বর্ধনশীল নেটওয়ার্কে যুক্ত হোন",
+    benefit2: "বিশেষ ইভেন্ট এবং কার্যক্রমে অংশ নেওয়ার সুযোগ নিন",
+    benefit3: "সহপাঠীদের সাথে একে অপরকে সহযোগিতা করুন",
+    benefit4: "বিভিন্ন এসএসসি ব্যাচ ও পেশার মানুষের সাথে যুক্ত হোন",
+    personalInfo: "ব্যক্তিগত তথ্য",
+    professionalDetails: "পেশাগত তথ্য",
+    contactHealth: "যোগাযোগ ও স্বাস্থ্য সম্পর্কিত তথ্য",
+    requestSubmittedTitle: "অনুরোধ জমা হয়েছে!",
+    requestSubmittedDescription: "আবেদন করার জন্য ধন্যবাদ। আমরা দ্রুত আপনার অনুরোধ পর্যালোচনা করে যোগাযোগ করব।",
+    submitAnother: "আরেকটি অনুরোধ পাঠান",
     fullName: "পূর্ণ নাম *",
     fullNamePlaceholder: "আপনার পূর্ণ নাম",
     sscYear: "এসএসসি সাল (ঐচ্ছিক)",

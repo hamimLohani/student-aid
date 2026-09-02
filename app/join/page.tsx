@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { addDoc, collection, serverTimestamp, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import { formatBdPhone, normalizeBdPhone } from "@/lib/phone";
@@ -23,10 +23,10 @@ import {
   Zap,
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
-import { getMemberTypeLabel, joinCopy } from "@/lib/i18n";
+import { getMemberTypeLabel, joinCopy, toBnDigits } from "@/lib/i18n";
 
 const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
-const MEMBER_TYPES = ["Senior Member", "Junior Member", "Locals"] as const;
+const MEMBER_TYPES = ["Founder Member", "General Member", "Locals"] as const;
 
 /* ── Field wrapper ── */
 function FieldWrap({
@@ -56,16 +56,24 @@ function FieldWrap({
 }
 
 /* ── Benefits panel ── */
-const benefits = [
-  { icon: <Users size={20} />, text: "Join a growing network of 120+ students" },
-  { icon: <Zap size={20} />, text: "Access exclusive events and activities" },
-  { icon: <Heart size={20} />, text: "Support and be supported by peers" },
-  { icon: <GraduationCap size={20} />, text: "Connect across SSC batches and professions" },
-];
+const getBenefits = (
+  copy: { benefit1: string; benefit2: string; benefit3: string; benefit4: string },
+  count: number,
+  language: string
+) => {
+  const displayCount = count > 0 ? (language === "bn" ? toBnDigits(count) : count) : (language === "bn" ? "০" : "0");
+  return [
+    { icon: <Users size={20} />, text: copy.benefit1.replace("{count}", String(displayCount)) },
+    { icon: <Zap size={20} />, text: copy.benefit2 },
+    { icon: <Heart size={20} />, text: copy.benefit3 },
+    { icon: <GraduationCap size={20} />, text: copy.benefit4 },
+  ];
+};
 
 export default function JoinPage() {
   const { language } = useLanguage();
   const copy = joinCopy[language];
+  const [memberCount, setMemberCount] = useState<number>(0);
 
   const [form, setForm] = useState({
     name: "",
@@ -83,6 +91,12 @@ export default function JoinPage() {
   const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    return onSnapshot(collection(db, "members"), (snap) => {
+      setMemberCount(snap.size);
+    });
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -136,38 +150,40 @@ export default function JoinPage() {
   /* ── Success state ── */
   if (submitted) {
     return (
-      <div className="pt-28 sm:pt-32 pb-20 px-4 min-h-screen flex items-center justify-center">
+      <div className="pt-28 sm:pt-32 pb-20 px-4 min-h-[70vh] flex items-center justify-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ type: "spring", stiffness: 280, damping: 22 }}
-          className="card p-10 max-w-md w-full text-center"
+          className="card p-8 sm:p-12 text-center max-w-lg mx-auto"
         >
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
-            className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center"
-            style={{ background: "linear-gradient(135deg, #22c55e, #16a34a)" }}
-          >
-            <CheckCircle2 size={40} className="text-white" />
-          </motion.div>
-          <h2 className="font-display text-2xl font-bold mb-3" style={{ color: "var(--text-primary)" }}>
-            Request Submitted!
-          </h2>
-          <p className="text-sm leading-relaxed mb-6" style={{ color: "var(--text-secondary)" }}>
-            {copy.submitted}. We&apos;ll review your application and get back to you soon.
+          <div className="w-16 h-16 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center mx-auto mb-6">
+            <CheckCircle2 size={36} />
+          </div>
+          <h2 className="text-2xl font-bold mb-2">{copy.requestSubmittedTitle}</h2>
+          <p className="text-secondary text-sm mb-6 max-w-sm mx-auto">
+            {copy.requestSubmittedDescription}
           </p>
           <button
             onClick={() => {
               setSubmitted(false);
-              setForm({ name: "", sscYear: "", memberType: "", work: "", workplace: "", bloodGroup: "", address: "", phone: "", email: "", message: "" });
-              setPhoto(null);
               setPreview(null);
+              setPhoto(null);
+              setForm({
+                name: "",
+                sscYear: "",
+                memberType: "",
+                work: "",
+                workplace: "",
+                bloodGroup: "",
+                address: "",
+                phone: "",
+                email: "",
+                message: "",
+              });
             }}
-            className="btn-ghost w-full justify-center"
+            className="btn-ghost"
           >
-            Submit Another
+            {copy.submitAnother}
           </button>
         </motion.div>
       </div>
@@ -185,7 +201,7 @@ export default function JoinPage() {
         >
           <span className="badge mb-4">
             <Users size={12} />
-            Join Community
+            {copy.badge}
           </span>
           <h1
             className="font-display text-4xl sm:text-5xl md:text-6xl font-extrabold mb-4 leading-tight"
@@ -222,7 +238,7 @@ export default function JoinPage() {
               {/* Photo upload section */}
               <div className="flex flex-col items-center mb-8">
                 <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: "var(--text-muted)" }}>
-                  Profile Photo
+                  {copy.profilePhotoLabel}
                 </p>
                 <motion.div
                   whileHover={{ scale: 1.04 }}
@@ -271,10 +287,10 @@ export default function JoinPage() {
 
               {/* Benefits */}
               <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: "var(--text-muted)" }}>
-                Why Join Us?
+                {copy.whyJoinUs}
               </p>
               <ul className="space-y-4">
-                {benefits.map((b, i) => (
+                {getBenefits(copy, memberCount, language).map((b, i) => (
                   <motion.li
                     key={i}
                     initial={{ opacity: 0, x: -12 }}
@@ -309,7 +325,7 @@ export default function JoinPage() {
           >
             <form onSubmit={handleSubmit} className="card p-6 sm:p-8 space-y-5">
               <h2 className="font-display text-xl font-bold mb-1" style={{ color: "var(--text-primary)" }}>
-                Personal Information
+                {copy.personalInfo}
               </h2>
 
               <FieldWrap label={copy.fullName} icon={<User size={14} />} required>
@@ -358,7 +374,7 @@ export default function JoinPage() {
 
               <div className="glow-line" />
               <h2 className="font-display text-xl font-bold" style={{ color: "var(--text-primary)" }}>
-                Professional Details
+                {copy.professionalDetails}
               </h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -397,7 +413,7 @@ export default function JoinPage() {
 
               <div className="glow-line" />
               <h2 className="font-display text-xl font-bold" style={{ color: "var(--text-primary)" }}>
-                Contact & Health
+                {copy.contactHealth}
               </h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">

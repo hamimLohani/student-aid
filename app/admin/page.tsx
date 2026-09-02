@@ -28,7 +28,7 @@ interface Announcement { id: string; title: string; content: string; }
 interface JoinRequest { id: string; name: string; sscYear: string; memberType?: string; work: string; workplace: string; bloodGroup: string; address: string; phone?: string; email?: string; image?: string; message: string; status: string; approvedAt?: { seconds: number }; }
 
 const inputCls = "input-field";
-const MEMBER_TYPES = ["Senior Member", "Junior Member", "Locals"] as const;
+const MEMBER_TYPES = ["Founder Member", "General Member", "Locals"] as const;
 
 export default function AdminDashboard() {
   const { user, loading } = useAuth();

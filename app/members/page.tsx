@@ -30,7 +30,10 @@ interface Member {
 const PAGE_SIZE = 16;
 
 const memberTypeColor: Record<string, string> = {
+  "Founder Member": "pill-violet",
+  "Established Member": "pill-violet",
   "Senior Member": "pill-violet",
+  "General Member": "pill-cyan",
   "Junior Member": "pill-cyan",
   Locals: "pill-amber",
 };
