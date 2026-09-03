@@ -35,7 +35,7 @@ export default function AdminDashboard() {
   const { language } = useLanguage();
   const copy = adminCopy[language];
   const router = useRouter();
-  const [tab, setTab] = useState<Tab>("members");
+  const [tab, setTab] = useState<Tab>("analytics");
 
   const [members, setMembers] = useState<Member[]>([]);
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -43,12 +43,14 @@ export default function AdminDashboard() {
   const [requests, setRequests] = useState<JoinRequest[]>([]);
 
   const [memberForm, setMemberForm] = useState({ name: "", sscYear: "", memberType: "", work: "", workplace: "", bloodGroup: "", address: "", phone: "", email: "" });
+  const [memberFormErrors, setMemberFormErrors] = useState<string[]>([]);
   const [memberImage, setMemberImage] = useState<File | null>(null);
   const [memberLoading, setMemberLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isEditPanelVisible, setIsEditPanelVisible] = useState(true);
   const [editLoading, setEditLoading] = useState(false);
   const [editForm, setEditForm] = useState({ name: "", sscYear: "", memberType: "", work: "", workplace: "", bloodGroup: "", address: "", phone: "", email: "" });
+  const [editFormErrors, setEditFormErrors] = useState<string[]>([]);
   const [editImage, setEditImage] = useState<File | null>(null);
   const [memberSearch, setMemberSearch] = useState("");
   const [memberTypeFilter, setMemberTypeFilter] = useState("");
@@ -87,9 +89,20 @@ export default function AdminDashboard() {
   }, [activityMedia]);
 
   const addMember = async () => {
-    if (!memberForm.name) return toast.error(copy.nameRequired);
-    if (!memberForm.memberType) return toast.error(copy.memberTypeRequired);
-    if (!memberForm.phone) return toast.error(copy.phoneRequired);
+    const errors: string[] = [];
+    if (!memberForm.name) errors.push("name");
+    if (!memberForm.memberType) errors.push("memberType");
+    if (!memberForm.work) errors.push("work");
+    if (!memberForm.workplace) errors.push("workplace");
+    if (!memberForm.bloodGroup) errors.push("bloodGroup");
+    if (!memberForm.address) errors.push("address");
+    if (!memberForm.phone) errors.push("phone");
+
+    if (errors.length > 0) {
+      setMemberFormErrors(errors);
+      return toast.error((copy as any).requiredFields);
+    }
+    setMemberFormErrors([]);
     if (memberForm.phone && !normalizeBdPhone(memberForm.phone)) return toast.error(copy.invalidPhone);
     setMemberLoading(true);
     try {
@@ -98,11 +111,28 @@ export default function AdminDashboard() {
         toast.loading(copy.uploadingPhoto, { id: "mphoto" });
         image = await uploadToCloudinary(memberImage);
       }
-      await addDoc(collection(db, "members"), { ...memberForm, phone: memberForm.phone ? formatBdPhone(memberForm.phone) : "", image });
+      const formattedPhone = memberForm.phone ? formatBdPhone(memberForm.phone) : "";
+      await addDoc(collection(db, "members"), { ...memberForm, phone: formattedPhone, image });
+      
+      const reqEmail = typeof memberForm.email === "string" ? memberForm.email.trim() : "";
+      if (reqEmail && reqEmail.includes("@")) {
+        fetch("/api/send-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: "admin-added",
+            name: memberForm.name,
+            recipientEmails: [reqEmail],
+            details: { ...memberForm, phone: formattedPhone }
+          }),
+        }).catch((err) => console.error("Admin member email error:", err));
+      }
+
       setMemberForm({ name: "", sscYear: "", memberType: "", work: "", workplace: "", bloodGroup: "", address: "", phone: "", email: "" });
       setMemberImage(null);
       toast.success(copy.memberAdded);
-    } catch {
+    } catch (error) {
+      console.error(error);
       toast.error(copy.addMemberFailed);
     } finally {
       toast.dismiss("mphoto");
@@ -231,8 +261,20 @@ export default function AdminDashboard() {
 
   const saveEdit = async () => {
     if (!editingId) return;
-    if (!editForm.memberType) return toast.error(copy.memberTypeRequired);
-    if (!editForm.phone) return toast.error(copy.phoneRequired);
+    const errors: string[] = [];
+    if (!editForm.name) errors.push("name");
+    if (!editForm.memberType) errors.push("memberType");
+    if (!editForm.work) errors.push("work");
+    if (!editForm.workplace) errors.push("workplace");
+    if (!editForm.bloodGroup) errors.push("bloodGroup");
+    if (!editForm.address) errors.push("address");
+    if (!editForm.phone) errors.push("phone");
+
+    if (errors.length > 0) {
+      setEditFormErrors(errors);
+      return toast.error((copy as any).requiredFields);
+    }
+    setEditFormErrors([]);
     if (editForm.phone && !normalizeBdPhone(editForm.phone)) return toast.error(copy.invalidPhone);
     setEditLoading(true);
     try {
@@ -471,9 +513,12 @@ export default function AdminDashboard() {
             </h2>
             <div className="space-y-3">
               {([["name", copy.fullNameRequired], ["work", copy.occupationRequired], ["workplace", copy.workplaceRequired], ["address", copy.addressRequired], ["phone", copy.phoneNumberRequired], ["email", copy.emailOptional]] as [keyof typeof memberForm, string][]).map(([k, p]) => (
-                <input key={k} placeholder={p} value={memberForm[k as keyof typeof memberForm]}
-                  onChange={(e) => setMemberForm({ ...memberForm, [k]: e.target.value })}
-                  className={inputCls}
+                <input key={k} placeholder={p} value={memberForm[k]}
+                  onChange={(e) => {
+                    setMemberForm({ ...memberForm, [k]: e.target.value });
+                    if (memberFormErrors.includes(k)) setMemberFormErrors(memberFormErrors.filter(err => err !== k));
+                  }}
+                  className={`${inputCls} ${memberFormErrors.includes(k) ? "input-error" : ""}`}
                 />
               ))}
               <select value={memberForm.sscYear}
@@ -486,8 +531,11 @@ export default function AdminDashboard() {
                 ))}
               </select>
               <select value={memberForm.memberType}
-                onChange={(e) => setMemberForm({ ...memberForm, memberType: e.target.value })}
-                className={inputCls}
+                onChange={(e) => {
+                  setMemberForm({ ...memberForm, memberType: e.target.value });
+                  if (memberFormErrors.includes("memberType")) setMemberFormErrors(memberFormErrors.filter(err => err !== "memberType"));
+                }}
+                className={`${inputCls} ${memberFormErrors.includes("memberType") ? "input-error" : ""}`}
               >
                 <option value="">{copy.memberTypeRequiredLabel}</option>
                 {MEMBER_TYPES.map((type) => (
@@ -495,8 +543,11 @@ export default function AdminDashboard() {
                 ))}
               </select>
               <select value={memberForm.bloodGroup}
-                onChange={(e) => setMemberForm({ ...memberForm, bloodGroup: e.target.value })}
-                className={inputCls}
+                onChange={(e) => {
+                  setMemberForm({ ...memberForm, bloodGroup: e.target.value });
+                  if (memberFormErrors.includes("bloodGroup")) setMemberFormErrors(memberFormErrors.filter(err => err !== "bloodGroup"));
+                }}
+                className={`${inputCls} ${memberFormErrors.includes("bloodGroup") ? "input-error" : ""}`}
               >
                 <option value="">{copy.bloodGroupRequired}</option>
                 {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((b) => (
@@ -569,8 +620,11 @@ export default function AdminDashboard() {
                       <>
                         {([["name", copy.fullName], ["work", copy.occupation], ["workplace", copy.workplace], ["address", copy.address], ["phone", copy.phone], ["email", copy.email]] as [keyof typeof editForm, string][]).map(([k, p]) => (
                           <input key={k} placeholder={p} value={editForm[k]}
-                            onChange={(e) => setEditForm({ ...editForm, [k]: e.target.value })}
-                            className={inputCls}
+                            onChange={(e) => {
+                              setEditForm({ ...editForm, [k]: e.target.value });
+                              if (editFormErrors.includes(k)) setEditFormErrors(editFormErrors.filter(err => err !== k));
+                            }}
+                            className={`${inputCls} ${editFormErrors.includes(k) ? "input-error" : ""}`}
                           />
                         ))}
                         <select value={editForm.sscYear}
@@ -583,8 +637,11 @@ export default function AdminDashboard() {
                           ))}
                         </select>
                         <select value={editForm.memberType}
-                          onChange={(e) => setEditForm({ ...editForm, memberType: e.target.value })}
-                          className={inputCls}
+                          onChange={(e) => {
+                            setEditForm({ ...editForm, memberType: e.target.value });
+                            if (editFormErrors.includes("memberType")) setEditFormErrors(editFormErrors.filter(err => err !== "memberType"));
+                          }}
+                          className={`${inputCls} ${editFormErrors.includes("memberType") ? "input-error" : ""}`}
                         >
                           <option value="">{copy.memberTypeRequiredLabel}</option>
                           {MEMBER_TYPES.map((type) => (
@@ -592,8 +649,11 @@ export default function AdminDashboard() {
                           ))}
                         </select>
                         <select value={editForm.bloodGroup}
-                          onChange={(e) => setEditForm({ ...editForm, bloodGroup: e.target.value })}
-                          className={inputCls}
+                          onChange={(e) => {
+                            setEditForm({ ...editForm, bloodGroup: e.target.value });
+                            if (editFormErrors.includes("bloodGroup")) setEditFormErrors(editFormErrors.filter(err => err !== "bloodGroup"));
+                          }}
+                          className={`${inputCls} ${editFormErrors.includes("bloodGroup") ? "input-error" : ""}`}
                         >
                           <option value="">{copy.bloodGroup}</option>
                           {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((b) => (
@@ -786,6 +846,26 @@ export default function AdminDashboard() {
         members.forEach((m) => { const t = m.memberType || "Unknown"; typeCounts[t] = (typeCounts[t] || 0) + 1; });
         const typeData = Object.entries(typeCounts).map(([type, count]) => ({ type: type.split(" ")[0], count }));
 
+        // Blood Group count
+        const bloodCounts: Record<string, number> = {};
+        members.forEach((m) => { if (m.bloodGroup) bloodCounts[m.bloodGroup] = (bloodCounts[m.bloodGroup] || 0) + 1; });
+        const bloodData = Object.entries(bloodCounts).map(([blood, count]) => ({ blood, count })).sort((a, b) => b.count - a.count);
+
+        // Workplace count
+        const workplaceCounts: Record<string, number> = {};
+        members.forEach((m) => { if (m.workplace) workplaceCounts[m.workplace] = (workplaceCounts[m.workplace] || 0) + 1; });
+        const workplaceData = Object.entries(workplaceCounts).map(([workplace, count]) => ({ workplace, count })).sort((a, b) => b.count - a.count).slice(0, 5);
+
+        // Occupation count
+        const workCounts: Record<string, number> = {};
+        members.forEach((m) => { if (m.work) workCounts[m.work] = (workCounts[m.work] || 0) + 1; });
+        const workData = Object.entries(workCounts).map(([work, count]) => ({ work, count })).sort((a, b) => b.count - a.count).slice(0, 5);
+
+        // Address count
+        const addressCounts: Record<string, number> = {};
+        members.forEach((m) => { if (m.address) addressCounts[m.address] = (addressCounts[m.address] || 0) + 1; });
+        const addressData = Object.entries(addressCounts).map(([address, count]) => ({ address: address.length > 15 ? address.substring(0,15)+"..." : address, count })).sort((a, b) => b.count - a.count).slice(0, 5);
+
         // Top liked announcements
         interface Announcement { id: string; title: string; content: string; likes?: string[]; }
         const topAnnouncements = [...(announcements as Announcement[])]
@@ -850,6 +930,74 @@ export default function AdminDashboard() {
                     </BarChart>
                   </ResponsiveContainer>
                 ) : <p className="text-sm text-center py-12" style={{ color: "var(--text-muted)" }}>No member type data yet</p>}
+              </div>
+
+              {/* Members by Blood Group */}
+              <div className="card p-5">
+                <h3 className="font-display font-semibold mb-4 text-sm" style={{ color: "var(--text-primary)" }}>Members by Blood Group</h3>
+                {bloodData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={200}>
+                    <BarChart data={bloodData} margin={{ top: 0, right: 0, bottom: 0, left: -20 }}>
+                      <XAxis dataKey="blood" tick={{ fontSize: 11, fill: "var(--text-muted)" }} />
+                      <YAxis tick={{ fontSize: 11, fill: "var(--text-muted)" }} allowDecimals={false} />
+                      <Tooltip contentStyle={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "0.75rem", fontSize: 12 }} />
+                      <Bar dataKey="count" radius={[6, 6, 0, 0]}>
+                        {bloodData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : <p className="text-sm text-center py-12" style={{ color: "var(--text-muted)" }}>No blood group data</p>}
+              </div>
+
+              {/* Members by Occupation */}
+              <div className="card p-5">
+                <h3 className="font-display font-semibold mb-4 text-sm" style={{ color: "var(--text-primary)" }}>Top Occupations</h3>
+                {workData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={200}>
+                    <BarChart data={workData} margin={{ top: 0, right: 0, bottom: 0, left: -20 }}>
+                      <XAxis dataKey="work" tick={{ fontSize: 11, fill: "var(--text-muted)" }} />
+                      <YAxis tick={{ fontSize: 11, fill: "var(--text-muted)" }} allowDecimals={false} />
+                      <Tooltip contentStyle={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "0.75rem", fontSize: 12 }} />
+                      <Bar dataKey="count" radius={[6, 6, 0, 0]}>
+                        {workData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : <p className="text-sm text-center py-12" style={{ color: "var(--text-muted)" }}>No occupation data</p>}
+              </div>
+
+              {/* Members by Workplace */}
+              <div className="card p-5">
+                <h3 className="font-display font-semibold mb-4 text-sm" style={{ color: "var(--text-primary)" }}>Top Workplaces</h3>
+                {workplaceData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={200}>
+                    <BarChart data={workplaceData} margin={{ top: 0, right: 0, bottom: 0, left: -20 }}>
+                      <XAxis dataKey="workplace" tick={{ fontSize: 11, fill: "var(--text-muted)" }} />
+                      <YAxis tick={{ fontSize: 11, fill: "var(--text-muted)" }} allowDecimals={false} />
+                      <Tooltip contentStyle={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "0.75rem", fontSize: 12 }} />
+                      <Bar dataKey="count" radius={[6, 6, 0, 0]}>
+                        {workplaceData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : <p className="text-sm text-center py-12" style={{ color: "var(--text-muted)" }}>No workplace data</p>}
+              </div>
+
+              {/* Members by Address */}
+              <div className="card p-5">
+                <h3 className="font-display font-semibold mb-4 text-sm" style={{ color: "var(--text-primary)" }}>Top Locations</h3>
+                {addressData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={200}>
+                    <BarChart data={addressData} margin={{ top: 0, right: 0, bottom: 0, left: -20 }}>
+                      <XAxis dataKey="address" tick={{ fontSize: 11, fill: "var(--text-muted)" }} />
+                      <YAxis tick={{ fontSize: 11, fill: "var(--text-muted)" }} allowDecimals={false} />
+                      <Tooltip contentStyle={{ background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: "0.75rem", fontSize: 12 }} />
+                      <Bar dataKey="count" radius={[6, 6, 0, 0]}>
+                        {addressData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : <p className="text-sm text-center py-12" style={{ color: "var(--text-muted)" }}>No address data</p>}
               </div>
             </div>
 

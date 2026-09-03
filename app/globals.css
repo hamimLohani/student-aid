@@ -318,6 +318,16 @@ h1, h2, h3, h4, h5, h6 {
   transition: border-color 0.25s, box-shadow 0.25s, background 0.25s, transform 0.2s;
   backdrop-filter: blur(8px);
 }
+.input-error {
+  border-color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.05) !important;
+}
+.dark .input-error {
+  background: rgba(239, 68, 68, 0.1) !important;
+}
+.input-error:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
+}
 .input-field:hover {
   border-color: rgba(52,116,78,0.4);
   transform: translateY(-1px);

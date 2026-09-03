@@ -88,6 +88,7 @@ export default function JoinPage() {
     message: "",
   });
   const [photo, setPhoto] = useState<File | null>(null);
+  const [formErrors, setFormErrors] = useState<string[]>([]);
   const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -104,8 +105,12 @@ export default function JoinPage() {
     };
   }, [preview]);
 
-  const set = (key: string, value: string) =>
+  const set = (key: string, value: string) => {
     setForm((f) => ({ ...f, [key]: value }));
+    if (formErrors.includes(key)) setFormErrors(formErrors.filter(err => err !== key));
+  };
+
+  const getInputCls = (key: string) => `input-field ${formErrors.includes(key) ? "input-error" : ""}`;
 
   const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
@@ -117,9 +122,21 @@ export default function JoinPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const { name, memberType, work, workplace, bloodGroup, address, phone } = form;
-    if (!name || !memberType || !work || !workplace || !bloodGroup || !address || !phone) {
+    
+    const errors: string[] = [];
+    if (!name) errors.push("name");
+    if (!memberType) errors.push("memberType");
+    if (!work) errors.push("work");
+    if (!workplace) errors.push("workplace");
+    if (!bloodGroup) errors.push("bloodGroup");
+    if (!address) errors.push("address");
+    if (!phone) errors.push("phone");
+
+    if (errors.length > 0) {
+      setFormErrors(errors);
       return toast.error(copy.requiredFields);
     }
+    setFormErrors([]);
     const normalizedPhone = normalizeBdPhone(phone);
     if (!normalizedPhone) return toast.error(copy.invalidPhone);
 
@@ -359,7 +376,7 @@ export default function JoinPage() {
                   value={form.name}
                   onChange={(e) => set("name", e.target.value)}
                   placeholder={copy.fullNamePlaceholder}
-                  className="input-field"
+                  className={getInputCls("name")}
                   id="join-name"
                 />
               </FieldWrap>
@@ -369,7 +386,7 @@ export default function JoinPage() {
                   <select
                     value={form.sscYear}
                     onChange={(e) => set("sscYear", e.target.value)}
-                    className="input-field"
+                    className={getInputCls("sscYear")}
                     id="join-sscyear"
                   >
                     <option value="">{copy.selectSscYear}</option>
@@ -384,7 +401,7 @@ export default function JoinPage() {
                     required
                     value={form.memberType}
                     onChange={(e) => set("memberType", e.target.value)}
-                    className="input-field"
+                    className={getInputCls("memberType")}
                     id="join-membertype"
                   >
                     <option value="">{copy.selectMemberType}</option>
@@ -409,7 +426,7 @@ export default function JoinPage() {
                     value={form.work}
                     onChange={(e) => set("work", e.target.value)}
                     placeholder={copy.occupationPlaceholder}
-                    className="input-field"
+                    className={getInputCls("work")}
                     id="join-work"
                   />
                 </FieldWrap>
@@ -419,7 +436,7 @@ export default function JoinPage() {
                     value={form.workplace}
                     onChange={(e) => set("workplace", e.target.value)}
                     placeholder={copy.workplacePlaceholder}
-                    className="input-field"
+                    className={getInputCls("workplace")}
                     id="join-workplace"
                   />
                 </FieldWrap>
@@ -431,7 +448,7 @@ export default function JoinPage() {
                   value={form.address}
                   onChange={(e) => set("address", e.target.value)}
                   placeholder={copy.addressPlaceholder}
-                  className="input-field"
+                  className={getInputCls("address")}
                   id="join-address"
                 />
               </FieldWrap>
@@ -451,7 +468,7 @@ export default function JoinPage() {
                     placeholder={copy.phonePlaceholder}
                     inputMode="numeric"
                     title={copy.phoneTitle}
-                    className="input-field"
+                    className={getInputCls("phone")}
                     id="join-phone"
                   />
                 </FieldWrap>
@@ -461,7 +478,7 @@ export default function JoinPage() {
                     value={form.email}
                     onChange={(e) => set("email", e.target.value)}
                     placeholder={copy.emailPlaceholder}
-                    className="input-field"
+                    className={getInputCls("email")}
                     id="join-email"
                   />
                 </FieldWrap>
@@ -472,7 +489,7 @@ export default function JoinPage() {
                   required
                   value={form.bloodGroup}
                   onChange={(e) => set("bloodGroup", e.target.value)}
-                  className="input-field"
+                  className={getInputCls("bloodGroup")}
                   id="join-blood"
                 >
                   <option value="">{copy.selectBloodGroup}</option>

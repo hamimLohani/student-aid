@@ -8,7 +8,7 @@ export function normalizeBdPhone(value: string) {
   const digits = digitsOnly(value);
 
   if (digits.startsWith("8801") && digits.length === 13) {
-    const local = `0${digits.slice(2)}`;
+    const local = digits.slice(2);
     return BD_MOBILE_REGEX.test(local) ? local : null;
   }
 

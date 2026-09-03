@@ -35,33 +35,42 @@ export async function POST(req: NextRequest) {
 
     const recipientName = name || "সদস্য";
 
+    let detailsHtml = "";
+    if (details && typeof details === "object") {
+      const detailsTitle = type === "join-confirmation" ? "আপনার জমাকৃত তথ্যাবলী:" : "আপনার প্রোফাইল তথ্য:";
+      detailsHtml = `
+        <div style="margin-top: 20px; border-top: 1px solid #cbd5e1; padding-top: 16px;">
+          <h4 style="margin: 0 0 12px 0; color: #0f172a; font-size: 14px; font-weight: 700;">📋 ${detailsTitle}</h4>
+          <table role="presentation" style="width: 100%; border-collapse: collapse; font-size: 13px;">
+            ${details.name ? `<tr><td style="padding: 5px 0; color: #64748b; font-weight: 600; width: 40%;">নাম:</td><td style="padding: 5px 0; color: #0f172a; font-weight: 700;">${details.name}</td></tr>` : ""}
+            ${details.phone ? `<tr><td style="padding: 5px 0; color: #64748b; font-weight: 600;">ফোন নম্বর:</td><td style="padding: 5px 0; color: #0f172a;">${details.phone}</td></tr>` : ""}
+            ${details.email ? `<tr><td style="padding: 5px 0; color: #64748b; font-weight: 600;">ইমেইল:</td><td style="padding: 5px 0; color: #0f172a;">${details.email}</td></tr>` : ""}
+            ${details.sscYear ? `<tr><td style="padding: 5px 0; color: #64748b; font-weight: 600;">এসএসসি ব্যাচ:</td><td style="padding: 5px 0; color: #0f172a;">${details.sscYear}</td></tr>` : ""}
+            ${details.memberType ? `<tr><td style="padding: 5px 0; color: #64748b; font-weight: 600;">সদস্যের ধরন:</td><td style="padding: 5px 0; color: #0f172a;">${details.memberType}</td></tr>` : ""}
+            ${details.work ? `<tr><td style="padding: 5px 0; color: #64748b; font-weight: 600;">পেশা:</td><td style="padding: 5px 0; color: #0f172a;">${details.work}</td></tr>` : ""}
+            ${details.workplace ? `<tr><td style="padding: 5px 0; color: #64748b; font-weight: 600;">কর্মস্থল/প্রতিষ্ঠান:</td><td style="padding: 5px 0; color: #0f172a;">${details.workplace}</td></tr>` : ""}
+            ${details.bloodGroup ? `<tr><td style="padding: 5px 0; color: #64748b; font-weight: 600;">রক্তের গ্রুপ:</td><td style="padding: 5px 0; color: #0f172a;">${details.bloodGroup}</td></tr>` : ""}
+            ${details.address ? `<tr><td style="padding: 5px 0; color: #64748b; font-weight: 600;">ঠিকানা:</td><td style="padding: 5px 0; color: #0f172a;">${details.address}</td></tr>` : ""}
+          </table>
+        </div>
+      `;
+    }
+
     if (type === "join-confirmation") {
       subject = `🎉 সদস্যপদের আবেদন জমা হয়েছে | স্টুডেন্ট এইড বিডিজি`;
       badgeText = "✅ আবেদন প্রাপ্তি নিশ্চিতকরণ";
       mainHeading = `প্রিয় ${recipientName}, আপনার আবেদনের জন্য ধন্যবাদ!`;
-      
-      let detailsHtml = "";
-      if (details && typeof details === "object") {
-        detailsHtml = `
-          <div style="margin-top: 20px; border-top: 1px solid #cbd5e1; padding-top: 16px;">
-            <h4 style="margin: 0 0 12px 0; color: #0f172a; font-size: 14px; font-weight: 700;">📋 আপনার জমাকৃত তথ্যাবলী:</h4>
-            <table role="presentation" style="width: 100%; border-collapse: collapse; font-size: 13px;">
-              ${details.name ? `<tr><td style="padding: 5px 0; color: #64748b; font-weight: 600; width: 40%;">নাম:</td><td style="padding: 5px 0; color: #0f172a; font-weight: 700;">${details.name}</td></tr>` : ""}
-              ${details.phone ? `<tr><td style="padding: 5px 0; color: #64748b; font-weight: 600;">ফোন নম্বর:</td><td style="padding: 5px 0; color: #0f172a;">${details.phone}</td></tr>` : ""}
-              ${details.email ? `<tr><td style="padding: 5px 0; color: #64748b; font-weight: 600;">ইমেইল:</td><td style="padding: 5px 0; color: #0f172a;">${details.email}</td></tr>` : ""}
-              ${details.sscYear ? `<tr><td style="padding: 5px 0; color: #64748b; font-weight: 600;">এসএসসি ব্যাচ:</td><td style="padding: 5px 0; color: #0f172a;">${details.sscYear}</td></tr>` : ""}
-              ${details.memberType ? `<tr><td style="padding: 5px 0; color: #64748b; font-weight: 600;">সদস্যের ধরন:</td><td style="padding: 5px 0; color: #0f172a;">${details.memberType}</td></tr>` : ""}
-              ${details.work ? `<tr><td style="padding: 5px 0; color: #64748b; font-weight: 600;">পেশা:</td><td style="padding: 5px 0; color: #0f172a;">${details.work}</td></tr>` : ""}
-              ${details.workplace ? `<tr><td style="padding: 5px 0; color: #64748b; font-weight: 600;">কর্মস্থল/প্রতিষ্ঠান:</td><td style="padding: 5px 0; color: #0f172a;">${details.workplace}</td></tr>` : ""}
-              ${details.bloodGroup ? `<tr><td style="padding: 5px 0; color: #64748b; font-weight: 600;">রক্তের গ্রুপ:</td><td style="padding: 5px 0; color: #0f172a;">${details.bloodGroup}</td></tr>` : ""}
-              ${details.address ? `<tr><td style="padding: 5px 0; color: #64748b; font-weight: 600;">ঠিকানা:</td><td style="padding: 5px 0; color: #0f172a;">${details.address}</td></tr>` : ""}
-            </table>
-          </div>
-        `;
-      }
-
       emailBodyText = `
         স্টুডেন্ট এইড বিডিজি (Student Aid BDG)-তে সদস্যপদের জন্য আপনার আবেদনটি সফলভাবে সিস্টেমে জমা হয়েছে। অ্যাডমিন প্যানেল বর্তমানে আপনার তথ্যসমূহ পর্যালোচনা করছে।<br/>
+        ${detailsHtml}
+      `;
+    } else if (type === "admin-added") {
+      subject = `🟢 অভিনন্দন! আপনাকে স্টুডেন্ট এইড বিডিজি-তে সদস্য হিসেবে যুক্ত করা হয়েছে`;
+      badgeText = "🎉 নতুন সদস্যপদ";
+      mainHeading = `অভিনন্দন ${recipientName}!`;
+      emailBodyText = `
+        আপনাকে স্টুডেন্ট এইড বিডিজি (Student Aid BDG)-এর অফিশিয়াল সদস্য হিসেবে যুক্ত করা হয়েছে।<br/>
+        আপনি এখন আমাদের অফিশিয়াল সদস্য ডিরেক্টরিতে অন্তর্ভুক্ত হয়েছেন। ওয়েবসাইট ভিজিট করে আপনার প্রোফাইল ও আমাদের কার্যক্রম দেখতে পারেন।<br/>
         ${detailsHtml}
       `;
     } else if (type === "approval") {
