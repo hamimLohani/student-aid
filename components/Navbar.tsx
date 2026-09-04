@@ -313,12 +313,29 @@ export default function Navbar() {
 
               {/* Nav Links */}
               <div className="flex flex-col gap-1 p-4 pt-2">
+                <motion.div
+                  initial={{ y: 10, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.1, type: "spring", stiffness: 300, damping: 25 }}
+                >
+                  <button
+                    onClick={() => {
+                      setSearchOpen(true);
+                      setOpen(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition hover:bg-[var(--bg-card-hover)] text-left"
+                    style={{ color: "var(--text-secondary)", fontFamily: "'Outfit', system-ui, sans-serif" }}
+                  >
+                    <Search size={18} />
+                    Search
+                  </button>
+                </motion.div>
                 {links.map((l, i) => (
                   <motion.div
                     key={l.href}
                     initial={{ y: 10, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: i * 0.04 + 0.1, type: "spring", stiffness: 300, damping: 25 }}
+                    transition={{ delay: (i + 1) * 0.04 + 0.1, type: "spring", stiffness: 300, damping: 25 }}
                   >
                     <Link
                       href={l.href}
