@@ -17,6 +17,8 @@ interface Member {
   address?: string;
   work?: string;
   image?: string;
+  memberType?: string;
+  sscYear?: string;
 }
 
 const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
@@ -50,7 +52,24 @@ export default function DonorFinderPage() {
     });
   }, []);
 
-  const filtered = selected ? members.filter((m) => m.bloodGroup === selected) : members;
+  const filtered = (selected ? members.filter((m) => m.bloodGroup === selected) : members).sort((a, b) => {
+    // 1. Founder Member priority
+    const aFounder = a.memberType === "Founder Member";
+    const bFounder = b.memberType === "Founder Member";
+    if (aFounder && !bFounder) return -1;
+    if (!aFounder && bFounder) return 1;
+
+    // 2. SSC Year (Senior first -> earlier year)
+    const aYear = a.sscYear ? parseInt(a.sscYear) : Infinity;
+    const bYear = b.sscYear ? parseInt(b.sscYear) : Infinity;
+
+    if (aYear !== bYear) {
+      return aYear - bYear;
+    }
+
+    // Fallback to name
+    return a.name.localeCompare(b.name);
+  });
 
   const handleEmergency = async () => {
     if (!selected) return;

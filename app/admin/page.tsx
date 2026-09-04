@@ -404,6 +404,23 @@ export default function AdminDashboard() {
 
     const matchesType = !memberTypeFilter || member.memberType === memberTypeFilter;
     return matchesSearch && matchesType;
+  }).sort((a, b) => {
+    // 1. Founder Member priority
+    const aFounder = a.memberType === "Founder Member";
+    const bFounder = b.memberType === "Founder Member";
+    if (aFounder && !bFounder) return -1;
+    if (!aFounder && bFounder) return 1;
+
+    // 2. SSC Year (Senior first -> earlier year)
+    const aYear = a.sscYear ? parseInt(a.sscYear) : Infinity;
+    const bYear = b.sscYear ? parseInt(b.sscYear) : Infinity;
+
+    if (aYear !== bYear) {
+      return aYear - bYear;
+    }
+
+    // Fallback to name
+    return a.name.localeCompare(b.name);
   });
 
   const exportPDF = async () => {
