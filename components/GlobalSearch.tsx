@@ -7,6 +7,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Search, X, Users, Calendar, Megaphone, ArrowRight, Loader2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { useLanguage } from "@/context/LanguageContext";
+import { globalSearchCopy } from "@/lib/i18n";
 
 interface Result {
   id: string;
@@ -41,6 +43,8 @@ const TYPE_COLORS: Record<string, string> = {
 };
 
 export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
+  const { language } = useLanguage();
+  const copy = globalSearchCopy[language];
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Result[]>([]);
   const [loading, setLoading] = useState(false);
@@ -192,7 +196,7 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={handleKey}
-                  placeholder="Search members, activities, announcements..."
+                  placeholder={copy.placeholder}
                   className="flex-1 bg-transparent outline-none text-base font-medium"
                   style={{ color: "var(--text-primary)", fontFamily: "'Inter', system-ui, sans-serif" }}
                   id="global-search-input"
@@ -284,8 +288,8 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
               {query && !loading && results.length === 0 && (
                 <div className="py-12 text-center" style={{ color: "var(--text-muted)" }}>
                   <Search size={32} className="mx-auto mb-3 opacity-30" />
-                  <p className="text-sm font-medium">No results for &ldquo;{query}&rdquo;</p>
-                  <p className="text-xs mt-1">Try searching for a member name, activity, or announcement</p>
+                  <p className="text-sm font-medium">{copy.noResults} &ldquo;{query}&rdquo;</p>
+                  <p className="text-xs mt-1">{copy.trySearching}</p>
                 </div>
               )}
 
@@ -298,15 +302,15 @@ export default function GlobalSearch({ open, onClose }: GlobalSearchProps) {
                   <span className="flex items-center gap-1.5">
                     <kbd className="px-1.5 py-0.5 rounded border" style={{ borderColor: "var(--border)", background: "var(--bg-section)" }}>↑</kbd>
                     <kbd className="px-1.5 py-0.5 rounded border" style={{ borderColor: "var(--border)", background: "var(--bg-section)" }}>↓</kbd>
-                    Navigate
+                    {copy.navigate}
                   </span>
                   <span className="flex items-center gap-1.5">
                     <kbd className="px-1.5 py-0.5 rounded border" style={{ borderColor: "var(--border)", background: "var(--bg-section)" }}>↵</kbd>
-                    Open
+                    {copy.open}
                   </span>
                   <span className="flex items-center gap-1.5">
                     <kbd className="px-1.5 py-0.5 rounded border" style={{ borderColor: "var(--border)", background: "var(--bg-section)" }}>Esc</kbd>
-                    Close
+                    {copy.close}
                   </span>
                 </div>
               )}

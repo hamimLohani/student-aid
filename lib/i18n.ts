@@ -596,3 +596,22 @@ export const donorsCopy = {
     announcementFooter: "অনুগ্রহ করে অবিলম্বে কোনো {group} রক্তের ডোনারের সাথে যোগাযোগ করুন।",
   },
 } as const;
+
+export const globalSearchCopy = {
+  en: {
+    placeholder: "Search members, activities, announcements...",
+    noResults: "No results for",
+    trySearching: "Try searching for a member name, activity, or announcement",
+    navigate: "Navigate",
+    open: "Open",
+    close: "Close",
+  },
+  bn: {
+    placeholder: "সদস্য, কার্যক্রম, ঘোষণা খুঁজুন...",
+    noResults: "এর জন্য কোনো ফলাফল পাওয়া যায়নি",
+    trySearching: "সদস্যের নাম, কার্যক্রম, বা ঘোষণা খোঁজার চেষ্টা করুন",
+    navigate: "নেভিগেট",
+    open: "খুলুন",
+    close: "বন্ধ করুন",
+  },
+} as const;
