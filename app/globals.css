@@ -291,9 +291,13 @@ h1, h2, h3, h4, h5, h6 {
 .pill-violet { background: rgba(52,116,78,0.12); color: #34744e; border: 1px solid rgba(52,116,78,0.25); }
 .pill-violet:hover { background: rgba(52,116,78,0.22); border-color: rgba(52,116,78,0.5); }
 .pill-red    { background: rgba(239,68,68,0.1);  color: #ef4444; border: 1px solid rgba(239,68,68,0.2); }
+.pill-red:hover { background: rgba(239,68,68,0.2); border-color: rgba(239,68,68,0.4); }
 .pill-green  { background: rgba(34,197,94,0.1);  color: #22c55e; border: 1px solid rgba(34,197,94,0.2); }
+.pill-green:hover { background: rgba(34,197,94,0.2); border-color: rgba(34,197,94,0.4); }
 .pill-amber  { background: rgba(245,158,11,0.1); color: #d97706; border: 1px solid rgba(245,158,11,0.2); }
+.pill-amber:hover { background: rgba(245,158,11,0.2); border-color: rgba(245,158,11,0.4); }
 .pill-cyan   { background: rgba(6,182,212,0.1);  color: #0891b2; border: 1px solid rgba(6,182,212,0.2); }
+.pill-cyan:hover { background: rgba(6,182,212,0.2); border-color: rgba(6,182,212,0.4); }
 .dark .pill-violet { color: #6fa076; }
 .dark .pill-red    { color: #f87171; }
 .dark .pill-green  { color: #4ade80; }

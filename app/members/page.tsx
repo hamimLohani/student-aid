@@ -201,8 +201,10 @@ export default function MembersPage() {
   };
 
   const MemberCard = ({ m }: { m: Member }) => (
-    <Link href={`/members/${m.id}`} className="member-card block group">
-      <div className="p-4 sm:p-5 text-center">
+    <div className="member-card block group relative">
+      <Link href={`/members/${m.id}`} className="absolute inset-0 z-0" aria-label={`View ${m.name}`} />
+      
+      <div className="p-4 sm:p-5 text-center relative z-10 pointer-events-none">
         <div
           className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full mx-auto mb-3 overflow-hidden flex-shrink-0"
           style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)", boxShadow: "0 0 0 2px var(--border)" }}
@@ -230,19 +232,35 @@ export default function MembersPage() {
           <Briefcase size={10} />
           {m.workplace || m.work || "—"}
         </p>
-        <div className="flex flex-wrap justify-center gap-1 mt-2.5">
-          {m.bloodGroup && <span className="pill pill-red text-[10px]">{m.bloodGroup}</span>}
-          {m.phone && <span className="pill pill-green text-[10px]">📞</span>}
-          {m.email && <span className="pill pill-cyan text-[10px]">✉️</span>}
+        <div className="flex flex-wrap justify-center gap-1 mt-2.5 pointer-events-auto">
+          {m.bloodGroup && <span className="pill pill-red text-[10px] pointer-events-none">{m.bloodGroup}</span>}
+          {m.phone && (
+            <a
+              href={`tel:${m.phone}`}
+              className="pill pill-green text-[10px] hover:scale-105 transition-transform cursor-pointer inline-block"
+              title="Call"
+            >
+              📞
+            </a>
+          )}
+          {m.email && (
+            <a
+              href={`mailto:${m.email}`}
+              className="pill pill-cyan text-[10px] hover:scale-105 transition-transform cursor-pointer inline-block"
+              title="Email"
+            >
+              ✉️
+            </a>
+          )}
         </div>
       </div>
-      <div className="overlay">
+      <div className="overlay relative z-10 pointer-events-none">
         <div className="flex items-center gap-2">
           <MapPin size={12} className="text-emerald-300 flex-shrink-0" />
           <span className="text-white text-xs truncate">{m.address || "—"}</span>
         </div>
       </div>
-    </Link>
+    </div>
   );
 
   return (
