@@ -17,6 +17,7 @@ import toast from "react-hot-toast";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { Trash2, Plus, Users, Megaphone, Calendar, FileText, Pencil, X, Check, BarChart2, TrendingUp, Clock3, CheckCircle2, FileDown, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import AnimatedCounter from "@/components/AnimatedCounter";
 
 const RichTextEditor = dynamic(() => import("@/components/RichTextEditor"), { ssr: false });
 
@@ -900,14 +901,16 @@ export default function AdminDashboard() {
             {/* Top stat cards */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {[
-                { label: "Total Members", value: members.length, icon: <Users size={18} />, color: "#6366f1" },
-                { label: "Activities", value: activities.length, icon: <Calendar size={18} />, color: "#8b5cf6" },
-                { label: "Upcoming Events", value: upcomingActivities.length, icon: <TrendingUp size={18} />, color: "#06b6d4" },
-                { label: "Pending Requests", value: pendingRequests.length, icon: <Clock3 size={18} />, color: "#f59e0b" },
+                { label: copy.totalMembers, value: members.length, icon: <Users size={18} />, color: "#6366f1" },
+                { label: copy.activities, value: activities.length, icon: <Calendar size={18} />, color: "#8b5cf6" },
+                { label: copy.upcomingEvents, value: upcomingActivities.length, icon: <TrendingUp size={18} />, color: "#06b6d4" },
+                { label: copy.pendingRequests, value: pendingRequests.length, icon: <Clock3 size={18} />, color: "#f59e0b" },
               ].map((s) => (
                 <div key={s.label} className="stat-card">
                   <div className="w-10 h-10 rounded-2xl mx-auto mb-3 flex items-center justify-center text-white" style={{ background: s.color }}>{s.icon}</div>
-                  <div className="font-display text-3xl font-extrabold mb-1" style={{ color: s.color }}>{s.value}</div>
+                  <div className="font-display text-3xl font-extrabold mb-1" style={{ color: s.color }}>
+                    <AnimatedCounter value={s.value} startOnMount={true} />
+                  </div>
                   <p className="text-xs" style={{ color: "var(--text-muted)" }}>{s.label}</p>
                 </div>
               ))}
@@ -917,7 +920,7 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
               {/* Members by SSC Year */}
               <div className="card p-5">
-                <h3 className="font-display font-semibold mb-4 text-sm" style={{ color: "var(--text-primary)" }}>Members by SSC Year</h3>
+                <h3 className="font-display font-semibold mb-4 text-sm" style={{ color: "var(--text-primary)" }}>{copy.membersBySsc}</h3>
                 {yearData.length > 0 ? (
                   <ResponsiveContainer width="100%" height={200}>
                     <BarChart data={yearData} margin={{ top: 0, right: 0, bottom: 0, left: -20 }}>
@@ -929,12 +932,12 @@ export default function AdminDashboard() {
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
-                ) : <p className="text-sm text-center py-12" style={{ color: "var(--text-muted)" }}>No SSC year data yet</p>}
+                ) : <p className="text-sm text-center py-12" style={{ color: "var(--text-muted)" }}>{copy.noSscData}</p>}
               </div>
 
               {/* Members by Type */}
               <div className="card p-5">
-                <h3 className="font-display font-semibold mb-4 text-sm" style={{ color: "var(--text-primary)" }}>Members by Type</h3>
+                <h3 className="font-display font-semibold mb-4 text-sm" style={{ color: "var(--text-primary)" }}>{copy.membersByType}</h3>
                 {typeData.length > 0 ? (
                   <ResponsiveContainer width="100%" height={200}>
                     <BarChart data={typeData} margin={{ top: 0, right: 0, bottom: 0, left: -20 }}>
@@ -946,12 +949,12 @@ export default function AdminDashboard() {
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
-                ) : <p className="text-sm text-center py-12" style={{ color: "var(--text-muted)" }}>No member type data yet</p>}
+                ) : <p className="text-sm text-center py-12" style={{ color: "var(--text-muted)" }}>{copy.noTypeData}</p>}
               </div>
 
               {/* Members by Blood Group */}
               <div className="card p-5">
-                <h3 className="font-display font-semibold mb-4 text-sm" style={{ color: "var(--text-primary)" }}>Members by Blood Group</h3>
+                <h3 className="font-display font-semibold mb-4 text-sm" style={{ color: "var(--text-primary)" }}>{copy.membersByBlood}</h3>
                 {bloodData.length > 0 ? (
                   <ResponsiveContainer width="100%" height={200}>
                     <BarChart data={bloodData} margin={{ top: 0, right: 0, bottom: 0, left: -20 }}>
@@ -963,12 +966,12 @@ export default function AdminDashboard() {
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
-                ) : <p className="text-sm text-center py-12" style={{ color: "var(--text-muted)" }}>No blood group data</p>}
+                ) : <p className="text-sm text-center py-12" style={{ color: "var(--text-muted)" }}>{copy.noBloodData}</p>}
               </div>
 
               {/* Members by Occupation */}
               <div className="card p-5">
-                <h3 className="font-display font-semibold mb-4 text-sm" style={{ color: "var(--text-primary)" }}>Top Occupations</h3>
+                <h3 className="font-display font-semibold mb-4 text-sm" style={{ color: "var(--text-primary)" }}>{copy.topOccupations}</h3>
                 {workData.length > 0 ? (
                   <ResponsiveContainer width="100%" height={200}>
                     <BarChart data={workData} margin={{ top: 0, right: 0, bottom: 0, left: -20 }}>
@@ -980,12 +983,12 @@ export default function AdminDashboard() {
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
-                ) : <p className="text-sm text-center py-12" style={{ color: "var(--text-muted)" }}>No occupation data</p>}
+                ) : <p className="text-sm text-center py-12" style={{ color: "var(--text-muted)" }}>{copy.noOccupationData}</p>}
               </div>
 
               {/* Members by Workplace */}
               <div className="card p-5">
-                <h3 className="font-display font-semibold mb-4 text-sm" style={{ color: "var(--text-primary)" }}>Top Workplaces</h3>
+                <h3 className="font-display font-semibold mb-4 text-sm" style={{ color: "var(--text-primary)" }}>{copy.topWorkplaces}</h3>
                 {workplaceData.length > 0 ? (
                   <ResponsiveContainer width="100%" height={200}>
                     <BarChart data={workplaceData} margin={{ top: 0, right: 0, bottom: 0, left: -20 }}>
@@ -997,12 +1000,12 @@ export default function AdminDashboard() {
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
-                ) : <p className="text-sm text-center py-12" style={{ color: "var(--text-muted)" }}>No workplace data</p>}
+                ) : <p className="text-sm text-center py-12" style={{ color: "var(--text-muted)" }}>{copy.noWorkplaceData}</p>}
               </div>
 
               {/* Members by Address */}
               <div className="card p-5">
-                <h3 className="font-display font-semibold mb-4 text-sm" style={{ color: "var(--text-primary)" }}>Top Locations</h3>
+                <h3 className="font-display font-semibold mb-4 text-sm" style={{ color: "var(--text-primary)" }}>{copy.topLocations}</h3>
                 {addressData.length > 0 ? (
                   <ResponsiveContainer width="100%" height={200}>
                     <BarChart data={addressData} margin={{ top: 0, right: 0, bottom: 0, left: -20 }}>
@@ -1014,14 +1017,14 @@ export default function AdminDashboard() {
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
-                ) : <p className="text-sm text-center py-12" style={{ color: "var(--text-muted)" }}>No address data</p>}
+                ) : <p className="text-sm text-center py-12" style={{ color: "var(--text-muted)" }}>{copy.noLocationData}</p>}
               </div>
             </div>
 
             {/* Top liked announcements */}
             {topAnnouncements.length > 0 && (
               <div className="card p-5">
-                <h3 className="font-display font-semibold mb-4 text-sm" style={{ color: "var(--text-primary)" }}>Top Liked Announcements</h3>
+                <h3 className="font-display font-semibold mb-4 text-sm" style={{ color: "var(--text-primary)" }}>{copy.topLikedAnnouncements}</h3>
                 <ResponsiveContainer width="100%" height={180}>
                   <BarChart data={topAnnouncements} layout="vertical" margin={{ top: 0, right: 20, bottom: 0, left: 0 }}>
                     <XAxis type="number" tick={{ fontSize: 11, fill: "var(--text-muted)" }} allowDecimals={false} />
@@ -1036,14 +1039,14 @@ export default function AdminDashboard() {
             {/* Upcoming events */}
             {upcomingActivities.length > 0 && (
               <div className="card p-5">
-                <h3 className="font-display font-semibold mb-4 text-sm" style={{ color: "var(--text-primary)" }}>Upcoming Events</h3>
+                <h3 className="font-display font-semibold mb-4 text-sm" style={{ color: "var(--text-primary)" }}>{copy.upcomingEvents}</h3>
                 <div className="space-y-2">
                   {upcomingActivities.slice(0, 5).map((a) => {
                     const diff = Math.ceil((new Date(a.date).getTime() - Date.now()) / 86400000);
                     return (
                       <div key={a.id} className="flex items-center justify-between px-4 py-2.5 rounded-xl" style={{ background: "var(--bg-section)" }}>
                         <span className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>{a.title}</span>
-                        <span className="countdown-pill ml-3 flex-shrink-0">{diff === 0 ? "Today" : `${diff}d`}</span>
+                        <span className="countdown-pill ml-3 flex-shrink-0">{diff === 0 ? copy.today : `${diff}d`}</span>
                       </div>
                     );
                   })}
@@ -1055,7 +1058,7 @@ export default function AdminDashboard() {
             {pendingRequests.length > 0 && (
               <div className="card p-5">
                 <h3 className="font-display font-semibold mb-4 text-sm flex items-center gap-2" style={{ color: "var(--text-primary)" }}>
-                  <Clock3 size={15} className="text-amber-400" /> Pending Join Requests ({pendingRequests.length})
+                  <Clock3 size={15} className="text-amber-400" /> {copy.pendingJoinRequests} ({pendingRequests.length})
                 </h3>
                 <div className="space-y-3">
                   {pendingRequests.slice(0, 5).map((r) => (
@@ -1069,14 +1072,14 @@ export default function AdminDashboard() {
                       </div>
                       <div className="flex gap-2">
                         <button onClick={() => approveRequest(r)} disabled={approvingId === r.id} className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-500 disabled:opacity-50 text-white transition font-medium">
-                          <CheckCircle2 size={12} /> {approvingId === r.id ? "..." : "Approve"}
+                          <CheckCircle2 size={12} /> {approvingId === r.id ? "..." : copy.approve}
                         </button>
-                        <button onClick={() => rejectRequest(r)} className="text-xs px-3 py-1.5 rounded-lg text-red-400 border transition hover:bg-red-500/10" style={{ borderColor: "var(--border)" }}>Reject</button>
+                        <button onClick={() => rejectRequest(r)} className="text-xs px-3 py-1.5 rounded-lg text-red-400 border transition hover:bg-red-500/10" style={{ borderColor: "var(--border)" }}>{copy.reject}</button>
                       </div>
                     </div>
                   ))}
                   {pendingRequests.length > 5 && (
-                    <button onClick={() => setTab("requests")} className="text-xs text-emerald-500 hover:text-emerald-400 transition">View all {pendingRequests.length} requests →</button>
+                    <button onClick={() => setTab("requests")} className="text-xs text-emerald-500 hover:text-emerald-400 transition">{copy.viewAllRequests.replace("{count}", String(pendingRequests.length))}</button>
                   )}
                 </div>
               </div>
