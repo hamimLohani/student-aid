@@ -67,12 +67,22 @@ export default function ActivityDetailClient() {
   const [comments, setComments] = useState<Comment[]>([]);
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState("");
+  const [windowHeight, setWindowHeight] = useState(0);
+
+  useEffect(() => {
+    setWindowHeight(window.innerHeight);
+    const handleResize = () => setWindowHeight(window.innerHeight);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     return onSnapshot(doc(db, "activities", id), (d) => {
       if (d.exists()) setActivity(d.data() as Activity);
     });
   }, [id]);
+
+
 
   useEffect(() => {
     if (!showComments) return;
@@ -95,7 +105,7 @@ export default function ActivityDetailClient() {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lightbox, activity]);
 
   const postComment = async () => {
@@ -308,52 +318,66 @@ export default function ActivityDetailClient() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center px-4"
+            className="fixed inset-x-0 top-0 z-[100] bg-black/60 backdrop-blur-md flex items-center justify-center p-4 sm:p-8"
+            style={{ height: windowHeight ? `${windowHeight}px` : "100vh" }}
             onClick={() => setLightbox(null)}
           >
-            {/* Controls */}
-            <button
-              className="absolute top-4 right-4 text-white/70 hover:text-white z-10"
-              onClick={() => setLightbox(null)}
-            >
-              <X size={28} />
-            </button>
-            <button
-              className="absolute top-4 left-4 text-white/70 hover:text-white z-10 flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg bg-white/10"
-              onClick={(e) => { e.stopPropagation(); downloadImage(activity.images[lightbox], lightbox); }}
-            >
-              <Download size={14} /> Save
-            </button>
-
-            {activity.images.length > 1 && (
-              <>
+            <div className="relative max-w-5xl w-full flex flex-col items-center">
+              {/* Controls bar above the image */}
+              <div className="w-full flex justify-between items-center mb-4">
                 <button
-                  className="absolute left-3 sm:left-6 text-white/70 hover:text-white z-10 bg-white/10 rounded-full p-2"
-                  onClick={(e) => { e.stopPropagation(); prev(); }}
+                  className="flex items-center gap-1.5 text-xs font-medium px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 transition text-white/90"
+                  onClick={(e) => { e.stopPropagation(); downloadImage(activity.images[lightbox], lightbox); }}
                 >
-                  <ChevronLeft size={24} />
+                  <Download size={14} /> Save
                 </button>
                 <button
-                  className="absolute right-3 sm:right-6 text-white/70 hover:text-white z-10 bg-white/10 rounded-full p-2"
-                  onClick={(e) => { e.stopPropagation(); next(); }}
+                  className="text-white/70 hover:text-white p-2 bg-black/40 hover:bg-black/60 rounded-full transition"
+                  onClick={() => setLightbox(null)}
                 >
-                  <ChevronRight size={24} />
+                  <X size={24} />
                 </button>
-              </>
-            )}
+              </div>
 
-            <motion.img
-              key={lightbox}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              src={activity.images[lightbox]}
-              alt={`${copy.photo} ${lightbox + 1}`}
-              className="max-h-[85vh] max-w-full rounded-xl object-contain"
-              onClick={(e) => e.stopPropagation()}
-            />
-            <p className="absolute bottom-4 text-white/50 text-sm">
-              {lightbox + 1} / {activity.images.length}
-            </p>
+              {/* Image Container */}
+              <div
+                className="relative w-full flex items-center justify-center"
+                style={{ maxHeight: windowHeight ? `${windowHeight * 0.75}px` : "75vh" }}
+              >
+                <motion.img
+                  key={lightbox}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  src={activity.images[lightbox]}
+                  alt={`${copy.photo} ${lightbox + 1}`}
+                  className="w-full object-contain rounded-2xl shadow-2xl pointer-events-auto"
+                  style={{ maxHeight: windowHeight ? `${windowHeight * 0.75}px` : "75vh" }}
+                  onClick={(e) => e.stopPropagation()}
+                />
+
+                {/* Left/Right Navigation */}
+                {activity.images.length > 1 && (
+                  <>
+                    <button
+                      className="absolute left-2 sm:-left-4 md:-left-12 text-white/70 hover:text-white bg-black/40 hover:bg-black/60 transition rounded-full p-2 backdrop-blur-sm"
+                      onClick={(e) => { e.stopPropagation(); prev(); }}
+                    >
+                      <ChevronLeft size={28} />
+                    </button>
+                    <button
+                      className="absolute right-2 sm:-right-4 md:-right-12 text-white/70 hover:text-white bg-black/40 hover:bg-black/60 transition rounded-full p-2 backdrop-blur-sm"
+                      onClick={(e) => { e.stopPropagation(); next(); }}
+                    >
+                      <ChevronRight size={28} />
+                    </button>
+                  </>
+                )}
+              </div>
+
+              <p className="mt-4 text-white/70 text-sm font-medium tracking-wide">
+                {lightbox + 1} / {activity.images.length}
+              </p>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

@@ -148,7 +148,8 @@ export default function AdminDashboard() {
     toast.loading(copy.uploadingImages, { id: "upload" });
     try {
       const images = await Promise.all(activityMedia.map((f) => uploadToCloudinary(f)));
-      const data = { ...activityForm, images };
+      const finalDate = activityForm.date || new Date().toISOString().split("T")[0];
+      const data = { ...activityForm, date: finalDate, images };
       
       const titleToEmail = `New Activity: ${activityForm.title}`;
       const contentToEmail = activityForm.description;
