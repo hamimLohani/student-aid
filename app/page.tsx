@@ -57,8 +57,8 @@ export default function HomePage() {
     },
   ];
 
-  const [memberCount, setMemberCount] = useState<number>(120);
-  const [activityCount, setActivityCount] = useState<number>(40);
+  const [memberCount, setMemberCount] = useState<number>(0);
+  const [activityCount, setActivityCount] = useState<number>(0);
 
   useEffect(() => {
     async function fetchCounts() {
