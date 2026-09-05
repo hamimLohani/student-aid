@@ -118,12 +118,31 @@ export default function ActivityDetailClient() {
     setCommentText("");
   };
 
-  const downloadImage = (src: string, idx: number) => {
-    const a = document.createElement("a");
-    a.href = src;
-    a.download = `photo-${idx + 1}.jpg`;
-    a.target = "_blank";
-    a.click();
+  const downloadImage = async (src: string, idx: number) => {
+    try {
+      // Fetch the image as a blob to force download behavior
+      const response = await fetch(src);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = `student-aid-activity-${idx + 1}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      
+      // Cleanup
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Download failed, opening in new tab:", error);
+      // Fallback if fetch fails (e.g. CORS issues)
+      const a = document.createElement("a");
+      a.href = src;
+      a.download = `student-aid-activity-${idx + 1}.jpg`;
+      a.target = "_blank";
+      a.click();
+    }
   };
 
   if (!activity) return (
