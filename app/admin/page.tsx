@@ -62,6 +62,8 @@ export default function AdminDashboard() {
   const [approvingId, setApprovingId] = useState<string | null>(null);
   const [sendEmailNotify, setSendEmailNotify] = useState(true);
   const [sendingEmail, setSendingEmail] = useState(false);
+  const [sendActivityEmailNotify, setSendActivityEmailNotify] = useState(true);
+  const [sendingActivityEmail, setSendingActivityEmail] = useState(false);
   const [testEmail, setTestEmail] = useState("");
   const [testingEmail, setTestingEmail] = useState(false);
   const [exporting, setExporting] = useState(false);
@@ -147,16 +149,54 @@ export default function AdminDashboard() {
     try {
       const images = await Promise.all(activityMedia.map((f) => uploadToCloudinary(f)));
       const data = { ...activityForm, images };
+      
+      const titleToEmail = `New Activity: ${activityForm.title}`;
+      const contentToEmail = activityForm.description;
+      
       await addDoc(collection(db, "activities"), data);
       await addDoc(collection(db, "announcements"), {
-        title: `New Activity: ${activityForm.title}`,
-        content: activityForm.description,
+        title: titleToEmail,
+        content: contentToEmail,
         timestamp: serverTimestamp(),
         likes: [],
       });
       setActivityForm({ title: "", description: "", date: "" });
       setActivityMedia([]);
       toast.success(copy.activityAdded);
+
+      if (sendActivityEmailNotify) {
+        setSendingActivityEmail(true);
+        const memberEmails = members
+          .map((m) => m.email)
+          .filter((e): e is string => Boolean(e && e.includes("@")));
+
+        if (memberEmails.length > 0) {
+          toast.loading("সদস্যদের ইমেইল পাঠানো হচ্ছে...", { id: "activity-email-send" });
+          try {
+            const res = await fetch("/api/send-announcement-email", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                title: titleToEmail,
+                content: contentToEmail,
+                recipientEmails: memberEmails,
+              }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+              toast.success(`📧 ${data.message || "সদস্যদের ইমেইল নোটিফিকেশন পাঠানো হয়েছে!"}`, { id: "activity-email-send" });
+            } else {
+              toast.error(`ইমেইল পাঠাতে সমস্যা: ${data.error}`, { id: "activity-email-send" });
+            }
+          } catch (e) {
+            toast.error("ইমেইল পাঠাতে সমস্যা হয়েছে", { id: "activity-email-send" });
+          } finally {
+            setSendingActivityEmail(false);
+          }
+        } else {
+          setSendingActivityEmail(false);
+        }
+      }
     } catch {
       toast.error(copy.addActivityFailed);
     } finally {
@@ -745,10 +785,14 @@ export default function AdminDashboard() {
                 onChange={(e) => setActivityForm({ ...activityForm, title: e.target.value })}
                 className={inputCls}
               />
-              <textarea placeholder={copy.description} value={activityForm.description} rows={3}
-                onChange={(e) => setActivityForm({ ...activityForm, description: e.target.value })}
-                className={`${inputCls} resize-none`}
-              />
+              <div>
+                <label className="block text-xs mb-1.5" style={{ color: "var(--text-secondary)" }}>{copy.description}</label>
+                <RichTextEditor
+                  value={activityForm.description}
+                  onChange={(html) => setActivityForm({ ...activityForm, description: html })}
+                  placeholder={copy.description}
+                />
+              </div>
               <input type="date" value={activityForm.date}
                 onChange={(e) => setActivityForm({ ...activityForm, date: e.target.value })}
                 className={inputCls}
@@ -773,10 +817,22 @@ export default function AdminDashboard() {
                 )}
               </div>
             </div>
-            <button onClick={addActivity}
-              className="mt-4 w-full sm:w-auto btn-primary !py-2.5 !px-6 !text-sm"
+            <div className="pt-2 flex flex-col gap-2 mt-2">
+              <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer" style={{ color: "var(--text-primary)" }}>
+                <input
+                  type="checkbox"
+                  checked={sendActivityEmailNotify}
+                  onChange={(e) => setSendActivityEmailNotify(e.target.checked)}
+                  className="w-4 h-4 rounded accent-[var(--accent)] cursor-pointer"
+                />
+                <span>{copy.sendEmailLabel}</span>
+              </label>
+            </div>
+            <button onClick={addActivity} disabled={sendingActivityEmail}
+              className="mt-4 w-full sm:w-auto btn-primary !py-2.5 !px-6 !text-sm flex items-center justify-center gap-2"
             >
-              {copy.addActivityButton}
+              {sendingActivityEmail ? <Loader2 size={16} className="animate-spin" /> : null}
+              {sendingActivityEmail ? "ইমেইল পাঠানো হচ্ছে..." : copy.addActivityButton}
             </button>
           </div>
 
@@ -824,7 +880,7 @@ export default function AdminDashboard() {
                     onChange={(e) => setSendEmailNotify(e.target.checked)}
                     className="w-4 h-4 rounded accent-[var(--accent)] cursor-pointer"
                   />
-                  <span>📧 সকল সদস্যের ইমেইলে বার্তা পাঠান (Send email notification to all member emails)</span>
+                  <span>{copy.sendEmailLabel}</span>
                 </label>
               </div>
             </div>

@@ -48,8 +48,9 @@ function ToolbarBtn({
     <button
       type="button"
       onClick={onClick}
+      onMouseDown={(e) => e.preventDefault()}
       title={title}
-      className="p-1.5 rounded-lg transition text-sm"
+      className="p-1.5 rounded-lg transition text-sm flex-shrink-0"
       style={{
         background: active ? "rgba(99,102,241,0.15)" : "transparent",
         color: active ? "var(--accent)" : "var(--text-secondary)",
@@ -80,7 +81,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
     editorProps: {
       attributes: {
-        class: "outline-none min-h-[160px] prose prose-sm max-w-none",
+        class: "outline-none min-h-[160px] rich-content max-w-none",
         style:
           "color: var(--text-primary); font-family: 'Inter', system-ui, sans-serif; font-size: 0.9rem; line-height: 1.7;",
       },
@@ -120,10 +121,11 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
       style={{ borderColor: "var(--input-border)", background: "var(--input-bg)" }}
     >
       {/* Toolbar */}
-      <div
-        className="flex flex-wrap gap-0.5 px-2 py-2 border-b"
-        style={{ borderColor: "var(--border)", background: "var(--bg-section)" }}
-      >
+      <div className="overflow-x-auto scrollbar-hide border-b" style={{ borderColor: "var(--border)" }}>
+        <div
+          className="inline-flex gap-1 px-2 py-2 items-center min-w-full"
+          style={{ background: "var(--bg-section)" }}
+        >
         <ToolbarBtn onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive("bold")} title="Bold">
           <Bold size={15} />
         </ToolbarBtn>
@@ -134,7 +136,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
           <UnderlineIcon size={15} />
         </ToolbarBtn>
 
-        <div className="w-px mx-1 self-stretch" style={{ background: "var(--border)" }} />
+        <div className="w-px h-5 mx-1 flex-shrink-0" style={{ background: "var(--border)" }} />
 
         <ToolbarBtn onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} active={editor.isActive("heading", { level: 2 })} title="Heading 2">
           <Heading2 size={15} />
@@ -146,7 +148,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
           <Quote size={15} />
         </ToolbarBtn>
 
-        <div className="w-px mx-1 self-stretch" style={{ background: "var(--border)" }} />
+        <div className="w-px h-5 mx-1 flex-shrink-0" style={{ background: "var(--border)" }} />
 
         <ToolbarBtn onClick={() => editor.chain().focus().toggleBulletList().run()} active={editor.isActive("bulletList")} title="Bullet List">
           <List size={15} />
@@ -155,7 +157,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
           <ListOrdered size={15} />
         </ToolbarBtn>
 
-        <div className="w-px mx-1 self-stretch" style={{ background: "var(--border)" }} />
+        <div className="w-px h-5 mx-1 flex-shrink-0" style={{ background: "var(--border)" }} />
 
         <ToolbarBtn onClick={() => editor.chain().focus().setTextAlign("left").run()} active={editor.isActive({ textAlign: "left" })} title="Align Left">
           <AlignLeft size={15} />
@@ -167,7 +169,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
           <AlignRight size={15} />
         </ToolbarBtn>
 
-        <div className="w-px mx-1 self-stretch" style={{ background: "var(--border)" }} />
+        <div className="w-px h-5 mx-1 flex-shrink-0" style={{ background: "var(--border)" }} />
 
         <ToolbarBtn onClick={addLink} active={editor.isActive("link")} title="Add Link">
           <Link2 size={15} />
@@ -179,7 +181,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
           <YoutubeIcon size={15} />
         </ToolbarBtn>
 
-        <div className="w-px mx-1 self-stretch" style={{ background: "var(--border)" }} />
+        <div className="w-px h-5 mx-1 flex-shrink-0" style={{ background: "var(--border)" }} />
 
         <ToolbarBtn onClick={() => editor.chain().focus().undo().run()} title="Undo">
           <Undo size={15} />
@@ -187,6 +189,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
         <ToolbarBtn onClick={() => editor.chain().focus().redo().run()} title="Redo">
           <Redo size={15} />
         </ToolbarBtn>
+        </div>
       </div>
 
       {/* Editor area */}

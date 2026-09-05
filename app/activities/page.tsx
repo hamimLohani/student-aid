@@ -232,7 +232,7 @@ export default function ActivitiesPage() {
                       className="text-sm mb-4 line-clamp-2 leading-relaxed"
                       style={{ color: "var(--text-secondary)" }}
                     >
-                      {a.description}
+                      {a.description?.replace(/<[^>]*>?/gm, '') || ""}
                     </p>
 
                     <div className="flex items-center justify-between">

@@ -17,10 +17,10 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       const image = data.images?.[0];
       return {
         title: `${data.title} — Student Aid BDG`,
-        description: data.description?.slice(0, 155) || "An activity by Student Aid BDG community.",
+        description: data.description?.replace(/<[^>]*>?/gm, '').slice(0, 155) || "An activity by Student Aid BDG community.",
         openGraph: {
           title: data.title,
-          description: data.description?.slice(0, 155),
+          description: data.description?.replace(/<[^>]*>?/gm, '').slice(0, 155),
           type: "article",
           images: image ? [{ url: image, width: 1200, height: 630, alt: data.title }] : [],
           url: `${baseUrl}/activities/${id}`,
@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
         twitter: {
           card: "summary_large_image",
           title: data.title,
-          description: data.description?.slice(0, 155),
+          description: data.description?.replace(/<[^>]*>?/gm, '').slice(0, 155),
           images: image ? [image] : [],
         },
       };

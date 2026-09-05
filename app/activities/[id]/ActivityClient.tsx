@@ -175,12 +175,11 @@ export default function ActivityDetailClient() {
         </div>
 
         {/* Description */}
-        <p
-          className="text-sm sm:text-base leading-relaxed mb-10 whitespace-pre-line"
+        <div
+          className="text-sm sm:text-base leading-relaxed mb-10 rich-content"
           style={{ color: "var(--text-secondary)" }}
-        >
-          {activity.description}
-        </p>
+          dangerouslySetInnerHTML={{ __html: activity.description || "" }}
+        />
 
         {/* Photo gallery */}
         {activity.images?.length > 1 && (
