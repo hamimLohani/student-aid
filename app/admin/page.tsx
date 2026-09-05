@@ -154,7 +154,9 @@ export default function AdminDashboard() {
       const titleToEmail = `New Activity: ${activityForm.title}`;
       const contentToEmail = activityForm.description;
       
-      await addDoc(collection(db, "activities"), data);
+      const docRef = await addDoc(collection(db, "activities"), data);
+      const newActivityId = docRef.id;
+      
       await addDoc(collection(db, "announcements"), {
         title: titleToEmail,
         content: contentToEmail,
@@ -174,10 +176,12 @@ export default function AdminDashboard() {
         if (memberEmails.length > 0) {
           toast.loading("সদস্যদের ইমেইল পাঠানো হচ্ছে...", { id: "activity-email-send" });
           try {
-            const res = await fetch("/api/send-announcement-email", {
+            const res = await fetch("/api/send-email", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
+                type: "activity",
+                activityId: newActivityId,
                 title: titleToEmail,
                 content: contentToEmail,
                 recipientEmails: memberEmails,
@@ -245,7 +249,8 @@ export default function AdminDashboard() {
       const titleToEmail = announcementForm.title;
       const contentToEmail = announcementForm.content;
 
-      await addDoc(collection(db, "announcements"), { ...announcementForm, timestamp: serverTimestamp(), likes: [] });
+      const docRef = await addDoc(collection(db, "announcements"), { ...announcementForm, timestamp: serverTimestamp(), likes: [] });
+      const newAnnouncementId = docRef.id;
       setAnnouncementForm({ title: "", content: "" });
       toast.success(copy.announcementPosted);
 
@@ -262,6 +267,8 @@ export default function AdminDashboard() {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
+                type: "announcement",
+                announcementId: newAnnouncementId,
                 title: titleToEmail,
                 content: contentToEmail,
                 recipientEmails: memberEmails,
@@ -372,6 +379,7 @@ export default function AdminDashboard() {
           body: JSON.stringify({
             type: "approval",
             name: r.name,
+            memberId: memberRef.id,
             recipientEmails: [reqEmail],
           }),
         }).catch((err) => console.error("Approval email skipped/failed:", err));

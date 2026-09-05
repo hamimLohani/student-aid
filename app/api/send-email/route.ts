@@ -3,7 +3,7 @@ import nodemailer from "nodemailer";
 
 export async function POST(req: NextRequest) {
   try {
-    const { type = "announcement", title, content, recipientEmails, name, details } = await req.json();
+    const { type = "announcement", title, content, recipientEmails, name, details, activityId } = await req.json();
 
     if (!Array.isArray(recipientEmails) || recipientEmails.length === 0) {
       return NextResponse.json(
@@ -90,6 +90,11 @@ export async function POST(req: NextRequest) {
         অত্যন্ত দুঃখের সাথে জানাচ্ছি যে, তথ্যসমূহ পর্যালোচনার পর এই মুহূর্তে আপনার সদস্যপদের আবেদনটি অনুমোদন করা সম্ভব হয়নি।<br/><br/>
         প্রয়োজনে আপনি পরবর্তীতে সঠিক ও পূর্ণাঙ্গ তথ্য প্রদানপূর্বক পুনরায় আবেদন করতে পারবেন।
       `;
+    } else if (type === "activity") {
+      subject = `📢 নতুন কার্যক্রম: ${title || "বিজ্ঞপ্তি"} | স্টুডেন্ট এইড বিডিজি`;
+      badgeText = "📢 নতুন কার্যক্রম";
+      mainHeading = title || "অফিশিয়াল নোটিশ";
+      emailBodyText = content || "";
     } else {
       // Announcement
       subject = `📢 নতুন বার্তা: ${title || "বিজ্ঞপ্তি"} | স্টুডেন্ট এইড বিডিজি`;
@@ -131,6 +136,9 @@ export async function POST(req: NextRequest) {
     } else if (type === "announcement") {
       ctaUrl = "https://student-aid-bdg.vercel.app/announcements";
       ctaText = "ওয়েবসাইটে সকল বার্তা দেখুন →";
+    } else if (type === "activity") {
+      ctaUrl = activityId ? `https://student-aid-bdg.vercel.app/activities/${activityId}` : "https://student-aid-bdg.vercel.app/activities";
+      ctaText = "কার্যক্রমের বিস্তারিত দেখুন →";
     }
 
     const htmlBody = `
