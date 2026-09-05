@@ -318,7 +318,7 @@ export default function ActivityDetailClient() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-x-0 top-0 z-[100] bg-black/60 backdrop-blur-md flex items-center justify-center p-4 sm:p-8"
+            className="fixed inset-x-0 top-0 z-[100] bg-black/60 backdrop-blur-md flex items-center justify-center p-4 pt-24 sm:p-8 sm:pt-28"
             style={{ height: windowHeight ? `${windowHeight}px` : "100vh" }}
             onClick={() => setLightbox(null)}
           >
