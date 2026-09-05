@@ -106,11 +106,17 @@ export default function MembersPage() {
       (!filterAddress || m.address === filterAddress)
     );
   }).sort((a, b) => {
-    // 1. Founder Member priority
-    const aFounder = a.memberType === "Founder Member";
-    const bFounder = b.memberType === "Founder Member";
-    if (aFounder && !bFounder) return -1;
-    if (!aFounder && bFounder) return 1;
+    // 1. Member Type Priority: Founder Member > General Member > Locals
+    const getPriority = (type?: string) => {
+      if (type === "Founder Member") return 1;
+      if (type === "General Member") return 2;
+      if (type === "Locals") return 3;
+      return 4;
+    };
+
+    const pA = getPriority(a.memberType);
+    const pB = getPriority(b.memberType);
+    if (pA !== pB) return pA - pB;
 
     // 2. SSC Year (Senior first -> earlier year)
     const aYear = a.sscYear ? parseInt(a.sscYear) : Infinity;
@@ -118,6 +124,11 @@ export default function MembersPage() {
 
     if (aYear !== bYear) {
       return aYear - bYear;
+    }
+
+    // 3. Fallback: If SSC year is missing, sort pseudo-randomly
+    if (aYear === Infinity && bYear === Infinity) {
+      return a.id.localeCompare(b.id);
     }
 
     // Fallback to name

@@ -455,11 +455,17 @@ export default function AdminDashboard() {
     const matchesType = !memberTypeFilter || member.memberType === memberTypeFilter;
     return matchesSearch && matchesType;
   }).sort((a, b) => {
-    // 1. Founder Member priority
-    const aFounder = a.memberType === "Founder Member";
-    const bFounder = b.memberType === "Founder Member";
-    if (aFounder && !bFounder) return -1;
-    if (!aFounder && bFounder) return 1;
+    // 1. Member Type Priority: Founder Member > General Member > Locals
+    const getPriority = (type?: string) => {
+      if (type === "Founder Member") return 1;
+      if (type === "General Member") return 2;
+      if (type === "Locals") return 3;
+      return 4;
+    };
+
+    const pA = getPriority(a.memberType);
+    const pB = getPriority(b.memberType);
+    if (pA !== pB) return pA - pB;
 
     // 2. SSC Year (Senior first -> earlier year)
     const aYear = a.sscYear ? parseInt(a.sscYear) : Infinity;
@@ -467,6 +473,11 @@ export default function AdminDashboard() {
 
     if (aYear !== bYear) {
       return aYear - bYear;
+    }
+
+    // 3. Fallback: If SSC year is missing, sort pseudo-randomly
+    if (aYear === Infinity && bYear === Infinity) {
+      return a.id.localeCompare(b.id);
     }
 
     // Fallback to name
@@ -560,15 +571,26 @@ export default function AdminDashboard() {
 
       {/* Tabs — mobile app style (5 cols) on mobile, scrollable/flex on desktop */}
       <div className="grid grid-cols-5 gap-1.5 sm:flex sm:gap-2 mb-5 py-3">
-        {tabs.map((t) => (
-          <button key={t.key} onClick={() => setTab(t.key)}
-            className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 p-2 sm:px-4 sm:py-2.5 rounded-xl text-[10px] sm:text-sm font-medium transition ${
-              tab === t.key ? "bg-[var(--accent)] text-white shadow-lg shadow-emerald-950/30 font-semibold" : "bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-hover)]"
-            }`}
-          >
-            {t.icon} <span className="truncate w-full text-center">{t.label}</span>
-          </button>
-        ))}
+        {tabs.map((t) => {
+          const isRequestsTab = t.key === "requests";
+          const pendingCount = requests.filter((r) => r.status === "pending").length;
+          const hasPending = isRequestsTab && pendingCount > 0;
+          return (
+            <button key={t.key} onClick={() => setTab(t.key)}
+              className={`relative flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 p-2 sm:px-4 sm:py-2.5 rounded-xl text-[10px] sm:text-sm font-medium transition ${
+                tab === t.key ? "bg-[var(--accent)] text-white shadow-lg shadow-emerald-950/30 font-semibold" : "bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-hover)]"
+              }`}
+            >
+              {t.icon} <span className="truncate w-full text-center">{t.label}</span>
+              {hasPending && (
+                <span className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* ── Members Tab ── */}
